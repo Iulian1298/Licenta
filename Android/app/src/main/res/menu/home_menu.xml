@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group>
+        <item
+            android:id="@+id/menuHome"
+            android:icon="@drawable/ic_home_black_24dp"
+            android:title="@string/menuHomeButton" />
+        <item
+            android:id="@+id/menuProfile"
+            android:icon="@drawable/ic_person_black_24dp"
+            android:title="@string/menuProfileButton" />
+        <item
+            android:id="@+id/menuSettings"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/menuNotifManagerButton" />
+        <item
+            android:id="@+id/menuLogout"
+            android:icon="@drawable/ic_exit_to_app_black_24dp"
+            android:title="@string/menuLogoutButton" />
+    </group>
+</menu>

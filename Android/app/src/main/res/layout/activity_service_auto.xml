@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/dialButton"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="-4dp">
+
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:descendantFocusability="blocksDescendants"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/logoImageFullCV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="5dp"
+                android:elevation="8dp"
+                app:cardCornerRadius="15dp">
+
+                <ImageView
+                    android:id="@+id/logoImageFull"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_marginEnd="3dp"
+                    android:layout_marginBottom="3dp"
+                    android:contentDescription="@string/serviceLogo" />
+            </android.support.v7.widget.CardView>
+
+            <TextView
+                android:id="@+id/serviceNameFull"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="5dp"
+                android:layout_toEndOf="@+id/logoImageFullCV"
+                android:text="@string/serviceName"
+                android:textSize="28sp" />
+
+            <TextView
+                android:id="@+id/addressFull"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/serviceNameFull"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_toEndOf="@+id/logoImageFullCV"
+                android:text="@string/address"
+                android:textSize="20sp" />
+
+            <RatingBar
+                android:id="@+id/ratingFull"
+                style="?android:attr/ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/addressFull"
+                android:layout_margin="10dp"
+                android:layout_toEndOf="@+id/logoImageFullCV"
+                android:isIndicator="true"
+                android:numStars="5"
+                android:progressTint="@color/colorGolden"
+                android:stepSize="0.1" />
+
+            <LinearLayout
+                android:id="@+id/llServiceDescriptionFull"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/logoImageFullCV"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/distanceFromYouFull"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="20dp"
+                    android:text="@string/distanceFromYou"
+                    android:textAlignment="center"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/serviceDescriptionFull"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:text="@string/serviceDescription"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/llServiceDescriptionFull"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/scheduleToService"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/buttons_layout_border"
+                    android:padding="10dp"
+                    android:text="@string/scheduleToService"
+                    android:textSize="12sp" />
+
+
+                <Button
+                    android:id="@+id/viewComments"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/buttons_layout_border"
+                    android:padding="10dp"
+                    android:text="@string/viewComments"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/leaveComment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/buttons_layout_border"
+                    android:padding="10dp"
+                    android:text="@string/leaveComment"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/dialButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="20dp"
+        android:background="@drawable/ic_call_black_24dp" />
+
+
+    <Button
+        android:id="@+id/sendMailButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/ic_email_black_24dp" />
+
+
+    <RelativeLayout
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_toStartOf="@id/sendMailButton"
+        android:layout_toEndOf="@id/dialButton"
+        android:padding="3dp">
+
+        <TextView
+            android:id="@+id/contactEmailFullInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:text="@string/contactEmail"
+            android:textSize="15sp"
+            android:textStyle="italic" />
+
+        <TextView
+            android:id="@+id/contactPhoneNumbeFullInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:text="@string/phoneNumber"
+            android:textSize="15sp"
+            android:textStyle="italic" />
+    </RelativeLayout>
+</RelativeLayout>

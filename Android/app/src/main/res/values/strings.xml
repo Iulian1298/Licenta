@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">YCM</string>
+    <string name="registerBtn">Register</string>
+    <string name="loginBtn">Login</string>
+    <string name="app_description">Masina ta conteaza. Gaseste cel mai apropiat service si fa o programare direct din aplicatie.</string>
+    <string name="email">Emailul tau..</string>
+    <string name="password">Parola ta..</string>
+    <string name="fullName">Numele tau..</string>
+    <string name="rePassword">Reintrodu parola..</string>
+    <string name="menuHomeButton">Acasa</string>
+    <string name="menuProfileButton">Profilul meu</string>
+    <string name="menuNotifManagerButton">TBD</string>
+    <string name="menuLogoutButton">Iesire</string>
+    <string name="searchButton">Cauta..</string>
+    <string name="filterResult">Filtreaza..</string>
+    <string name="headerMenuImage">Image</string>
+    <string name="headerMenuUsername">Username</string>
+    <string name="headerMenuMail">Email</string>
+    <string name="navigation_drawer_open">Open</string>
+    <string name="navigation_drawer_close">Close</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="serviceLogo">Logo sau o imagine</string>
+    <string name="serviceName">Numele service-ului</string>
+    <string name="serviceDescription">Descrierea service-ului in maxim 100 de caractere</string>
+    <string name="distanceFromYou">Distanta fata de locatia curenta</string>
+    <string name="address">Adresa service-ului</string>
+    <string name="ratingMin">Rating-ul minim:</string>
+    <string name="ratingMax">Rating-ul maxim:</string>
+    <string name="nameFilter">Nume service:</string>
+    <string name="range">Nu mai departe de:</string>
+    <string name="cityFilter">Oras:</string>
+    <string name="resetFilter">Reseteaza</string>
+    <string name="workingTime">o sa fie schimbat</string>
+    <string name="viewComments">Comentarii</string>
+    <string name="leaveComment">Lasa un comentariu</string>
+    <string name="contactEmail">testEmail@yahoo.com</string>
+    <string name="phoneNumber">07XXXXXXXX</string>
+    <string name="scheduleToService">Programeaza-te</string>
+</resources>
