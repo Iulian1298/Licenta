@@ -1,5 +1,9 @@
 
 Python/YCM.db
-Python/venv/Scripts/winsound.pyd
-Python/venv/Scripts/unicodedata.pyd
-Python/venv/Scripts/vcruntime140.dll
+Python/venv/
+Python/.idea/
+Android/.idea/
+Python/Images/
+Python/__pycache__/
+Python/API/__pycache__/
+Python/models/__pycache__/
