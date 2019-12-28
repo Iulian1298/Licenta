@@ -18,13 +18,17 @@ def getCommentById(commentId):
         result["comment"] = commentDict["comment"]
         result["creationTime"] = commentDict["creationTime"]
         result["rating"] = commentDict["rating"]
-        result["ownerName"] = owner.first().toDict["fullName"]
+        result["ownerName"] = owner.first().toDict()["fullName"]
         result["serviceId"] = commentDict["serviceId"]
         result["ownerId"] = commentDict["userId"]
-        with open(owner.first().toDict["fullName"], "rb") as image:
+        with open(owner.first().toDict()["imagePath"], "rb") as image:
             imageEncoded = base64.b64encode(image.read()).decode('utf-8')
             result["imageEncoded"] = imageEncoded
-        return make_response(jsonify({"status": "Found", "comment": result}), status.HTTP_302_FOUND)
+        # print(result)
+        response = make_response(jsonify({"status": "Found", "comment": result}))
+        print(len(str({"status": "Found", "comment": result})))
+        response.headers.set('Content-Length', len({"status": "Found", "comment": result}))
+        return make_response(jsonify({"status": "Found", "comment": result}))
     return make_response(jsonify({"status": "NotFound"}), status.HTTP_404_NOT_FOUND)
 
 

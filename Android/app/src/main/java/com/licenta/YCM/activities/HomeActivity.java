@@ -1,13 +1,24 @@
 package com.licenta.YCM.activities;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -27,6 +38,8 @@ import android.widget.TextView;
 
 import java.util.concurrent.ExecutionException;
 
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -37,12 +50,15 @@ public class HomeActivity extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
     private boolean mIsLoggedIn;
+    private LocationManager mLocationManager;
+    private Context mCtx;
+    private LocationListener mLocationListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        mPreferencesManager = SharedPreferencesManager.getInstance(getApplicationContext());
+        mPreferencesManager = SharedPreferencesManager.getInstance(this);
         try {
             mIsLoggedIn = mPreferencesManager.isLoggedIn();
         } catch (ExecutionException e) {
@@ -51,6 +67,7 @@ public class HomeActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         init();
+
         setNavigationDrawer();
         try {
             setHeaderHomeMenu();
@@ -62,10 +79,12 @@ public class HomeActivity extends AppCompatActivity {
         //set startup fragment
         getSupportActionBar().setTitle("Acasa");
         getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment()).commit();
-
+        requestLocationPermission();
     }
 
     private void init() {
+        mPreferencesManager.setPermissionLocation(false);
+        mCtx = getApplicationContext();
         mToolbar = findViewById(R.id.homeToolbar);
         mDrawerLayout = findViewById(R.id.drawerLayout);
         setSupportActionBar(mToolbar);
@@ -75,6 +94,32 @@ public class HomeActivity extends AppCompatActivity {
         mDrawerLayout.addDrawerListener(toggle);
         toggle.syncState();
         mNavigationView = findViewById(R.id.navigationView);
+        mLocationManager = (LocationManager) mCtx.getSystemService(Context.LOCATION_SERVICE);
+        mLocationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                Log.i(TAG, "onLocationChanged: latitude: " + location.getLatitude() + " longitude: " + location.getLongitude());
+                mPreferencesManager.setUserLatitude((float) location.getLatitude());
+                mPreferencesManager.setUserLongitude((float) location.getLongitude());
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+
     }
 
     private void setHeaderHomeMenu() throws ExecutionException, InterruptedException {
@@ -171,6 +216,53 @@ public class HomeActivity extends AppCompatActivity {
         }
         //ToDo: same as onActivityResult() or not(need investigation)
     }
+
+    private void requestLocationPermission() {
+        Log.i(TAG, "requestLocationPermission: ");
+        int result = ContextCompat.checkSelfPermission(getApplicationContext(), ACCESS_FINE_LOCATION);
+        if (result != PackageManager.PERMISSION_GRANTED) {
+            Log.i(TAG, "requestLocationPermission: request permission");
+            ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION}, 11);
+        } else {
+            Log.i(TAG, "requestLocationPermission: permission already granted");
+            mPreferencesManager.setPermissionLocation(true);
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 5, mLocationListener);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (requestCode == 11) {
+            if (grantResults.length > 0) {
+                boolean locationAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                if (!locationAccepted) {
+                    Log.i(TAG, "onRequestPermissionsResult: permision not accepted");
+                    if (shouldShowRequestPermissionRationale(ACCESS_FINE_LOCATION)) {
+                        new AlertDialog.Builder(HomeActivity.this)
+                                .setMessage("Permite aplicatiei sa foloseasca locatia pentru a vede distanta fata de service-uri!")
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Log.i(TAG, "onClick: positive");
+                                        requestPermissions(new String[]{ACCESS_FINE_LOCATION}, 11);
+                                    }
+                                })
+                                .setNegativeButton("Cancel", null)
+                                .create()
+                                .show();
+                        mPreferencesManager.setPermissionLocation(false);
+                    }
+                } else {
+                    Log.i(TAG, "onRequestPermissionsResult: apply changes");
+                    mPreferencesManager.setPermissionLocation(true);
+                    if (ContextCompat.checkSelfPermission(getApplicationContext(), ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 5, mLocationListener);
+                    }
+                }
+            }
+        }
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

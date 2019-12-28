@@ -89,16 +89,18 @@ public class ServiceAuto {
     public double getLongitude() {
         return mLongitude;
     }
+
     public double calculateDistance(double lat2, double long2) {
-        if ((mLatitude == lat2) && (mLongitude== long2)) {
+        if ((mLatitude == lat2) && (mLongitude == long2)) {
             return 0;
         } else {
-            double theta = mLongitude - long2;
-            double dist = Math.sin(Math.toRadians(mLatitude)) * Math.sin(Math.toRadians(lat2)) + Math.cos(Math.toRadians(mLatitude)) * Math.cos(Math.toRadians(lat2)) * Math.cos(Math.toRadians(theta));
-            dist = Math.acos(dist);
-            dist = Math.toDegrees(dist);
-            dist = dist * 1.609344;
-            return (dist);
+            double lat1 = Math.toRadians(mLatitude);
+            double long1 = Math.toRadians(mLongitude);
+            lat2 = Math.toRadians(lat2);
+            long2 = Math.toRadians(long2);
+            double earthRadius = 6371.01; //Kilometers
+            double distance = earthRadius * Math.acos(Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(long1 - long2));
+            return distance;
         }
     }
 }

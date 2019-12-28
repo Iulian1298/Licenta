@@ -28,6 +28,9 @@ public class SharedPreferencesManager {
     private static final String KEY_USERNAME = "username";
     private static final String KEY_IMAGE = "image";
     private static final String KEY_USER_ID = "userID";
+    private static final String KEY_LONGITUDE = "longitude";
+    private static final String KEY_LATITUDE = "latitude";
+    private static final String KEY_PERMISION_LOCATION = "location";
 
 
     private static SharedPreferencesManager mInstance;
@@ -45,6 +48,42 @@ public class SharedPreferencesManager {
         return mInstance;
     }
 
+
+    public boolean getPermissionLocation() {
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean(KEY_PERMISION_LOCATION, false);
+    }
+
+    public void setPermissionLocation(boolean permision) {
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(KEY_PERMISION_LOCATION, permision);
+        editor.apply();
+    }
+
+    public float getUserLongitude() {
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getFloat(KEY_LONGITUDE, 0);
+    }
+
+    public void setUserLongitude(float longitude) {
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putFloat(KEY_LONGITUDE, longitude);
+        editor.apply();
+    }
+
+    public float getUserLatitude() {
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getFloat(KEY_LATITUDE, 0);
+    }
+
+    public void setUserLatitude(float latitude) {
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putFloat(KEY_LATITUDE, latitude);
+        editor.apply();
+    }
 
     public void setImage(String image) {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);

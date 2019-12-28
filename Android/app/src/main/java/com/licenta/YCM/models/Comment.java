@@ -60,7 +60,7 @@ public class Comment {
         return mServiceId;
     }
 
-    public Object getCreationTime() {
+    public String getCreationTime() {
         return mCreationTime;
     }
 

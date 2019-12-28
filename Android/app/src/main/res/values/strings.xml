@@ -38,4 +38,10 @@
     <string name="contactEmail">testEmail@yahoo.com</string>
     <string name="phoneNumber">07XXXXXXXX</string>
     <string name="scheduleToService">Programeaza-te</string>
+    <string name="seeAllComments">Toate</string>
+    <string name="userProfileImageComment">User profile image</string>
+    <string name="deleteMyComment">Sterge</string>
+    <string name="usernameComment">Comment owner</string>
+    <string name="comment">Comentariu Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt  ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</string>
+    <string name="commentDate">Data adaugarii</string>
 </resources>

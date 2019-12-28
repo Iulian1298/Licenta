@@ -15,7 +15,6 @@ import android.widget.TextView;
 
 import com.google.gson.JsonObject;
 import com.licenta.YCM.models.ServiceAuto;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -25,9 +24,12 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
     private ArrayList<ServiceAuto> mServiceAutoListFiltered;
     private Context mContext;
     private OnItemServiceAutoClickListener mItemServiceAutoClickListener;
+    private SharedPreferencesManager mPreferencesManager;
+
 
     public ServiceAutoAdapter(Context context, ArrayList<ServiceAuto> serviceAutoList) {
         this.mContext = context;
+        mPreferencesManager = SharedPreferencesManager.getInstance(mContext);
         this.mServiceAutoList = serviceAutoList;
         this.mServiceAutoListFiltered = serviceAutoList;
         this.mItemServiceAutoClickListener = null;
@@ -37,7 +39,7 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.services_layout, viewGroup, false);
+        View view = inflater.inflate(R.layout.service_layout, viewGroup, false);
         return new ViewHolder(view);
     }
 
@@ -45,11 +47,16 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
     @SuppressLint("DefaultLocale")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+        System.out.println("onBindViewHolder serviceautoadapter");
         ServiceAuto serviceAuto = mServiceAutoListFiltered.get(i);
 
         /*Picasso.get()
                 .load("http://10.0.2.2:5000/services/getImageById/3")
                 //.load(http://i.imgur.com/DvpvklR.png)
+                .into(viewHolder.mImage);
+        Glide.with(mContext)
+                .asBitmap()
+                .load("http://10.0.2.2:5000/services/getImageById/34b64501-9f9a-4bcf-8a60-810d889d84f6")
                 .into(viewHolder.mImage);*/
         viewHolder.mImage.setImageBitmap(serviceAuto.getImage());
         viewHolder.mName.setText(serviceAuto.getName());
@@ -58,7 +65,18 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
         } else {
             viewHolder.mDescription.setText(serviceAuto.getDescription());
         }
-        viewHolder.mDistance.setText(String.format("%.2f", serviceAuto.calculateDistance(0, 0)));
+        if (mPreferencesManager.getPermissionLocation()) {
+            viewHolder.mDistance.setVisibility(View.VISIBLE);
+            double distance = serviceAuto.calculateDistance(mPreferencesManager.getUserLatitude(), mPreferencesManager.getUserLongitude());
+
+            if (distance < 1) {
+                viewHolder.mDistance.setText(String.format("La aproximativ: %d m", (int) (distance * 1000)));
+            } else {
+                viewHolder.mDistance.setText(String.format("La aproximativ: %.2f km", distance));
+            }
+        } else {
+            viewHolder.mDistance.setVisibility(View.GONE);
+        }
         viewHolder.mAddress.setText(serviceAuto.getAddress());
         viewHolder.mRatingBar.setRating(serviceAuto.getRating());
     }
@@ -139,7 +157,7 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
                             if (!otherFilterParams.get("givenNameFilter").getAsString().isEmpty()) {
                                 if (serviceAuto.getName().toLowerCase().contains(otherFilterParams.get("givenNameFilter").getAsString().toLowerCase())) {
                                     if (!otherFilterParams.get("distanceInput").getAsString().isEmpty()) {
-                                        if (serviceAuto.calculateDistance(0, 0) < otherFilterParams.get("distanceInput").getAsDouble()) {
+                                        if (serviceAuto.calculateDistance(mPreferencesManager.getUserLatitude(), mPreferencesManager.getUserLongitude()) < otherFilterParams.get("distanceInput").getAsDouble()) {
                                             if (!otherFilterParams.get("cityInput").getAsString().isEmpty()) {
                                                 if (serviceAuto.getAddress().toLowerCase().contains(otherFilterParams.get("cityInput").getAsString().toLowerCase())) {
                                                     serviceAutoListFiltered.add(serviceAuto);
@@ -160,7 +178,7 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
                                 }
                             } else {
                                 if (!otherFilterParams.get("distanceInput").getAsString().isEmpty()) {
-                                    if (serviceAuto.calculateDistance(0, 0) < otherFilterParams.get("distanceInput").getAsDouble()) {
+                                    if (serviceAuto.calculateDistance(mPreferencesManager.getUserLatitude(), mPreferencesManager.getUserLongitude()) < otherFilterParams.get("distanceInput").getAsDouble()) {
                                         if (!otherFilterParams.get("cityInput").getAsString().isEmpty()) {
                                             if ((serviceAuto.getAddress().toLowerCase()).contains(otherFilterParams.get("cityInput").getAsString().toLowerCase())) {
                                                 serviceAutoListFiltered.add(serviceAuto);

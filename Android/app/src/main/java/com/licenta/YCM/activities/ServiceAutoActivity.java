@@ -1,5 +1,6 @@
 package com.licenta.YCM.activities;
 
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -8,9 +9,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.support.annotation.Nullable;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,26 +19,35 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.koushikdutta.ion.Ion;
 import com.koushikdutta.ion.Response;
 import com.licenta.YCM.R;
 import com.licenta.YCM.SharedPreferencesManager;
 import com.licenta.YCM.models.ServiceAuto;
+import com.roomorama.caldroid.CaldroidFragment;
+import com.roomorama.caldroid.CaldroidListener;
 
+import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
-import static java.security.AccessController.getContext;
 
 public class ServiceAutoActivity extends AppCompatActivity {
     private static final String TAG = "ServiceAutoActivity";
@@ -62,24 +72,29 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private Context mCtx;
     private String mAddCommentURL;
     private Intent mReturnIntent;
-    private boolean mIsLoggedIn;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "onCreate: ");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_service_auto);
-        mCtx = getApplication();
+        mCtx = getApplicationContext();
         mPreferencesManager = SharedPreferencesManager.getInstance(mCtx);
-        try {
-            mIsLoggedIn = mPreferencesManager.isLoggedIn();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
         init();
+    }
+
+    private Bitmap createBitmapFromLocalImage(String name) {
+        Log.i(TAG, "createBitmapFromLocalImage: ");
+        Bitmap bitmap = null;
+        try {
+            bitmap = BitmapFactory.decodeStream(mCtx
+                    .openFileInput(name));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return bitmap;
     }
 
     private void init() {
@@ -92,7 +107,8 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mContactPhoneNumber = findViewById(R.id.contactPhoneNumbeFullInfo);
         mContactEmail = findViewById(R.id.contactEmailFullInfo);
         mDistanceFromYou = findViewById(R.id.distanceFromYouFull);
-        if (!mIsLoggedIn) {
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (!mPreferencesManager.getPermissionLocation()) {
             mDistanceFromYou.setVisibility(View.GONE);
         }
         mDialButton = findViewById(R.id.dialButton);
@@ -105,7 +121,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         Intent intent = getIntent();
         mServiceAuto = new ServiceAuto(
                 intent.getStringExtra("serviceId"),
-                stringToBitmap(intent.getStringExtra("logoImage")),
+                createBitmapFromLocalImage(intent.getStringExtra("logoImage")),
                 intent.getStringExtra("serviceName"),
                 intent.getStringExtra("description"),
                 intent.getStringExtra("address"),
@@ -152,7 +168,15 @@ public class ServiceAutoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.v(TAG, "onClick() -> show leave comment pop-up ");
-                if (!mIsLoggedIn) {
+                boolean isLoggedIn = false;
+                try {
+                    isLoggedIn = mPreferencesManager.isLoggedIn();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (!isLoggedIn) {
                     showPopUpNotLogged();
                 } else {
                     final View leaveCommentView = getLayoutInflater().inflate(R.layout.leave_comment_popup_layout, null);
@@ -221,14 +245,163 @@ public class ServiceAutoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.i(TAG, "onClick: schedule clicked");
-                if (!mIsLoggedIn) {
+                boolean isLoggedIn = false;
+                try {
+                    isLoggedIn = mPreferencesManager.isLoggedIn();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (!isLoggedIn) {
                     showPopUpNotLogged();
                 } else {
-                    //ToDo: show time/date picker an schedule to a service
+                    //ToDo: show time/date picker and schedule to a service
+                    final CaldroidFragment dialogCaldroidFragment = CaldroidFragment.newInstance("Alege data", Calendar.getInstance().get(Calendar.MONTH) + 1, Calendar.getInstance().get(Calendar.YEAR));
+                    ArrayList<String> lockedDays = new ArrayList<>();
+                    dialogCaldroidFragment.setBackgroundDrawableForDate(new ColorDrawable(Color.parseColor("#3385ff")), Calendar.getInstance().getTime());
+                    dialogCaldroidFragment.setTextColorForDate(R.color.colorWhite, Calendar.getInstance().getTime());
+                    //set default locked days (SUNDAY, SATURDAY and days after current date + one year)
+                    setDefaultLockedDays(dialogCaldroidFragment, lockedDays);
+                    //get locked days from server
+                    try {
+                        Response<JsonObject> response = Ion.with(mCtx)
+                                .load("GET", "http://10.0.2.2:5000/getLockedDays")
+                                .setHeader("Authorization", mPreferencesManager.getToken())
+                                .asJsonObject()
+                                .withResponse()
+                                .get();
+                        if (response.getHeaders().code() == 200) {
+                            JsonArray jsonArray = response.getResult().get("lockedDays").getAsJsonArray();
+                            for (JsonElement day : jsonArray) {
+                                Log.i(TAG, "onClick: day locked: " + day.getAsString());
+                                lockedDays.add(day.getAsString());
+                            }
+                        }
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    dialogCaldroidFragment.setDisableDatesFromString(lockedDays);
+                    CaldroidListener listener = new CaldroidListener() {
+                        @Override
+                        public void onSelectDate(Date date, View view) {
+                            Toast.makeText(getApplicationContext(), date.toString(),
+                                    Toast.LENGTH_SHORT).show();
+                            //get locked hour from server
+                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                            ArrayList<String> lockedHours = new ArrayList<>();
+                            try {
+                                Response<JsonObject> response = Ion.with(mCtx)
+                                        .load("GET", "http://10.0.2.2:5000/getLockedDays/" + format.format(date))
+                                        .setHeader("Authorization", mPreferencesManager.getToken())
+                                        .asJsonObject()
+                                        .withResponse()
+                                        .get();
+                                if (response.getHeaders().code() == 200) {
+                                    JsonArray jsonArray = response.getResult().get("lockedHours").getAsJsonArray();
+                                    for (JsonElement day : jsonArray) {
+                                        Log.i(TAG, "onClick: hour locked: " + day.getAsString());
+                                        lockedHours.add(day.getAsString());
+                                    }
+                                }
+                            } catch (ExecutionException e) {
+                                e.printStackTrace();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            showTimePicker(lockedHours, date);
+                            dialogCaldroidFragment.dismiss();
+                        }
+                    };
+                    dialogCaldroidFragment.setCaldroidListener(listener);
+                    dialogCaldroidFragment.show(getSupportFragmentManager(), "TAG");
                 }
-
             }
         });
+    }
+
+    private void showTimePicker(ArrayList<String> lockedHours, final Date date) {
+        final ListView listView = new ListView(mCtx);
+        ArrayList<String> availableHours = new ArrayList<>();
+        //ToDo: for i=start program hour to end program hour if program will be available
+        availableHours.add("08:00");
+        availableHours.add("09:00");
+        availableHours.add("10:00");
+        availableHours.add("11:00");
+        availableHours.add("12:00");
+        availableHours.add("13:00");
+        availableHours.add("14:00");
+        availableHours.add("15:00");
+        availableHours.add("16:00");
+        availableHours.add("17:00");
+        for (String elem : lockedHours) {
+            availableHours.remove(elem);
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(mCtx, R.layout.time_list_element_layout, availableHours);
+        listView.setAdapter(adapter);
+        final AlertDialog timePickerDialog = new AlertDialog.Builder(ServiceAutoActivity.this)
+                .create();
+        timePickerDialog.setView(listView, 50, 50, 50, 50);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String chosenHour = (String) listView.getItemAtPosition(position);
+                Toast.makeText(getApplicationContext(), chosenHour,
+                        Toast.LENGTH_SHORT).show();
+                JsonObject jsonBody = new JsonObject();
+                jsonBody.addProperty("serviceId", mServiceAuto.getServiceId());
+                jsonBody.addProperty("ownerId", mPreferencesManager.getUserId());
+                jsonBody.addProperty("day", new SimpleDateFormat("yyyy-MM-dd").format(date));
+                jsonBody.addProperty("hour", chosenHour);
+                try {
+                    Response<JsonObject> response = Ion.with(getApplicationContext())
+                            .load("POST", "http://10.0.2.2:5000/addLockedPeriod")
+                            .setHeader("Authorization", mPreferencesManager.getToken())
+                            .setJsonObjectBody(jsonBody)
+                            .asJsonObject()
+                            .withResponse()
+                            .get();
+                    if (response.getHeaders().code() == 201) {
+                        Log.i(TAG, "onItemClick: scheduled!");
+                        Toast.makeText(getApplicationContext(), "Programare realizata cu succes!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        if (response.getHeaders().code() == 409) {
+                            Toast.makeText(getApplicationContext(), "Conflict in baza de date!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                timePickerDialog.dismiss();
+            }
+        });
+        timePickerDialog.show();
+        timePickerDialog.getWindow().setLayout(600, 800);
+    }
+
+    private void setDefaultLockedDays(CaldroidFragment caldroidFragment, ArrayList<String> lockedDays) {
+        Calendar minDate = Calendar.getInstance();
+        minDate.add(Calendar.DATE, 1);
+        caldroidFragment.setMinDate(minDate.getTime());
+
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        for (int i = 1; i < 366; i++) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DATE, i);
+            if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                lockedDays.add(format.format(calendar.getTime()));
+            }
+        }
+
+        Calendar maxDate = Calendar.getInstance();
+        maxDate.add(Calendar.DATE, 365);
+        caldroidFragment.setMaxDate(maxDate.getTime());
     }
 
     private void showPopUpNotLogged() {
@@ -268,22 +441,24 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mDescription.setText(mServiceAuto.getDescription());
         mContactPhoneNumber.setText(mServiceAuto.getContactPhoneNumber());
         mContactEmail.setText(mServiceAuto.getContactEmail());
-        mDistanceFromYou.setText(String.format("%s %.2f", "Distanta fata de tine:", mServiceAuto.calculateDistance(0, 0)));
+        if (mPreferencesManager.getPermissionLocation()) {
+            double distance = mServiceAuto.calculateDistance(mPreferencesManager.getUserLatitude(), mPreferencesManager.getUserLongitude());
+
+            if (distance < 1) {
+                mDistanceFromYou.setText(String.format("La aproximativ: %d m de tine", (int) (distance * 1000)));
+            } else {
+                mDistanceFromYou.setText(String.format("La aproximativ: %.2f km de tine", distance));
+            }
+        }
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 
         if (requestCode == 3) {
             Log.i(TAG, "onActivityResult: out from login intent");
-            try {
-                mIsLoggedIn = mPreferencesManager.isLoggedIn();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (mIsLoggedIn) {
+            if (mPreferencesManager.getPermissionLocation()) {
                 mDistanceFromYou.setVisibility(View.VISIBLE);
             }
         }
@@ -315,5 +490,18 @@ public class ServiceAutoActivity extends AppCompatActivity {
             e.getMessage();
             return null;
         }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        Log.v(TAG, "onSupportNavigateUp()");
+        onBackPressed();
+        return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.v(TAG, "onDestroy()");
+        super.onDestroy();
     }
 }

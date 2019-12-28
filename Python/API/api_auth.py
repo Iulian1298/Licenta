@@ -11,7 +11,7 @@ def isLoggedIn():
 
 
 def getJWT(user):
-    token = jwt.encode({'user': user, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=180)},
+    token = jwt.encode({'user': user, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=180)},
                        app.config["SECRET_KEY"]).decode("UTF-8")
     return token
 
@@ -61,7 +61,7 @@ def authLogin():
                 imageEncoded = base64.b64encode(image.read()).decode('utf-8')
                 userDict["imageEncoded"] = imageEncoded
             del userDict["imagePath"]
-            print(userDict)
+            #print(userDict)
             return make_response(jsonify({"status": "Found",
                                           "token": getJWT(repr(user)),
                                           "user": userDict}),

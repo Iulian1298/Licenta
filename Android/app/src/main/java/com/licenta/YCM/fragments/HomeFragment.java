@@ -52,6 +52,8 @@ import com.squareup.picasso.Target;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
@@ -73,6 +75,7 @@ public class HomeFragment extends Fragment {
     private String mAllServicesIdsURL;
     private Context mCtx;
     private boolean mIsLoggedIn;
+    private String mServiceIdFilterBy;
 
     private int mLastElementClickedPosition;
 
@@ -105,6 +108,7 @@ public class HomeFragment extends Fragment {
         mServiceAutoRecyclerView.setLayoutManager(new LinearLayoutManager(mCtx));
         mServiceByIdURL = "http://10.0.2.2:5000/services/getById/";
         mAllServicesIdsURL = "http://10.0.2.2:5000/services/getAllIds";
+        mServiceIdFilterBy = "http://10.0.2.2:5000/services/getIdsFilterBy/";
         mServiceAutoList = new ArrayList<>();
         mServiceAutoAdapter = new ServiceAutoAdapter(mCtx, mServiceAutoList);
         mServiceAutoRecyclerView.addItemDecoration(new DividerItemDecoration(mCtx, DividerItemDecoration.VERTICAL));
@@ -116,11 +120,12 @@ public class HomeFragment extends Fragment {
             @Override
             public void onItemServiceAutoClick(View view, int pos) {
                 Log.i(TAG, "onItemServiceAutoClick: ");
+
                 //Toast.makeText(mCtx, "You clicked item at position: " + pos, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(mCtx, ServiceAutoActivity.class);
                 ServiceAuto serviceAuto = mServiceAutoAdapter.getElemInFilteredListAtPos(pos);
                 intent.putExtra("serviceId", serviceAuto.getServiceId());
-                intent.putExtra("logoImage", serviceAuto.getImageAsString());
+                intent.putExtra("logoImage", createLocalImageFromBitmap(serviceAuto.getImage()));
                 intent.putExtra("serviceName", serviceAuto.getName());
                 intent.putExtra("description", serviceAuto.getDescription());
                 intent.putExtra("latitude", serviceAuto.getLatitude());
@@ -133,6 +138,22 @@ public class HomeFragment extends Fragment {
                 startActivityForResult(intent, 1);
             }
         });
+    }
+
+    private String createLocalImageFromBitmap(Bitmap bitmap) {
+        Log.i(TAG, "createLocalImageFromBitmap: ");
+        String fileName = "myImage";
+        try {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+            FileOutputStream fo = mCtx.openFileOutput(fileName, Context.MODE_PRIVATE);
+            fo.write(bytes.toByteArray());
+            fo.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fileName = null;
+        }
+        return fileName;
     }
 
     private Bitmap stringToBitmap(String imageEncoded) {
@@ -163,39 +184,49 @@ public class HomeFragment extends Fragment {
                             if (response.getHeaders().code() == 200) {
                                 Log.i(TAG, "populateServiceAutoList: services Ids received");
                                 final JsonArray servicesId = response.getResult().get("ids").getAsJsonArray();
-                                for (int i = 0; i < servicesId.size(); i++) {
-                                    final String finalI = servicesId.get(i).getAsString();
-                                    Log.i(TAG, "populateServiceAutoList: add services with ID: " + finalI);
-                                    AsyncHttpRequest httpGetService = new AsyncHttpRequest(new AsyncHttpRequest.Listener() {
-                                        @Override
-                                        public void onResult(String result) {
-                                            if (!result.isEmpty()) {
-                                                try {
-                                                    Log.i(TAG, "onResult: Received service with id: " + finalI);
-                                                    JSONObject service = new JSONObject(result).getJSONObject("service");
-                                                    mServiceAutoList.add(new ServiceAuto(
-                                                            service.getString("id"),
-                                                            stringToBitmap(service.getString("imageEncoded")),
-                                                            service.getString("name"),
-                                                            service.getString("description"),
-                                                            service.getString("address"),
-                                                            Float.valueOf(service.getString("rating")),
-                                                            service.getString("phoneNumber"),
-                                                            service.getString("email"),
-                                                            Double.valueOf(service.getString("latitude")),
-                                                            Double.valueOf(service.getString("longitude"))));
-                                                    mServiceAutoAdapter.notifyDataSetChanged();
-                                                } catch (JSONException e1) {
-                                                    e1.printStackTrace();
-                                                    Log.e(TAG, "onResult: NoResult");
-                                                }
-                                            } else {
-                                                Log.e(TAG, "onResult: Service with id: " + finalI + "not received!");
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        for (int i = 0; i < servicesId.size(); i++) {
+                                            try {
+                                                Thread.sleep(250);
+                                            } catch (InterruptedException e1) {
+                                                e1.printStackTrace();
                                             }
+                                            final String finalI = servicesId.get(i).getAsString();
+                                            Log.i(TAG, "populateServiceAutoList: add services with ID: " + finalI);
+                                            final AsyncHttpRequest httpGetService = new AsyncHttpRequest(new AsyncHttpRequest.Listener() {
+                                                @Override
+                                                public void onResult(String result) {
+                                                    if (!result.isEmpty()) {
+                                                        try {
+                                                            Log.i(TAG, "onResult: Received service with id: " + finalI);
+                                                            JSONObject service = new JSONObject(result).getJSONObject("service");
+                                                            mServiceAutoList.add(new ServiceAuto(
+                                                                    service.getString("id"),
+                                                                    stringToBitmap(service.getString("imageEncoded")),
+                                                                    service.getString("name"),
+                                                                    service.getString("description"),
+                                                                    service.getString("address"),
+                                                                    Float.valueOf(service.getString("rating")),
+                                                                    service.getString("phoneNumber"),
+                                                                    service.getString("email"),
+                                                                    Double.valueOf(service.getString("latitude")),
+                                                                    Double.valueOf(service.getString("longitude"))));
+                                                            mServiceAutoAdapter.notifyDataSetChanged();
+                                                        } catch (JSONException e1) {
+                                                            e1.printStackTrace();
+                                                            Log.e(TAG, "onResult: NoResult");
+                                                        }
+                                                    } else {
+                                                        Log.e(TAG, "onResult: Service with id: " + finalI + "not received!");
+                                                    }
+                                                }
+                                            });
+                                            httpGetService.execute("GET", mServiceByIdURL + finalI);
                                         }
-                                    });
-                                    httpGetService.execute("GET", mServiceByIdURL + finalI);
-                                }
+                                    }
+                                }).start();
                             } else {
                                 Toast.makeText(mCtx, "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
                             }
@@ -358,7 +389,7 @@ public class HomeFragment extends Fragment {
                 final EditText rangeInput = advancedFilterView.findViewById(R.id.rangeInputFilter);
                 final EditText cityInput = advancedFilterView.findViewById(R.id.cityInputFilter);
                 final CheckBox resetFilterCheck = advancedFilterView.findViewById(R.id.resetFilterCheck);
-                if (!mIsLoggedIn) {
+                if (!mPreferencesManager.getPermissionLocation()) {
                     TextView rangeInputLabel = advancedFilterView.findViewById(R.id.range);
                     rangeInputLabel.setVisibility(View.GONE);
                     rangeInput.setVisibility(View.GONE);
@@ -392,6 +423,20 @@ public class HomeFragment extends Fragment {
                                             advFilterParams.addProperty("givenNameFilter", givenNameFilter.getText().toString());
                                             advFilterParams.addProperty("distanceInput", rangeInput.getText().toString());
                                             advFilterParams.addProperty("cityInput", cityInput.getText().toString());
+                                            advFilterParams.addProperty("longitute", mPreferencesManager.getUserLongitude());
+                                            advFilterParams.addProperty("latitude", mPreferencesManager.getUserLatitude());
+                                            try {
+                                                Response<JsonObject> response = Ion.with(mCtx)
+                                                        .load("GET", mServiceIdFilterBy)
+                                                        .setJsonObjectBody(advFilterParams)
+                                                        .asJsonObject()
+                                                        .withResponse()
+                                                        .get();
+                                            } catch (ExecutionException e) {
+                                                e.printStackTrace();
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
                                             mServiceAutoAdapter.getFilter(advFilterParams).filter("");
                                         }
                                     }

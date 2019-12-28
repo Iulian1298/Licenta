@@ -1,4 +1,5 @@
-from flask import send_file, send_from_directory, Response
+from flask import send_file, send_from_directory, Response, url_for
+from werkzeug.utils import redirect
 
 from API import *
 from API.api_check import check_token
@@ -58,6 +59,17 @@ def createService():
                          status.HTTP_201_CREATED)
 
 
+@app.route("/services/getIdsFilterBy/", methods=["GET"])
+def getServiceIdsFilterBy():
+    minRating = request.json['minRating']
+    maxRating = request.json['maxRating']
+    givenNameFilter = request.json['givenNameFilter']
+    latitude = request.json['latitude']
+    longitude = request.json['longitude']
+    distanceInput = request.json['distanceInput']
+    cityInput = request.json['cityInput']
+
+
 '''
 @app.route("/services/getInfoById/<serviceId>", methods=['GET'])
 def getServiceInfo(serviceId):
@@ -72,11 +84,13 @@ def getServiceInfo(serviceId):
     return make_response(jsonify({"status": "NotFound"}), status.HTTP_404_NOT_FOUND)
 
 
+
 @app.route("/services/getImageById/<serviceId>", methods=['GET'])
 def getServiceImage(serviceId):
     service = Service.query.filter_by(id=serviceId)
     if service.first():
         serviceDict = service.first().toDict()
+        #return redirect(url_for('/services/getImageById/'+serviceId, filename=app.config['IMAGE_FOLDER'] + serviceDict["logoPath"]))
         return send_file(app.config['IMAGE_FOLDER'] + serviceDict["logoPath"], mimetype='image/jpeg')
     # return send_file(app.config['IMAGE_FOLDER'] + serviceDict["logoPath"], mimetype='image/jpg',
     #                 attachment_filename='snapshot.png')

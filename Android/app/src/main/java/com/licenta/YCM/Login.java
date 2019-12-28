@@ -106,11 +106,15 @@ public class Login implements Authentication {
                 .get();
         if (response.getHeaders().code() == 200) {
             System.out.println(response.getResult());
-            mPreferencesManager.setToken(response.getResult().get("token").getAsString());
-            mPreferencesManager.setImage(response.getResult().get("user").getAsJsonObject().get("imageEncoded").getAsString());
-            mPreferencesManager.setUsername(response.getResult().get("user").getAsJsonObject().get("fullName").getAsString());
-            mPreferencesManager.setUserId(response.getResult().get("user").getAsJsonObject().get("id").getAsString());
-            mPreferencesManager.setUserMail(response.getResult().get("user").getAsJsonObject().get("email").getAsString());
+            try {
+                mPreferencesManager.setToken(response.getResult().get("token").getAsString());
+                mPreferencesManager.setImage(response.getResult().get("user").getAsJsonObject().get("imageEncoded").getAsString());
+                mPreferencesManager.setUsername(response.getResult().get("user").getAsJsonObject().get("fullName").getAsString());
+                mPreferencesManager.setUserId(response.getResult().get("user").getAsJsonObject().get("id").getAsString());
+                mPreferencesManager.setUserMail(response.getResult().get("user").getAsJsonObject().get("email").getAsString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } else {
             if (response.getHeaders().code() == 401) {
                 resultOk = false;
