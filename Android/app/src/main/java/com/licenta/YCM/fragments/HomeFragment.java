@@ -400,7 +400,7 @@ public class HomeFragment extends Fragment {
                 filterTitle.setPadding(10, 10, 10, 10);
                 filterTitle.setTextSize(18);
                 filterTitle.setTextColor(Color.DKGRAY);
-                AlertDialog advancedFilterPopUp = new AlertDialog.Builder(getActivity())
+                AlertDialog advancedFilterPopUp = new AlertDialog.Builder(mCtx)
                         .setCustomTitle(filterTitle)
                         .setView(advancedFilterView)
                         .setPositiveButton("Filtreaza", new DialogInterface.OnClickListener() {
@@ -437,6 +437,7 @@ public class HomeFragment extends Fragment {
                                             } catch (InterruptedException e) {
                                                 e.printStackTrace();
                                             }
+                                            //ToDo: move filter on server
                                             mServiceAutoAdapter.getFilter(advFilterParams).filter("");
                                         }
                                     }

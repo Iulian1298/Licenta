@@ -15,13 +15,18 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -65,9 +70,6 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private TextView mDistanceFromYou;
     private Button mDialButton;
     private Button mSendMailButton;
-    private Button mViewComments;
-    private Button mLeaveComment;
-    private Button mScheduleToService;
 
     private Context mCtx;
     private String mAddCommentURL;
@@ -113,9 +115,6 @@ public class ServiceAutoActivity extends AppCompatActivity {
         }
         mDialButton = findViewById(R.id.dialButton);
         mSendMailButton = findViewById(R.id.sendMailButton);
-        mViewComments = findViewById(R.id.viewComments);
-        mLeaveComment = findViewById(R.id.leaveComment);
-        mScheduleToService = findViewById(R.id.scheduleToService);
 
         mAddCommentURL = "http://10.0.2.2:5000/comments/addComment";
         Intent intent = getIntent();
@@ -155,27 +154,34 @@ public class ServiceAutoActivity extends AppCompatActivity {
                         "Trimite mail-ul cu: "));
             }
         });
-        mViewComments.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.service_auto_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        boolean isLoggedIn = false;
+        try {
+            isLoggedIn = mPreferencesManager.isLoggedIn();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        switch (item.getItemId()) {
+            case R.id.viewComments:
                 Log.v(TAG, "onClick() -> open comments page ");
                 Intent intentViewComments = new Intent(getApplicationContext(), CommentsActivity.class);
                 intentViewComments.putExtra("serviceId", mServiceAuto.getServiceId());
                 startActivityForResult(intentViewComments, 1);
-            }
-        });
-        mLeaveComment.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                break;
+            case R.id.leaveComment:
                 Log.v(TAG, "onClick() -> show leave comment pop-up ");
-                boolean isLoggedIn = false;
-                try {
-                    isLoggedIn = mPreferencesManager.isLoggedIn();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
                 if (!isLoggedIn) {
                     showPopUpNotLogged();
                 } else {
@@ -239,24 +245,15 @@ public class ServiceAutoActivity extends AppCompatActivity {
                             .create();
                     addCommentPopUp.show();
                 }
-            }
-        });
-        mScheduleToService.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                break;
+            case R.id.scheduleToService:
                 Log.i(TAG, "onClick: schedule clicked");
-                boolean isLoggedIn = false;
-                try {
-                    isLoggedIn = mPreferencesManager.isLoggedIn();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                //ToDo: before date time picker ask user type of scheule (constatare, vulcanizare,
+                //ToDo: tinichigerie)de adaugat in bd tipul iar la interogare trebuie vazut
+                //ToDo: ce tip vrea userul (tipul trebuie adaugat la time si facut cheie multipla cu dayId ul si time ul
                 if (!isLoggedIn) {
                     showPopUpNotLogged();
                 } else {
-                    //ToDo: show time/date picker and schedule to a service
                     final CaldroidFragment dialogCaldroidFragment = CaldroidFragment.newInstance("Alege data", Calendar.getInstance().get(Calendar.MONTH) + 1, Calendar.getInstance().get(Calendar.YEAR));
                     ArrayList<String> lockedDays = new ArrayList<>();
                     dialogCaldroidFragment.setBackgroundDrawableForDate(new ColorDrawable(Color.parseColor("#3385ff")), Calendar.getInstance().getTime());
@@ -266,7 +263,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                     //get locked days from server
                     try {
                         Response<JsonObject> response = Ion.with(mCtx)
-                                .load("GET", "http://10.0.2.2:5000/getLockedDays")
+                                .load("GET", "http://10.0.2.2:5000/getLockedDays/" + mServiceAuto.getServiceId())
                                 .setHeader("Authorization", mPreferencesManager.getToken())
                                 .asJsonObject()
                                 .withResponse()
@@ -294,7 +291,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                             ArrayList<String> lockedHours = new ArrayList<>();
                             try {
                                 Response<JsonObject> response = Ion.with(mCtx)
-                                        .load("GET", "http://10.0.2.2:5000/getLockedDays/" + format.format(date))
+                                        .load("GET", "http://10.0.2.2:5000/getLockedHoursForDay/" + format.format(date) + "/serviceId/" + mServiceAuto.getServiceId())
                                         .setHeader("Authorization", mPreferencesManager.getToken())
                                         .asJsonObject()
                                         .withResponse()
@@ -318,14 +315,135 @@ public class ServiceAutoActivity extends AppCompatActivity {
                     dialogCaldroidFragment.setCaldroidListener(listener);
                     dialogCaldroidFragment.show(getSupportFragmentManager(), "TAG");
                 }
-            }
-        });
+                break;
+            case R.id.requestOffer:
+                if (!isLoggedIn) {
+                    showPopUpNotLogged();
+                } else {
+                    TextView requestTypeTitle = new TextView(mCtx);
+                    requestTypeTitle.setText("Tipul de problema!");
+                    requestTypeTitle.setGravity(Gravity.CENTER);
+                    requestTypeTitle.setPadding(10, 10, 10, 10);
+                    requestTypeTitle.setTextSize(18);
+                    requestTypeTitle.setTextColor(Color.DKGRAY);
+                    TextView requestTypeContent = new TextView(mCtx);
+                    requestTypeContent.setText("Apasa \"DA\" daca vrei o oferta pentru rezolvarea unei probleme mecanice sau \"NU\" altfel!");
+                    requestTypeContent.setGravity(Gravity.CENTER);
+                    requestTypeContent.setPadding(10, 10, 10, 10);
+                    AlertDialog requestType = new AlertDialog.Builder(ServiceAutoActivity.this)
+                            .setCustomTitle(requestTypeTitle)
+                            .setView(requestTypeContent)
+                            .setPositiveButton("DA", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Log.i(TAG, "onClick: DA");
+                                    showRequestOffer(true);
+                                }
+                            })
+                            .setNegativeButton("NU", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Log.i(TAG, "onClick: NU");
+                                    showRequestOffer(false);
+                                }
+                            })
+                            .create();
+                    requestType.show();
+                }
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
+
+    private void showRequestOffer(boolean withMyPartsAvailable) {
+        View requestOffer = getLayoutInflater().inflate(R.layout.request_offer_popup_layout, null);
+        final EditText requestText = requestOffer.findViewById(R.id.requestText);
+        final EditText carType = requestOffer.findViewById(R.id.carType);
+        final EditText carModel = requestOffer.findViewById(R.id.carModel);
+        final EditText carYear = requestOffer.findViewById(R.id.carYear);
+        final EditText carVin = requestOffer.findViewById(R.id.carVin);
+        TextView withMyPartsLabel = requestOffer.findViewById(R.id.withMyPartsLabel);
+        final CheckBox withMyPartsCheck = requestOffer.findViewById(R.id.withMyPartsCheck);
+        if (!withMyPartsAvailable) {
+            withMyPartsLabel.setVisibility(View.GONE);
+            withMyPartsCheck.setVisibility(View.GONE);
+        }
+        TextView requestOfferTitle = new TextView(mCtx);
+        requestOfferTitle.setText("Filtrare avansata!");
+        requestOfferTitle.setGravity(Gravity.CENTER);
+        requestOfferTitle.setPadding(10, 10, 10, 10);
+        requestOfferTitle.setTextSize(18);
+        requestOfferTitle.setTextColor(Color.DKGRAY);
+        AlertDialog requestOfferPopUp = new AlertDialog.Builder(ServiceAutoActivity.this)
+                .setCustomTitle(requestOfferTitle)
+                .setView(requestOffer)
+                .setPositiveButton("Confirma", new DialogInterface.OnClickListener() {
+                    //ToDo: ca in login sa nu se inchida dialogul daca ceva nu e valid
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (requestText.getText().toString().trim().isEmpty() ||
+                                carType.getText().toString().trim().isEmpty() ||
+                                carModel.getText().toString().trim().isEmpty() ||
+                                carYear.getText().toString().trim().isEmpty() ||
+                                carVin.getText().toString().trim().isEmpty()) {
+                            Toast.makeText(mCtx, "Trebuie completate toate campurile cererii!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            if (carVin.getText().toString().trim().length() != 17) {
+                                Toast.makeText(mCtx, "VIN-ul completat nu este valid!", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Log.i(TAG, "onClick: Request: " + requestText.getText().toString() +
+                                        " With My Parts: " + withMyPartsCheck.isChecked() +
+                                        " carType: " + carType.getText().toString() +
+                                        " carModel: " + carModel.getText().toString() +
+                                        " carYear: " + carYear.getText().toString() +
+                                        " carVin: " + carVin.getText().toString());
+                                JsonObject requestDetails = new JsonObject();
+                                requestDetails.addProperty("serviceId", mServiceAuto.getServiceId());
+                                requestDetails.addProperty("userId", mPreferencesManager.getUserId());
+                                requestDetails.addProperty("request", requestText.getText().toString());
+                                requestDetails.addProperty("withUserParts", withMyPartsCheck.isChecked());
+                                requestDetails.addProperty("carType", carType.getText().toString());
+                                requestDetails.addProperty("carModel", carModel.getText().toString());
+                                requestDetails.addProperty("carYear", carYear.getText().toString());
+                                requestDetails.addProperty("carVin", carVin.getText().toString());
+                                try {
+                                    Response<JsonObject> response = Ion.with(mCtx)
+                                            .load("POST", "http://10.0.2.2:5000/addRequestedOffer")
+                                            .setJsonObjectBody(requestDetails)
+                                            .asJsonObject()
+                                            .withResponse()
+                                            .get();
+                                    if (response.getHeaders().code() == 201) {
+                                        Log.i(TAG, "onClick: requestAdded");
+                                        Toast.makeText(getApplicationContext(), "Cerere realizata cu succes!", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        if (response.getHeaders().code() == 409) {
+                                            Toast.makeText(getApplicationContext(), "Conflict in baza de date!", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Toast.makeText(getApplicationContext(), "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                } catch (ExecutionException e) {
+                                    e.printStackTrace();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                })
+                .setNegativeButton("Anuleaza", null)
+                .create();
+        requestOfferPopUp.show();
+    }
+
 
     private void showTimePicker(ArrayList<String> lockedHours, final Date date) {
         final ListView listView = new ListView(mCtx);
         ArrayList<String> availableHours = new ArrayList<>();
-        //ToDo: for i=start program hour to end program hour if program will be available
+        //ToDo: for i=start program hour to end program hour if program will be available, probably no
         availableHours.add("08:00");
         availableHours.add("09:00");
         availableHours.add("10:00");
@@ -339,9 +457,16 @@ public class ServiceAutoActivity extends AppCompatActivity {
         for (String elem : lockedHours) {
             availableHours.remove(elem);
         }
+        TextView choseHourTitle = new TextView(mCtx);
+        choseHourTitle.setText("Alege ora!");
+        choseHourTitle.setGravity(Gravity.CENTER);
+        choseHourTitle.setPadding(10, 10, 10, 10);
+        choseHourTitle.setTextSize(18);
+        choseHourTitle.setTextColor(Color.DKGRAY);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(mCtx, R.layout.time_list_element_layout, availableHours);
         listView.setAdapter(adapter);
         final AlertDialog timePickerDialog = new AlertDialog.Builder(ServiceAutoActivity.this)
+                .setCustomTitle(choseHourTitle)
                 .create();
         timePickerDialog.setView(listView, 50, 50, 50, 50);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -443,7 +568,6 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mContactEmail.setText(mServiceAuto.getContactEmail());
         if (mPreferencesManager.getPermissionLocation()) {
             double distance = mServiceAuto.calculateDistance(mPreferencesManager.getUserLatitude(), mPreferencesManager.getUserLongitude());
-
             if (distance < 1) {
                 mDistanceFromYou.setText(String.format("La aproximativ: %d m de tine", (int) (distance * 1000)));
             } else {

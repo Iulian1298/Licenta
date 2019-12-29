@@ -6,14 +6,15 @@ from models.lockedHour import LockedHour
 
 
 @app.route("/addLockedPeriod", methods=['POST'])
-# @check_token
+@check_token
 def addLockedPeriod():
     try:
         lockedPeriod = {}
-        lockedDay = LockedDay.query.filter_by(day=request.json['day'])
+        lockedDay = LockedDay.query.filter_by(day=request.json['day'], serviceId=request.json['serviceId'])
         if lockedDay.first():
             newLockedHoursNr = lockedDay.first().toDict()['lockedHours'] + 1
-            db.session.query(LockedDay).filter(LockedDay.day == request.json['day']).update(
+            db.session.query(LockedDay).filter(LockedDay.day == request.json['day'],
+                                               LockedDay.serviceId == request.json['serviceId']).update(
                 {LockedDay.lockedHours: newLockedHoursNr}, synchronize_session=False)
 
             lockedHour = LockedHour(id=unicode(uuid.uuid4()),
@@ -47,10 +48,10 @@ def addLockedPeriod():
                          status.HTTP_201_CREATED)
 
 
-@app.route("/getLockedDays", methods=['GET'])
-# @check_token
-def getLockedDays():
-    result = LockedDay.query.with_entities(LockedDay.day).filter_by(lockedHours=10).all()
+@app.route("/getLockedDays/<serviceId>", methods=['GET'])
+@check_token
+def getLockedDays(serviceId):
+    result = LockedDay.query.with_entities(LockedDay.day).filter_by(lockedHours=10, serviceId=serviceId).all()
     if result:
         lockedDays = [i[0] for i in result]
         return make_response(jsonify({"lockedDays": lockedDays}), status.HTTP_200_OK)
@@ -58,10 +59,10 @@ def getLockedDays():
         return make_response(jsonify({"lockedDays": []}), status.HTTP_200_OK)
 
 
-@app.route("/getLockedDays/<day>", methods=['GET'])
-# @check_token
-def getLockedHoursForDay(day):
-    dayId = LockedDay.query.with_entities(LockedDay.id).filter_by(day=day)
+@app.route("/getLockedHoursForDay/<day>/serviceId/<serviceId>", methods=['GET'])
+@check_token
+def getLockedHoursForDay(day, serviceId):
+    dayId = LockedDay.query.with_entities(LockedDay.id).filter_by(day=day, serviceId=serviceId)
     lockedHours = []
     if dayId.first():
         result = LockedHour.query.with_entities(LockedHour.hour).filter_by(dayId=dayId[0][0]).all()

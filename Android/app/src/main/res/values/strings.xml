@@ -44,4 +44,11 @@
     <string name="usernameComment">Comment owner</string>
     <string name="comment">Comentariu Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt  ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</string>
     <string name="commentDate">Data adaugarii</string>
+    <string name="requestOffer">Cere oferta</string>
+    <string name="withMyParts">Cu piesele mele</string>
+    <string name="requestTextLabel">Ce trebuie facut la masina:</string>
+    <string name="carType">Masina:</string>
+    <string name="carModel">Model:</string>
+    <string name="carYear">Anul fabricatiei:</string>
+    <string name="carVin">VIN:</string>
 </resources>
