@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,7 +21,7 @@ import com.google.gson.JsonObject;
 import com.koushikdutta.ion.Ion;
 import com.koushikdutta.ion.Response;
 import com.licenta.YCM.AsyncHttpRequest;
-import com.licenta.YCM.CommentsAdapter;
+import com.licenta.YCM.adapters.CommentsAdapter;
 import com.licenta.YCM.R;
 import com.licenta.YCM.SharedPreferencesManager;
 import com.licenta.YCM.models.Comment;
@@ -56,6 +57,15 @@ public class CommentsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_comments);
         mPreferencesManager = SharedPreferencesManager.getInstance(this);
         mCtx = getApplicationContext();
+
+        final SwipeRefreshLayout refreshComments = findViewById(R.id.refreshComments);
+        refreshComments.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                init();
+                refreshComments.setRefreshing(false);
+            }
+        });
 
         init();
 
@@ -93,7 +103,7 @@ public class CommentsActivity extends AppCompatActivity {
         setResult(RESULT_CANCELED, mReturnIntent);
 
         //set listeners
-        mCommentsAdapter.setDeleteClick(new CommentsAdapter.OnDeleteClickListener() {
+        mCommentsAdapter.setDeleteClickListener(new CommentsAdapter.OnDeleteClickListener() {
             @Override
             public void onDeleteClick(View view, int pos) throws ExecutionException, InterruptedException {
                 Log.i(TAG, "onDeleteClick: delete comment at pos: " + pos);
@@ -140,53 +150,54 @@ public class CommentsActivity extends AppCompatActivity {
             Log.i(TAG, "populateCommentList: comments Ids received");
             if (response.getResult() != null) {
                 final JsonArray commentsId = response.getResult().get("Ids").getAsJsonArray();
-                new Thread(new Runnable() {
+               /* new Thread(new Runnable() {
                     @Override
-                    public void run() {
-                        for (int i = 0; i < commentsId.size(); i++) {
-                            try {
+                    public void run() {*/
+                for (int i = 0; i < commentsId.size(); i++) {
+                           /* try {
                                 Thread.sleep(250);
                             } catch (InterruptedException e1) {
                                 e1.printStackTrace();
-                            }
-                            final String commentId = commentsId.get(i).getAsString();
-                            Log.i(TAG, "populateCommentList: add comment with Id: " + commentId);
-                            final AsyncHttpRequest httpGetService = new AsyncHttpRequest(new AsyncHttpRequest.Listener() {
-                                @Override
-                                public void onResult(String result) {
-                                    if (!result.isEmpty()) {
-                                        try {
-                                            Log.i(TAG, "Comment received");
-                                            JSONObject comment = new JSONObject(result).getJSONObject("comment");
-                                            mCommentsList.add(new Comment(
-                                                    comment.getString("id"),
-                                                    stringToBitmap(comment.getString("imageEncoded")),
-                                                    comment.getString("comment"),
-                                                    comment.getString("ownerName"),
-                                                    Float.valueOf(comment.getString("rating")),
-                                                    comment.getString("creationTime"),
-                                                    comment.getString("serviceId"),
-                                                    comment.getString("ownerId")));
-                                            mCommentsAdapter.notifyDataSetChanged();
-                                        } catch (JSONException e1) {
-                                            e1.printStackTrace();
-                                            Log.e(TAG, "onResult: NoResult");
-                                        }
-                                    } else {
-                                        Log.e(TAG, "onResult: Service with id: " + commentId + "not received!");
-                                    }
+                            }*/
+                    final String commentId = commentsId.get(i).getAsString();
+                    Log.i(TAG, "populateCommentList: add comment with Id: " + commentId);
+                    final AsyncHttpRequest httpGetService = new AsyncHttpRequest(new AsyncHttpRequest.Listener() {
+                        @Override
+                        public void onResult(String result) {
+                            if (!result.isEmpty()) {
+                                try {
+                                    Log.i(TAG, "Comment received");
+                                    JSONObject comment = new JSONObject(result).getJSONObject("comment");
+                                    mCommentsList.add(new Comment(
+                                            comment.getString("id"),
+                                            stringToBitmap(comment.getString("imageEncoded")),
+                                            comment.getString("comment"),
+                                            comment.getString("ownerName"),
+                                            Float.valueOf(comment.getString("rating")),
+                                            comment.getString("creationTime"),
+                                            comment.getString("serviceId"),
+                                            comment.getString("ownerId")));
+                                    mCommentsAdapter.notifyDataSetChanged();
+                                } catch (JSONException e1) {
+                                    e1.printStackTrace();
+                                    Log.e(TAG, "onResult: NoResult");
                                 }
-                            });
-                            httpGetService.execute("GET", mCommentByIdUrl + commentId);
+                            } else {
+                                Log.e(TAG, "onResult: Service with id: " + commentId + "not received!");
+                            }
                         }
-                    }
-                }).start();
+                    });
+                    httpGetService.execute("GET", mCommentByIdUrl + commentId);
+                }
+                // }
+                //}).start();
             } else {
                 Log.e(TAG, "populateCommentList: All Ids not received");
             }
         } else {
             Toast.makeText(getApplicationContext(), "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
         }
+
     }
 
     @Override

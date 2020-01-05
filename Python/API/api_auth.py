@@ -28,6 +28,7 @@ def authRegister():
         f.write(image)
         user = User(id=userId,
                     email=request.json['email'],
+                    phoneNumber=request.json['phoneNumber'],
                     fullName=request.json['fullName'],
                     password=request.json['password'],
                     imagePath=imagePath)
@@ -61,7 +62,7 @@ def authLogin():
                 imageEncoded = base64.b64encode(image.read()).decode('utf-8')
                 userDict["imageEncoded"] = imageEncoded
             del userDict["imagePath"]
-            #print(userDict)
+            # print(userDict)
             return make_response(jsonify({"status": "Found",
                                           "token": getJWT(repr(user)),
                                           "user": userDict}),

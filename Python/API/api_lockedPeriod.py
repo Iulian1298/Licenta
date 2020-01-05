@@ -3,14 +3,20 @@ from API.api_check import check_token
 from database import db
 from models.lockedDay import LockedDay
 from models.lockedHour import LockedHour
+from models.users import User
 
 
 @app.route("/addLockedPeriod", methods=['POST'])
 @check_token
 def addLockedPeriod():
+    lockedDay = LockedDay.query.filter_by(day=request.json['day'], serviceId=request.json['serviceId'])
+    if lockedDay.first():
+        numberOfScheduledHour = LockedHour.query.filter_by(dayId=lockedDay.first().toDict()['id'],
+                                                           ownerId=request.json['ownerId'])
+        if numberOfScheduledHour.first() != None:
+            return make_response(jsonify({"status": "Could not create"}), status.HTTP_403_FORBIDDEN)
     try:
         lockedPeriod = {}
-        lockedDay = LockedDay.query.filter_by(day=request.json['day'], serviceId=request.json['serviceId'])
         if lockedDay.first():
             newLockedHoursNr = lockedDay.first().toDict()['lockedHours'] + 1
             db.session.query(LockedDay).filter(LockedDay.day == request.json['day'],
@@ -20,7 +26,8 @@ def addLockedPeriod():
             lockedHour = LockedHour(id=unicode(uuid.uuid4()),
                                     dayId=lockedDay.first().toDict()['id'],
                                     ownerId=request.json['ownerId'],
-                                    hour=request.json['hour'])
+                                    hour=request.json['hour'],
+                                    shortDescription=request.json['shortDescription'])
             lockedPeriod['lockedDay'] = lockedDay.first().toDict()
             lockedPeriod['lockedHour'] = lockedHour.toDict()
             db.session.add(lockedHour)
@@ -33,7 +40,8 @@ def addLockedPeriod():
             lockedHour = LockedHour(id=unicode(uuid.uuid4()),
                                     dayId=dayId,
                                     ownerId=request.json['ownerId'],
-                                    hour=request.json['hour'])
+                                    hour=request.json['hour'],
+                                    shortDescription=request.json['shortDescription'])
             lockedPeriod['lockedDay'] = lockedDay.toDict()
             lockedPeriod['lockedHour'] = lockedHour.toDict()
             db.session.add(lockedDay)
@@ -69,3 +77,24 @@ def getLockedHoursForDay(day, serviceId):
         if result:
             lockedHours = [i[0] for i in result]
     return make_response(jsonify({"lockedHours": lockedHours}), status.HTTP_200_OK)
+
+
+@app.route("/getLockedHoursForTodayForService/<serviceId>", methods=['GET'])
+# @check_token
+def getLockedHoursForToday(serviceId):
+    day = date.today()
+    dayId = LockedDay.query.with_entities(LockedDay.id).filter_by(day=day, serviceId=serviceId)
+    result = []
+    if dayId.first():
+        lockedHours = LockedHour.query.filter_by(dayId=dayId.first()[0]).all()
+        for i in lockedHours:
+            content = {}
+            content['username'] = User.query.with_entities(User.fullName).filter_by(id=i.toDict()['ownerId']).first()[0]
+            content['phoneNumber'] = \
+                User.query.with_entities(User.phoneNumber).filter_by(id=i.toDict()['ownerId']).first()[0]
+            content['hour'] = i.toDict()['hour']
+            content['shortDescription'] = i.toDict()['shortDescription']
+            content["dayId"] = i.toDict()['dayId']
+            result.append(content)
+        print((result))
+    return make_response(jsonify({"lockedHours": result}), status.HTTP_200_OK)

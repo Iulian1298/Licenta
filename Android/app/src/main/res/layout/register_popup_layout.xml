@@ -25,6 +25,16 @@
             android:inputType="textEmailAddress"
             android:textAlignment="center"
             android:textSize="30sp" />
+        <EditText
+            android:id="@+id/registerPopUpPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:background="@drawable/input_text_background_layout"
+            android:hint="@string/phone"
+            android:inputType="phone"
+            android:textAlignment="center"
+            android:textSize="30sp" />
 
         <EditText
             android:id="@+id/registerPopUpFullName"

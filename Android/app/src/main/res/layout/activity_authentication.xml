@@ -38,22 +38,22 @@
 
             <Button
                 android:id="@+id/loginButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:layout_height="35dp"
                 android:layout_margin="30dp"
                 android:background="@drawable/buttons_layout_border"
-                android:padding="10dp"
+                android:padding="3dp"
                 android:text="@string/loginBtn"
                 android:textSize="20sp"
                 android:textStyle="italic" />
 
             <Button
                 android:id="@+id/registerButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:layout_height="35dp"
                 android:layout_margin="30dp"
                 android:background="@drawable/buttons_layout_border"
-                android:padding="10dp"
+                android:padding="3dp"
                 android:text="@string/registerBtn"
                 android:textSize="20sp"
                 android:textStyle="italic" />

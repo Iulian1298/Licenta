@@ -1,13 +1,18 @@
 package com.licenta.YCM;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
@@ -25,6 +30,7 @@ import com.google.gson.JsonObject;
 import com.koushikdutta.ion.Ion;
 import com.koushikdutta.ion.Response;
 import com.licenta.YCM.activities.AuthenticationActivity;
+import com.licenta.YCM.activities.HomeActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.util.concurrent.ExecutionException;
@@ -41,7 +47,10 @@ public class Register implements Authentication {
     private ImageView mProfileImage;
     private View mRegisterView;
     private TextView mRegisterTitle;
+    private TextView mPhoneNumber;
+    private AlertDialog mRegisterPopUp;
     private SharedPreferencesManager mPreferencesManager;
+    private boolean mUseDefaultPhoto;
 
     public Register(Context ctx) {
         Log.i(TAG, "Register: Create register worker");
@@ -52,6 +61,7 @@ public class Register implements Authentication {
         LayoutInflater inflater = (LayoutInflater) mCtx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mRegisterView = inflater.inflate(R.layout.register_popup_layout, null);
         mEmail = mRegisterView.findViewById(R.id.registerPopUpEmail);
+        mPhoneNumber = mRegisterView.findViewById(R.id.registerPopUpPhone);
         mPassword = mRegisterView.findViewById(R.id.registerPopUpPassword);
         mRePassword = mRegisterView.findViewById(R.id.registerPopUpRePassword);
         mFullName = mRegisterView.findViewById(R.id.registerPopUpFullName);
@@ -59,9 +69,14 @@ public class Register implements Authentication {
         mProfileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                galleryIntent.setType("image/*");
-                ((AuthenticationActivity) mCtx).startActivityForResult(galleryIntent, 2);
+                if (ContextCompat.checkSelfPermission(mCtx, Manifest.permission.READ_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                    galleryIntent.setType("image/*");
+                    ((AuthenticationActivity) mCtx).startActivityForResult(galleryIntent, 2);
+                } else {
+                    Toast.makeText((AuthenticationActivity) mCtx, "Mai intai permite aplicatiei de a accesa galeria!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         mRegisterTitle = new TextView(mCtx);
@@ -70,22 +85,23 @@ public class Register implements Authentication {
         mRegisterTitle.setPadding(10, 10, 10, 10);
         mRegisterTitle.setTextSize(18);
         mRegisterTitle.setTextColor(Color.DKGRAY);
+        mUseDefaultPhoto = true;
     }
 
     @Override
     public void performAuth() {
         Log.i(TAG, "auth: Register");
 
-        final AlertDialog registerPopUp = new AlertDialog.Builder(mCtx)
+        mRegisterPopUp = new AlertDialog.Builder(mCtx)
                 .setCustomTitle(mRegisterTitle)
                 .setView(mRegisterView)
                 .setPositiveButton("Confirma", null)
                 .setNegativeButton("Anuleaza", null)
                 .create();
-        registerPopUp.setOnShowListener(new DialogInterface.OnShowListener() {
+        mRegisterPopUp.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                final Button confirm = registerPopUp.getButton(AlertDialog.BUTTON_POSITIVE);
+                final Button confirm = mRegisterPopUp.getButton(AlertDialog.BUTTON_POSITIVE);
                 confirm.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -93,7 +109,7 @@ public class Register implements Authentication {
                         if (verifyInputOnClientSide()) {
                             try {
                                 if (verifyInputOnServerSide()) {
-                                    registerPopUp.dismiss();
+                                    mRegisterPopUp.dismiss();
                                     ((AuthenticationActivity) mCtx).finish();
                                 } else {
                                     confirm.setError("Eroare!");
@@ -108,19 +124,23 @@ public class Register implements Authentication {
                 });
             }
         });
-        registerPopUp.show();
+        mRegisterPopUp.show();
     }
 
     private boolean verifyInputOnServerSide() throws ExecutionException, InterruptedException {
         Log.i(TAG, "verifyInputOnServerSide: Register");
         boolean resultOk = true;
         JsonObject jsonBody = new JsonObject();
+        if (mUseDefaultPhoto) {
+            mProfileImage.setImageURI(Uri.parse("android.resource://" + mCtx.getPackageName() + "/drawable/" + "default_profile_image"));
+        }
         BitmapDrawable drawable = (BitmapDrawable) mProfileImage.getDrawable();
         Bitmap bitmap = drawable.getBitmap();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
         String image = Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP);
         jsonBody.addProperty("email", mEmail.getText().toString().trim());
+        jsonBody.addProperty("phoneNumber", mPhoneNumber.getText().toString().trim());
         jsonBody.addProperty("password", mPassword.getText().toString().trim());
         jsonBody.addProperty("fullName", mFullName.getText().toString().trim());
         jsonBody.addProperty("imageEncoded", image);
@@ -166,6 +186,15 @@ public class Register implements Authentication {
                 resultOk = false;
             }
         }
+        if (mPhoneNumber.getText().toString().trim().isEmpty()) {
+            mPhoneNumber.setError("Completeaza campul!");
+            resultOk = false;
+        } else {
+            if (!Patterns.PHONE.matcher(mPhoneNumber.getText().toString().trim()).matches()) {
+                mPhoneNumber.setError("Numar invalid!");
+                resultOk = false;
+            }
+        }
         if (mPassword.getText().toString().trim().isEmpty()) {
             mPassword.setError("Completeaza campul!");
             resultOk = false;
@@ -186,11 +215,17 @@ public class Register implements Authentication {
     }
 
     @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        mRegisterPopUp.dismiss();
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent result) {
         Log.i(TAG, "onActivityResult: ");
         if (result != null) {
             Uri chosenImageByUser = result.getData();
             mProfileImage.setImageURI(chosenImageByUser);
+            mUseDefaultPhoto = false;
         }
     }
 }

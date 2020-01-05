@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.util.Log;
 import android.util.Patterns;
@@ -34,6 +35,7 @@ public class Login implements Authentication {
     private EditText mPassword;
     private View mLoginView;
     private TextView mLoginTitle;
+    private AlertDialog mLoginPopUp;
 
     public Login(Context ctx) {
         Log.i(TAG, "Login: Create login worker");
@@ -56,16 +58,16 @@ public class Login implements Authentication {
     @Override
     public void performAuth() {
         Log.i(TAG, "auth: Login");
-        final AlertDialog loginPopUp = new AlertDialog.Builder(mCtx)
+        mLoginPopUp = new AlertDialog.Builder(mCtx)
                 .setCustomTitle(mLoginTitle)
                 .setView(mLoginView)
                 .setPositiveButton("Confirma", null)
                 .setNegativeButton("Anuleaza", null)
                 .create();
-        loginPopUp.setOnShowListener(new DialogInterface.OnShowListener() {
+        mLoginPopUp.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                final Button confirm = loginPopUp.getButton(AlertDialog.BUTTON_POSITIVE);
+                final Button confirm = mLoginPopUp.getButton(AlertDialog.BUTTON_POSITIVE);
                 confirm.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -73,7 +75,7 @@ public class Login implements Authentication {
                         if (verifyInputOnClientSide()) {
                             try {
                                 if (verifyInputOnServerSide()) {
-                                    loginPopUp.dismiss();
+                                    mLoginPopUp.dismiss();
                                     ((AuthenticationActivity) mCtx).finish();
                                 } else {
                                     mPassword.setText("");
@@ -89,7 +91,7 @@ public class Login implements Authentication {
                 });
             }
         });
-        loginPopUp.show();
+        mLoginPopUp.show();
     }
 
     private boolean verifyInputOnServerSide() throws ExecutionException, InterruptedException {
@@ -148,30 +150,12 @@ public class Login implements Authentication {
 
 
     @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        mLoginPopUp.dismiss();
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent result) {
 
     }
-/*
-    private boolean verifyInputOnServerSide1() throws ExecutionException, InterruptedException {
-        Log.i(TAG, "verifyInputOnServerSide: Login");
-        boolean resultOk = true;
-        JsonObject jsonBody = new JsonObject();
-        jsonBody.addProperty("email", mEmail.getText().toString().trim());
-        jsonBody.addProperty("password", mPassword.getText().toString().trim());
-
-        OkHttpClient client = new OkHttpClient();
-        RequestBody body = RequestBody.create("application/json; charset=utf-8", MediaType.parse(jsonBody.toString()));
-        Request request = new Request.Builder()
-                .url(mLoginUrl)
-                .post(body)
-                .build();
-        try {
-            okhttp3.Response response = client.newCall(request).execute();
-            System.out.println(response.body().toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return resultOk;
-    }*/
 }

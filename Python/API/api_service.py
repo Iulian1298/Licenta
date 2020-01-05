@@ -30,24 +30,33 @@ def getAllServiceIds():
     return make_response(jsonify({"ids": serviceIds}), status.HTTP_200_OK)
 
 
+@check_token
+@app.route("/services/getAllIdsForMyServices/<userId>")
+def getAllServiceIdsForUser(userId):
+    serviceIds = Service.query.with_entities(Service.id).filter_by(owner=userId).all()
+    return make_response(jsonify({"ids": serviceIds}), status.HTTP_200_OK)
+
+
 @app.route("/services/addService", methods=["POST"])
 def createService():
     image = base64.b64decode(request.json['imageEncoded'])
-    imagePath = os.path.join("Images", request.json['name'] + request.json['owner'] + ".png")
+    imagePath = os.path.join("Images", request.json['serviceName'] + request.json['owner'] + ".png")
     f = open(imagePath, 'wb')
     f.write(image)
     try:
         service = Service(id=unicode(uuid.uuid4()),
-                          logoPath=imagePath,  # will be replaced with path of received image
-                          name=request.json['name'],
-                          description=request.json['description'],
-                          latitude=request.json['lat'],
-                          longitude=request.json['long'],
-                          address=request.json['address'],
-                          rating=request.json['rating'],
-                          phoneNumber=request.json['phoneNumber'],
-                          email=request.json['email'],
-                          owner=request.json['owner'])
+                          logoPath=imagePath,
+                          name=request.json['serviceName'],
+                          description=request.json['serviceDescription'],
+                          latitude=request.json['latitude'],
+                          longitude=request.json['longitude'],
+                          address=request.json['serviceAddress'],
+                          rating=0,
+                          phoneNumber=request.json['servicePhone'],
+                          email=request.json['serviceEmail'],
+                          owner=request.json['serviceOwner'],
+                          serviceType=request.json['serviceType'],
+                          acceptedBrand=request.json['serviceAcceptedBrand'])
         print(service)
         db.session.add(service)
         db.session.commit()

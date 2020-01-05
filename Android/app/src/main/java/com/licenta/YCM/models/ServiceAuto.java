@@ -16,6 +16,9 @@ public class ServiceAuto {
     private String mContactEmail;
     private double mLatitude;
     private double mLongitude;
+    private String mOwnerId;
+    private int mType;
+    private String mAcceptedBrands;
 
     public ServiceAuto(String serviceId,
                        Bitmap image,
@@ -26,7 +29,10 @@ public class ServiceAuto {
                        String phoneNumber,
                        String email,
                        double latitude,
-                       double longitude) {
+                       double longitude,
+                       String ownerId,
+                       int type,
+                       String acceptedBrands) {
         this.mServiceId = serviceId;
         this.mImage = image;
         this.mName = name;
@@ -37,6 +43,9 @@ public class ServiceAuto {
         this.mContactEmail = email;
         this.mLatitude = latitude;
         this.mLongitude = longitude;
+        this.mOwnerId = ownerId;
+        this.mType = type;
+        this.mAcceptedBrands = acceptedBrands;
     }
 
     public String getServiceId() {
@@ -90,6 +99,18 @@ public class ServiceAuto {
         return mLongitude;
     }
 
+    public String getOwnerId() {
+        return mOwnerId;
+    }
+
+    public int getType() {
+        return mType;
+    }
+
+    public String getAcceptedBrands() {
+        return mAcceptedBrands;
+    }
+
     public double calculateDistance(double lat2, double long2) {
         if ((mLatitude == lat2) && (mLongitude == long2)) {
             return 0;
@@ -103,5 +124,6 @@ public class ServiceAuto {
             return distance;
         }
     }
+
 }
 

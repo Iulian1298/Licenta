@@ -9,7 +9,7 @@
     <string name="rePassword">Reintrodu parola..</string>
     <string name="menuHomeButton">Acasa</string>
     <string name="menuProfileButton">Profilul meu</string>
-    <string name="menuNotifManagerButton">TBD</string>
+    <string name="menuSeeRequestOffer">Vezi cererile de oferta</string>
     <string name="menuLogoutButton">Iesire</string>
     <string name="searchButton">Cauta..</string>
     <string name="filterResult">Filtreaza..</string>
@@ -22,10 +22,11 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="serviceLogo">Logo sau o imagine</string>
-    <string name="serviceName">Numele service-ului</string>
+    <string name="serviceName">Nume service</string>
     <string name="serviceDescription">Descrierea service-ului in maxim 100 de caractere</string>
+    <string name="serviceDescriptionFull">Descrierea service-ului in mai multe caractere Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt  ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</string>
     <string name="distanceFromYou">Distanta fata de locatia curenta</string>
-    <string name="address">Adresa service-ului</string>
+    <string name="address">Adresa service</string>
     <string name="ratingMin">Rating-ul minim:</string>
     <string name="ratingMax">Rating-ul maxim:</string>
     <string name="nameFilter">Nume service:</string>
@@ -51,4 +52,25 @@
     <string name="carModel">Model:</string>
     <string name="carYear">Anul fabricatiei:</string>
     <string name="carVin">VIN:</string>
+    <string name="menuAuthButton">Autentificare</string>
+    <string name="menuMyServices">Service-urile mele</string>
+    <string name="menuMyRequestOffer">Cererile mele</string>
+    <string name="scheduledHour">08:00</string>
+    <string name="scheduleOwner">Schedule Owner</string>
+    <string name="scheduleUserPhone">0712345678</string>
+    <string name="scheduleShortDescription">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed dolore magna aliqua. Ut enim ad minim veniam, quis nostrud</string>
+    <string name="phone">Nr. tau de telefon..</string>
+    <string name="todaySchedule">Programarile pe azi</string>
+    <string name="offerRequest">Cereri de oferta</string>
+    <string name="editService">Editeaza service</string>
+    <string name="currentDay">Luni, 30 dec 2019</string>
+    <string name="servicePhone">Nr. tel. service</string>
+    <string name="serviceEmail">Email service</string>
+    <string name="serviceDescriptionAdd">Descriere</string>
+    <string name="acceptedBrand">Branduri acceptate</string>
+    <string name="repairService">Service</string>
+    <string name="serviceTire">Vulcanizare</string>
+    <string name="serviceChassis">Tinichigerie</string>
+    <string name="offeredServices">Servicii oferite: Service, Vulcanizare, Tinichigerie</string>
+    <string name="acceptedBrands">Branduri acceptate: BMW, Mercedes, Grupul VAG, BMW, Mercedes, Grupul VAG, BMW, Mercedes, Grupul VAG</string>
 </resources>

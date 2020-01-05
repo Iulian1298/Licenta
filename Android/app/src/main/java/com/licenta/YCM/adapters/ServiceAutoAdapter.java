@@ -1,4 +1,4 @@
-package com.licenta.YCM;
+package com.licenta.YCM.adapters;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -14,6 +14,8 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.google.gson.JsonObject;
+import com.licenta.YCM.R;
+import com.licenta.YCM.SharedPreferencesManager;
 import com.licenta.YCM.models.ServiceAuto;
 
 import java.util.ArrayList;
@@ -65,14 +67,14 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
         } else {
             viewHolder.mDescription.setText(serviceAuto.getDescription());
         }
-        if (mPreferencesManager.getPermissionLocation()) {
+        if (mPreferencesManager.getPermissionLocation() && !mPreferencesManager.getOnlyMyServices()) {
             viewHolder.mDistance.setVisibility(View.VISIBLE);
             double distance = serviceAuto.calculateDistance(mPreferencesManager.getUserLatitude(), mPreferencesManager.getUserLongitude());
 
             if (distance < 1) {
-                viewHolder.mDistance.setText(String.format("La aproximativ: %d m", (int) (distance * 1000)));
+                viewHolder.mDistance.setText(String.format("%d m", (int) (distance * 1000)));
             } else {
-                viewHolder.mDistance.setText(String.format("La aproximativ: %.2f km", distance));
+                viewHolder.mDistance.setText(String.format("%.2f km", distance));
             }
         } else {
             viewHolder.mDistance.setVisibility(View.GONE);

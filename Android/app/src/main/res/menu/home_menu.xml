@@ -10,12 +10,20 @@
             android:icon="@drawable/ic_person_black_24dp"
             android:title="@string/menuProfileButton" />
         <item
-            android:id="@+id/menuSettings"
-            android:icon="@drawable/ic_settings_black_24dp"
-            android:title="@string/menuNotifManagerButton" />
+            android:id="@+id/menuMyRequestOffer"
+            android:icon="@drawable/ic_done_black_24dp"
+            android:title="@string/menuMyRequestOffer" />
+        <item
+            android:id="@+id/menuMyServices"
+            android:icon="@drawable/ic_car_repairing"
+            android:title="@string/menuMyServices" />
         <item
             android:id="@+id/menuLogout"
             android:icon="@drawable/ic_exit_to_app_black_24dp"
             android:title="@string/menuLogoutButton" />
+        <item
+            android:id="@+id/menuAuth"
+            android:icon="@drawable/ic_lock_black_24dp"
+            android:title="@string/menuAuthButton" />
     </group>
 </menu>

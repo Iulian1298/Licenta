@@ -31,6 +31,7 @@ public class SharedPreferencesManager {
     private static final String KEY_LONGITUDE = "longitude";
     private static final String KEY_LATITUDE = "latitude";
     private static final String KEY_PERMISION_LOCATION = "location";
+    private static final String KEY_ONLY_MY_SERVICES = "onlyMyServices";
 
 
     private static SharedPreferencesManager mInstance;
@@ -48,6 +49,17 @@ public class SharedPreferencesManager {
         return mInstance;
     }
 
+    public boolean getOnlyMyServices() {
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean(KEY_ONLY_MY_SERVICES, false);
+    }
+
+    public void setOnlyMyServices(boolean status) {
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(KEY_ONLY_MY_SERVICES, status);
+        editor.apply();
+    }
 
     public boolean getPermissionLocation() {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
@@ -167,7 +179,11 @@ public class SharedPreferencesManager {
             if (response.getHeaders().code() == 202) {
                 Log.i(TAG, "isLoggedIn()->token still valid");
                 //System.out.println(response.getResult());
-                Log.i(TAG, response.getResult().toString());
+                if (response.getResult() != null) {
+                    Log.i(TAG, response.getResult().toString());
+                } else {
+                    Log.e(TAG, "isLoggedIn: result is null");
+                }
             } else {
                 if (response.getHeaders().code() == 403) {
                     Log.i(TAG, "isLoggedIn()->token not valid");

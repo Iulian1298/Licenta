@@ -14,18 +14,20 @@ class Service(db.Model):
     phoneNumber = db.Column(db.String)
     email = db.Column(db.String)
     owner = db.Column(db.String)
+    serviceType = db.Column(db.Integer)
+    acceptedBrand = db.Column(db.String)
 
     def __repr__(self):
         return "id: {}, logoPath: {}, name: {}, description: {}, latitude: {},longitude: {}, address: {}, " \
-               "rating: {}, phoneNumber: {}, email: {}, owner: {}" \
-            .format(self.id, self.logoPath, self.name, self.description, self.latitude,self.longitude, self.address,
-                    self.rating, self.phoneNumber, self.email, self.owner)
+               "rating: {}, phoneNumber: {}, email: {}, owner: {}, serviceType: {},acceptedBrand: {}" \
+            .format(self.id, self.logoPath, self.name, self.description, self.latitude, self.longitude, self.address,
+                    self.rating, self.phoneNumber, self.email, self.owner, self.serviceType, self.acceptedBrand)
 
     def toDict(self):
         return dict(zip(
             ["id", "logoPath", "name", "description", "latitude", "longitude", "address",
-             "rating", "phoneNumber", "email", "owner"], self.toList()))
+             "rating", "phoneNumber", "email", "owner", "serviceType", "acceptedBrand"], self.toList()))
 
     def toList(self):
-        return [self.id, self.logoPath, self.name, self.description, self.latitude,self.longitude, self.address,
-                self.rating, self.phoneNumber, self.email, self.owner]
+        return [self.id, self.logoPath, self.name, self.description, self.latitude, self.longitude, self.address,
+                self.rating, self.phoneNumber, self.email, self.owner, self.serviceType, self.acceptedBrand]

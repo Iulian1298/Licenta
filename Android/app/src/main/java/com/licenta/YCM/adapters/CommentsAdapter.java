@@ -1,10 +1,15 @@
-package com.licenta.YCM;
+package com.licenta.YCM.adapters;
 
 import android.app.Activity;
 import android.content.Context;
-import android.net.Uri;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.licenta.YCM.R;
+import com.licenta.YCM.SharedPreferencesManager;
 import com.licenta.YCM.models.Comment;
 
 import java.util.ArrayList;
@@ -38,11 +45,22 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, final int pos) {
-        Comment comment = mCommentsList.get(pos);
+        final Comment comment = mCommentsList.get(pos);
 
         viewHolder.mProfileImage.setImageBitmap(comment.getProfileImage());
         if (comment.getComment().length() > 100) {
-            viewHolder.mComment.setText(String.format("%s... See all!", comment.getComment().substring(0, 89)));
+            SpannableStringBuilder spannable = new SpannableStringBuilder(String.format("%s... Vezi tot!", comment.getComment().substring(0, 89)));
+            ForegroundColorSpan color = new ForegroundColorSpan(Color.parseColor("#ff0099cc"));
+            final StyleSpan style = new StyleSpan(Typeface.ITALIC);
+            spannable.setSpan(color, 93, 102, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            spannable.setSpan(style, 93, 102, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            viewHolder.mComment.setText(spannable);
+            viewHolder.mComment.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    viewHolder.mComment.setText(comment.getComment());
+                }
+            });
         } else {
             viewHolder.mComment.setText(comment.getComment());
         }
@@ -98,7 +116,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ViewHo
         }
     }
 
-    public void setDeleteClick(OnDeleteClickListener clickListener) {
+    public void setDeleteClickListener(OnDeleteClickListener clickListener) {
         this.mDeleteClickListener = clickListener;
     }
 
