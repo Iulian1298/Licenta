@@ -12,6 +12,7 @@
         android:background="@color/colorBlueWhite"
         android:hint="@string/serviceName"
         android:inputType="text"
+        android:maxLength="50"
         android:padding="8dp" />
 
     <EditText
@@ -21,6 +22,7 @@
         android:background="@color/colorBlueWhite"
         android:hint="@string/address"
         android:inputType="text"
+        android:maxLength="50"
         android:padding="8dp" />
 
     <EditText
@@ -39,6 +41,7 @@
         android:background="@color/colorBlueWhite"
         android:hint="@string/serviceEmail"
         android:inputType="textEmailAddress"
+        android:maxLength="50"
         android:padding="8dp" />
 
     <EditText
@@ -48,6 +51,7 @@
         android:background="@color/colorBlueWhite"
         android:hint="@string/serviceDescriptionAdd"
         android:inputType="text"
+        android:maxLength="5000"
         android:padding="8dp" />
 
     <EditText
@@ -57,6 +61,7 @@
         android:background="@color/colorBlueWhite"
         android:hint="@string/acceptedBrand"
         android:inputType="text"
+        android:maxLength="100"
         android:padding="8dp" />
 
     <LinearLayout

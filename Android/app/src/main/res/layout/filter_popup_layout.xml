@@ -90,7 +90,8 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_toEndOf="@id/nameFilter"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:maxLength="50" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -110,6 +111,7 @@
                     android:id="@+id/rangeInputFilter"
                     android:layout_width="150dp"
                     android:layout_height="wrap_content"
+                    android:maxLength="50"
                     android:layout_margin="5dp"
                     android:layout_toEndOf="@id/range"
                     android:inputType="number" />
@@ -133,7 +135,8 @@
                     android:layout_width="150dp"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:layout_toEndOf="@id/cityFilter" />
+                    android:layout_toEndOf="@id/cityFilter"
+                    android:maxLength="50" />
             </RelativeLayout>
 
             <RelativeLayout

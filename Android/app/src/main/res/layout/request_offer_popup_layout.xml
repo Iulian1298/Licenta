@@ -35,7 +35,8 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_toEndOf="@id/carTypeLabel"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:maxLength="50" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -60,7 +61,8 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_toEndOf="@id/carModelLabel"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:maxLength="50" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -85,7 +87,8 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_toEndOf="@id/carYearLabel"
-                    android:inputType="number" />
+                    android:inputType="number"
+                    android:maxLength="10" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -110,7 +113,8 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_toEndOf="@id/carVinLabel"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:maxLength="17" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -135,7 +139,8 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_toEndOf="@id/requestTextLabel"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:maxLength="500" />
             </RelativeLayout>
 
             <RelativeLayout

@@ -65,7 +65,7 @@ public class HomeActivity extends AppCompatActivity {
 
         getSupportActionBar().setTitle("Acasa");
         mPreferencesManager.setOnlyMyServices(false);
-        getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment()).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment(),"Acasa").commit();
 
         requestLocationPermission();
     }
@@ -172,7 +172,7 @@ public class HomeActivity extends AppCompatActivity {
                     case R.id.menuHome:
                         getSupportActionBar().setTitle("Acasa");
                         mPreferencesManager.setOnlyMyServices(false);
-                        getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment()).commit();
+                        getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment(), "Acasa").commit();
                         mDrawerLayout.closeDrawer(GravityCompat.START);
                         return true;
                     case R.id.menuProfile:
@@ -246,6 +246,10 @@ public class HomeActivity extends AppCompatActivity {
         } else {
             Log.i(TAG, "requestLocationPermission: permission already granted");
             mPreferencesManager.setPermissionLocation(true);
+            HomeFragment fragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag("Acasa");
+            if (fragment != null) {
+                fragment.refreshPage();
+            }
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 5, mLocationListener);
         }
     }
@@ -281,6 +285,10 @@ public class HomeActivity extends AppCompatActivity {
                 } else {
                     Log.i(TAG, "onRequestPermissionsResult: apply changes");
                     mPreferencesManager.setPermissionLocation(true);
+                    HomeFragment fragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag("Acasa");
+                    if (fragment != null) {
+                        fragment.refreshPage();
+                    }
                     if (ContextCompat.checkSelfPermission(getApplicationContext(), ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 5, mLocationListener);
                     }
@@ -294,6 +302,7 @@ public class HomeActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.i(TAG, "onCreateOptionsMenu: ");
         //getMenuInflater().inflate(R.menu.other_page_main_menu, menu);
+        setNavigationView();
         return super.onCreateOptionsMenu(menu);
     }
 

@@ -19,6 +19,7 @@
             android:ems="8"
             android:hint="@string/email"
             android:inputType="textEmailAddress"
+            android:maxLength="50"
             android:textAlignment="center"
             android:textSize="30sp" />
 
@@ -31,6 +32,7 @@
             android:ems="8"
             android:hint="@string/password"
             android:inputType="textPassword"
+            android:maxLength="50"
             android:textAlignment="center"
             android:textSize="30sp" />
 

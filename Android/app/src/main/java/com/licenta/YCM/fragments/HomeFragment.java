@@ -65,6 +65,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -101,11 +102,13 @@ public class HomeFragment extends Fragment {
     private ImageView mAddServiceImage;
     private boolean mUseDefaultServiceImage;
     private int mLastElementClickedPosition;
+    private View mFragmentView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View fragmentView = inflater.inflate(R.layout.fragment_home, container, false);
+        mFragmentView = fragmentView;
         mCtx = getContext();
         mPreferencesManager = SharedPreferencesManager.getInstance(mCtx);
         mShowOnlyMyServices = mPreferencesManager.getOnlyMyServices();
@@ -135,6 +138,12 @@ public class HomeFragment extends Fragment {
         return fragmentView;
     }
 
+    public void refreshPage() {
+        Log.i(TAG, "refreshPage: called refresh page");
+        //crash some time on instant build (apply changes)
+        init(mFragmentView);
+    }
+
     private void init(View v) {
         Log.i(TAG, "init: ");
         mServiceAutoRecyclerView = v.findViewById(R.id.servicesList);
@@ -143,7 +152,7 @@ public class HomeFragment extends Fragment {
         mUrl = "http://10.0.2.2:5000";
         mServiceAutoList = new ArrayList<>();
         mServiceAutoAdapter = new ServiceAutoAdapter(mCtx, mServiceAutoList);
-        mServiceAutoRecyclerView.addItemDecoration(new DividerItemDecoration(mCtx, DividerItemDecoration.VERTICAL));
+        //mServiceAutoRecyclerView.addItemDecoration(new DividerItemDecoration(mCtx, DividerItemDecoration.VERTICAL));
         mServiceAutoRecyclerView.setAdapter(mServiceAutoAdapter);
         mLastElementClickedPosition = 0;
         if (mShowOnlyMyServices) {
@@ -204,6 +213,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void initAddServicePopUp() {
+        Log.i(TAG, "initAddServicePopUp: ");
         mUseDefaultServiceImage = true;
         mAddService = new Dialog(mCtx);
         mAddService.setContentView(R.layout.add_service_popup_layout);
@@ -293,6 +303,7 @@ public class HomeFragment extends Fragment {
 
         Response<JsonObject> response = Ion.with(mCtx)
                 .load("POST", mUrl + "/services/addService")
+                .setHeader("Authorization", mPreferencesManager.getToken())
                 .setJsonObjectBody(jsonBody)
                 .asJsonObject()
                 .withResponse()
@@ -662,6 +673,22 @@ public class HomeFragment extends Fragment {
             if (resultCode == Activity.RESULT_CANCELED) {
                 Log.d(TAG, "onActivityResult: No comment was added or deleted!");
             }
+            if (resultCode == 3) {
+                Log.i(TAG, "onActivityResult: Apply edit changes");
+                ServiceAuto serviceAuto = mServiceAutoList.get(mLastElementClickedPosition);
+                serviceAuto.setName(data.getStringExtra("newServiceName"));
+                serviceAuto.setAddress(data.getStringExtra("newServiceAddress"));
+                serviceAuto.setContactEmail(data.getStringExtra("newServiceEmail"));
+                serviceAuto.setDescription(data.getStringExtra("newServiceDescription"));
+                serviceAuto.setContactPhoneNumber(data.getStringExtra("newServicePhone"));
+                serviceAuto.setAcceptedBrands(data.getStringExtra("newServiceAcceptedBrand"));
+                serviceAuto.setType(data.getIntExtra("newServiceType", 1));
+                serviceAuto.setLatitude(data.getDoubleExtra("newLatitude", 0));
+                serviceAuto.setLongitude(data.getDoubleExtra("newLongitude", 0));
+                serviceAuto.setImage(createBitmapFromLocalImage(data.getStringExtra("newLogoImage")));
+                mServiceAutoList.set(mLastElementClickedPosition, serviceAuto);
+                mServiceAutoAdapter.notifyDataSetChanged();
+            }
         }
         if (requestCode == 2) {
             if (data != null) {
@@ -775,6 +802,18 @@ public class HomeFragment extends Fragment {
                 return true;
         }
         return super.onOptionsItemSelected(menuItem);
+    }
+
+    private Bitmap createBitmapFromLocalImage(String name) {
+        Log.i(TAG, "createBitmapFromLocalImage: ");
+        Bitmap bitmap = null;
+        try {
+            bitmap = BitmapFactory.decodeStream(mCtx
+                    .openFileInput(name));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return bitmap;
     }
 
     public HomeFragment() {

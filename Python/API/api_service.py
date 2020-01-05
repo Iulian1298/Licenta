@@ -30,21 +30,23 @@ def getAllServiceIds():
     return make_response(jsonify({"ids": serviceIds}), status.HTTP_200_OK)
 
 
-@check_token
 @app.route("/services/getAllIdsForMyServices/<userId>")
+@check_token
 def getAllServiceIdsForUser(userId):
     serviceIds = Service.query.with_entities(Service.id).filter_by(owner=userId).all()
     return make_response(jsonify({"ids": serviceIds}), status.HTTP_200_OK)
 
 
 @app.route("/services/addService", methods=["POST"])
+@check_token
 def createService():
+    serviceId = unicode(uuid.uuid4())
     image = base64.b64decode(request.json['imageEncoded'])
-    imagePath = os.path.join("Images", request.json['serviceName'] + request.json['owner'] + ".png")
+    imagePath = os.path.join("Images", serviceId + "+" + request.json['serviceOwner'] + ".png")
     f = open(imagePath, 'wb')
     f.write(image)
     try:
-        service = Service(id=unicode(uuid.uuid4()),
+        service = Service(id=serviceId,
                           logoPath=imagePath,
                           name=request.json['serviceName'],
                           description=request.json['serviceDescription'],
@@ -66,6 +68,33 @@ def createService():
     return make_response(jsonify({"status": "Created",
                                   "user": service.toDict()}),
                          status.HTTP_201_CREATED)
+
+
+@app.route("/service/editService", methods=['PUT'])
+def updateService():
+    try:
+        db.session.query(Service).filter(Service.id == request.json['serviceId']).update(
+            {Service.name: request.json['serviceName'],
+             Service.address: request.json['serviceAddress'],
+             Service.phoneNumber: request.json['servicePhone'],
+             Service.email: request.json['serviceEmail'],
+             Service.description: request.json['serviceDescription'],
+             Service.acceptedBrand: request.json['serviceAcceptedBrand'],
+             Service.serviceType: request.json['serviceType'],
+             Service.longitude: request.json['longitude'],
+             Service.latitude: request.json['latitude']
+             }, synchronize_session=False)
+        db.session.commit()
+
+        image = base64.b64decode(request.json['imageEncoded'])
+        imagePath = os.path.join("Images", request.json['serviceId'] + "+" + request.json['serviceOwner'] + ".png")
+        f = open(imagePath, 'wb')
+        f.write(image)
+    except Exception as e:
+        print(e)
+        return make_response(jsonify({"status": "Could not create"}), status.HTTP_409_CONFLICT)
+    return make_response(jsonify({"status": "Updated"}),
+                         status.HTTP_200_OK)
 
 
 @app.route("/services/getIdsFilterBy/", methods=["GET"])

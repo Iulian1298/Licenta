@@ -23,7 +23,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="serviceLogo">Logo sau o imagine</string>
     <string name="serviceName">Nume service</string>
-    <string name="serviceDescription">Descrierea service-ului in maxim 100 de caractere</string>
+    <string name="serviceDescription">Descriere</string>
     <string name="serviceDescriptionFull">Descrierea service-ului in mai multe caractere Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt  ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</string>
     <string name="distanceFromYou">Distanta fata de locatia curenta</string>
     <string name="address">Adresa service</string>

@@ -52,8 +52,16 @@ public class ServiceAuto {
         return mServiceId;
     }
 
+    public void setServiceId(String newServiceId) {
+        mServiceId = newServiceId;
+    }
+
     public Bitmap getImage() {
         return mImage;
+    }
+
+    public void setImage(Bitmap newImage) {
+        mImage = newImage;
     }
 
     public String getImageAsString() {
@@ -67,12 +75,24 @@ public class ServiceAuto {
         return mName;
     }
 
+    public void setName(String newName) {
+        mName = newName;
+    }
+
     public String getDescription() {
         return mDescription;
     }
 
+    public void setDescription(String newDescription) {
+        mDescription = newDescription;
+    }
+
     public String getAddress() {
         return mAddress;
+    }
+
+    public void setAddress(String newAddress) {
+        mAddress = newAddress;
     }
 
     public float getRating() {
@@ -87,28 +107,56 @@ public class ServiceAuto {
         return mContactPhoneNumber;
     }
 
+    public void setContactPhoneNumber(String newContactPhoneNumber) {
+        mContactPhoneNumber = newContactPhoneNumber;
+    }
+
     public String getContactEmail() {
         return mContactEmail;
+    }
+
+    public void setContactEmail(String newContactEmail) {
+        mContactEmail = newContactEmail;
     }
 
     public double getLatitude() {
         return mLatitude;
     }
 
+    public void setLatitude(double newLatitude) {
+        mLatitude = newLatitude;
+    }
+
     public double getLongitude() {
         return mLongitude;
+    }
+
+    public void setLongitude(double newLongitude) {
+        mLongitude = newLongitude;
     }
 
     public String getOwnerId() {
         return mOwnerId;
     }
 
+    public void setOwnerId(String newOwnerId) {
+        mOwnerId = newOwnerId;
+    }
+
     public int getType() {
         return mType;
     }
 
+    public void setType(int newType) {
+        mType = newType;
+    }
+
     public String getAcceptedBrands() {
         return mAcceptedBrands;
+    }
+
+    public void setAcceptedBrands(String newAcceptedBrands) {
+        mAcceptedBrands = newAcceptedBrands;
     }
 
     public double calculateDistance(double lat2, double long2) {

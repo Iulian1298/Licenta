@@ -69,8 +69,8 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
         }
         if (mPreferencesManager.getPermissionLocation() && !mPreferencesManager.getOnlyMyServices()) {
             viewHolder.mDistance.setVisibility(View.VISIBLE);
+            viewHolder.mDistanceIcon.setVisibility(View.VISIBLE);
             double distance = serviceAuto.calculateDistance(mPreferencesManager.getUserLatitude(), mPreferencesManager.getUserLongitude());
-
             if (distance < 1) {
                 viewHolder.mDistance.setText(String.format("%d m", (int) (distance * 1000)));
             } else {
@@ -78,6 +78,7 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
             }
         } else {
             viewHolder.mDistance.setVisibility(View.GONE);
+            viewHolder.mDistanceIcon.setVisibility(View.GONE);
         }
         viewHolder.mAddress.setText(serviceAuto.getAddress());
         viewHolder.mRatingBar.setRating(serviceAuto.getRating());
@@ -95,6 +96,7 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
         private TextView mDistance;
         private TextView mAddress;
         private RatingBar mRatingBar;
+        private ImageView mDistanceIcon;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -102,6 +104,7 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
             mName = itemView.findViewById(R.id.serviceName);
             mDescription = itemView.findViewById(R.id.serviceDescription);
             mDistance = itemView.findViewById(R.id.distanceFromYou);
+            mDistanceIcon = itemView.findViewById(R.id.distanceFromYouIcon);
             mAddress = itemView.findViewById(R.id.address);
             mRatingBar = itemView.findViewById(R.id.rating);
             itemView.setOnClickListener(new View.OnClickListener() {
