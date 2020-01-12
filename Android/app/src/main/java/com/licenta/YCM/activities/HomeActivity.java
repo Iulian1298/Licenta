@@ -1,11 +1,14 @@
 package com.licenta.YCM.activities;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -24,17 +27,26 @@ import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.licenta.YCM.R;
 import com.licenta.YCM.SharedPreferencesManager;
 import com.licenta.YCM.fragments.HomeFragment;
 import com.licenta.YCM.fragments.MyRequestFragment;
 
 import android.support.design.widget.NavigationView;
+import android.util.Patterns;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.concurrent.ExecutionException;
 
@@ -52,6 +64,18 @@ public class HomeActivity extends AppCompatActivity {
     private LocationManager mLocationManager;
     private Context mCtx;
     private LocationListener mLocationListener;
+    private AlertDialog mEditMyProfilePopUp;
+    private ImageView mEditImage;
+    private EditText mEditEmail;
+    private EditText mEditPhone;
+    private EditText mEditFullName;
+    private EditText mEditOldPassword;
+    private EditText mEditNewPassword;
+    private EditText mEditNewRePassword;
+    private Button mConfirm;
+    private Button mCancel;
+    private ProgressBar mEditMyProfileProgressBar;
+    private LinearLayout mEditMyProfileLinearLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +89,7 @@ public class HomeActivity extends AppCompatActivity {
 
         getSupportActionBar().setTitle("Acasa");
         mPreferencesManager.setOnlyMyServices(false);
-        getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment(),"Acasa").commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment(), "Acasa").commit();
 
         requestLocationPermission();
     }
@@ -148,6 +172,13 @@ public class HomeActivity extends AppCompatActivity {
         TextView headerMenuUsername = headerView.findViewById(R.id.headerMenuUsername);
         TextView headerMenuUserMail = headerView.findViewById(R.id.headerMenuUserMail);
         ImageView headerMenuUserImage = headerView.findViewById(R.id.headerMenuUserImage);
+        headerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "onClick: edit profile");
+                editProfile();
+            }
+        });
 
 
         if (!mPreferencesManager.isLoggedIn()) {
@@ -155,7 +186,12 @@ public class HomeActivity extends AppCompatActivity {
             headerMenuUserMail.setVisibility(View.GONE);
             headerMenuUsername.setVisibility(View.GONE);
         } else {
-            headerMenuUserImage.setImageBitmap(stringToBitmap(mPreferencesManager.getImage()));
+            Glide.with(mCtx)
+                    .asBitmap()
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .load(Uri.parse(mPreferencesManager.getImage()))
+                    .into(headerMenuUserImage);
             headerMenuUserMail.setVisibility(View.VISIBLE);
             headerMenuUsername.setVisibility(View.VISIBLE);
             headerMenuUsername.setText(mPreferencesManager.getUsername());
@@ -211,7 +247,15 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.i(TAG, "onActivityResult: setNavigationView");
-        setNavigationView();
+
+        if (requestCode == 2) {
+            if (data != null) {
+                Uri chosenImageByUser = data.getData();
+                mEditImage.setImageURI(chosenImageByUser);
+            }
+        } else {
+            setNavigationView();
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -297,6 +341,148 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    private void editProfile() {
+        Log.i(TAG, "editProfile: ");
+        TextView editMyProfileTitle = new TextView(mCtx);
+        editMyProfileTitle.setText("Editeaza profilul!");
+        editMyProfileTitle.setGravity(Gravity.CENTER);
+        editMyProfileTitle.setPadding(10, 10, 10, 10);
+        editMyProfileTitle.setTextSize(18);
+        editMyProfileTitle.setTextColor(Color.DKGRAY);
+        View editMyProfileView = getLayoutInflater().inflate(R.layout.edit_myprofile_popup_layout, null);
+        mEditMyProfileProgressBar = editMyProfileView.findViewById(R.id.editMyProfileProgressBar);
+        mEditMyProfileLinearLayout = editMyProfileView.findViewById(R.id.editMyProfileLinearLayout);
+        mEditImage = editMyProfileView.findViewById(R.id.editMyProfileImage);
+        mEditEmail = editMyProfileView.findViewById(R.id.editMyProfileEmail);
+        mEditPhone = editMyProfileView.findViewById(R.id.editMyProfilePhone);
+        mEditFullName = editMyProfileView.findViewById(R.id.editMyProfileFullName);
+        mEditOldPassword = editMyProfileView.findViewById(R.id.editOldPassword);
+        mEditNewPassword = editMyProfileView.findViewById(R.id.editPassword);
+        mEditNewRePassword = editMyProfileView.findViewById(R.id.editPasswordRe);
+        mEditEmail.setText(mPreferencesManager.getUserMail());
+        mEditPhone.setText(mPreferencesManager.getUserPhone());
+        mEditFullName.setText(mPreferencesManager.getUsername());
+        Glide.with(mCtx)
+                .asBitmap()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .load(mPreferencesManager.getImage())
+                .into(mEditImage);
+        mEditImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ContextCompat.checkSelfPermission(mCtx, Manifest.permission.READ_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                    galleryIntent.setType("image/*");
+                    startActivityForResult(galleryIntent, 2);
+                } else {
+                    Toast.makeText(mCtx, "Mai intai permite aplicatiei de a accesa galeria!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        mEditMyProfilePopUp = new AlertDialog.Builder(HomeActivity.this)
+                .setCustomTitle(editMyProfileTitle)
+                .setView(editMyProfileView)
+                .setPositiveButton("Confirma", null)
+                .setNegativeButton("Anuleaza", null)
+                .create();
+        mEditMyProfilePopUp.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                mConfirm = mEditMyProfilePopUp.getButton(DialogInterface.BUTTON_POSITIVE);
+                mCancel = mEditMyProfilePopUp.getButton(DialogInterface.BUTTON_NEGATIVE);
+                mConfirm.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.i(TAG, "onClick: Confirma edit");
+                        mEditMyProfileProgressBar.setVisibility(View.VISIBLE);
+                        mEditMyProfileLinearLayout.setBackground(new ColorDrawable(Color.parseColor("#75676767")));
+                        if (verifyInputOnClientSide()) {
+                            try {
+                                if (verifyInputOnServerSide()) {
+                                } else {
+                                    mConfirm.setError("Eroare!");
+                                }
+                            } catch (ExecutionException e) {
+                                e.printStackTrace();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        mEditMyProfilePopUp.show();
+    }
+
+    private boolean verifyInputOnClientSide() {
+        Log.i(TAG, "verifyInputOnClientSide: ");
+        boolean resultOk = true;
+        if (mEditFullName.getText().toString().trim().isEmpty()) {
+            mEditFullName.setError("Completeaza campul!");
+            resultOk = false;
+        }
+        if (mEditEmail.getText().toString().trim().isEmpty()) {
+            mEditEmail.setError("Completeaza campul!");
+            resultOk = false;
+        } else {
+            if (!Patterns.EMAIL_ADDRESS.matcher(mEditEmail.getText().toString().trim()).matches()) {
+                mEditEmail.setError("Adresa nevalida!");
+                resultOk = false;
+            }
+        }
+        if (mEditPhone.getText().toString().trim().isEmpty()) {
+            mEditPhone.setError("Completeaza campul!");
+            resultOk = false;
+        } else {
+            if (!Patterns.PHONE.matcher(mEditPhone.getText().toString().trim()).matches()) {
+                mEditPhone.setError("Numar invalid!");
+                resultOk = false;
+            }
+        }
+        if (mEditOldPassword.getText().toString().trim().isEmpty()) {
+            mEditOldPassword.setError("Completeaza campul!");
+            resultOk = false;
+        } else if (mEditOldPassword.getText().toString().trim().length() < 6) {
+            mEditOldPassword.setError("Introdu minim 6 caractere!");
+            resultOk = false;
+        }
+        if (mEditNewPassword.getText().toString().trim().isEmpty()) {
+            mEditNewPassword.setError("Completeaza campul!");
+            resultOk = false;
+        } else if (mEditNewPassword.getText().toString().trim().length() < 6) {
+            mEditNewPassword.setError("Introdu minim 6 caractere!");
+            resultOk = false;
+        }
+        if (!mEditNewRePassword.getText().toString().trim().equals(mEditNewRePassword.getText().toString().trim())) {
+            mEditNewRePassword.setError("Parolele nu se potrivesc!");
+            resultOk = false;
+        }
+        return resultOk;
+    }
+
+    private boolean verifyInputOnServerSide() throws ExecutionException, InterruptedException {
+        Log.i(TAG, "verifyInputOnServerSide: ");
+        boolean resultOk = true;
+
+        return resultOk;
+    }
+
+    private void setEnableFields(boolean value) {
+        mEditImage.setEnabled(value);
+        mEditEmail.setEnabled(value);
+        mEditPhone.setEnabled(value);
+        mEditFullName.setEnabled(value);
+        mEditOldPassword.setEnabled(value);
+        mEditNewPassword.setEnabled(value);
+        mEditNewRePassword.setEnabled(value);
+        mEditEmail.setEnabled(value);
+        mEditPhone.setEnabled(value);
+        mEditFullName.setEnabled(value);
+        mConfirm.setEnabled(value);
+        mCancel.setEnabled(value);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

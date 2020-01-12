@@ -1,3 +1,5 @@
+from sqlalchemy import asc, desc
+
 from API import *
 from API.api_check import check_token
 from database import db
@@ -11,7 +13,7 @@ def getCommentById(commentId):
     comment = Comment.query.filter_by(id=commentId)
     if comment.first():
         commentDict = comment.first().toDict()
-        print(comment.first())
+        # print(comment.first())
         owner = User.query.filter_by(id=commentDict["userId"])
         result = {}
         result["id"] = commentDict["id"]
@@ -21,12 +23,9 @@ def getCommentById(commentId):
         result["ownerName"] = owner.first().toDict()["fullName"]
         result["serviceId"] = commentDict["serviceId"]
         result["ownerId"] = commentDict["userId"]
-        with open(owner.first().toDict()["imagePath"], "rb") as image:
-            imageEncoded = base64.b64encode(image.read()).decode('utf-8')
-            result["imageEncoded"] = imageEncoded
+        result["profileImage"] = owner.first().toDict()["imagePath"]
         # print(result)
         response = make_response(jsonify({"status": "Found", "comment": result}))
-        print(len(str({"status": "Found", "comment": result})))
         response.headers.set('Content-Length', len({"status": "Found", "comment": result}))
         return make_response(jsonify({"status": "Found", "comment": result}))
     return make_response(jsonify({"status": "NotFound"}), status.HTTP_404_NOT_FOUND)
@@ -59,9 +58,12 @@ def addComment():
     return make_response(jsonify({"status": "Created", "newRating": newRating}), status.HTTP_201_CREATED)
 
 
-@app.route("/comments/getAllIds/<serviceId>", methods=['GET'])
-def getAllCommentsIdsForService(serviceId):
-    serviceAllCommentsId = [i[0] for i in Comment.query.with_entities(Comment.id).filter_by(serviceId=serviceId).all()]
+@app.route("/comments/forService/<serviceId>/getIdsBetween/offset/<offset>/limit/<limit>", methods=['GET'])
+def getCommentsIdsBetweenForService(serviceId, offset, limit):
+    serviceAllCommentsId = [i[0] for i in
+                            Comment.query.with_entities(Comment.id).filter_by(serviceId=serviceId).order_by(
+                                desc(Comment.creationTime)).offset(offset).limit(limit).all()]
+    # print(serviceAllCommentsId)
     return make_response(jsonify({"Ids": serviceAllCommentsId}), status.HTTP_200_OK)
 
 
@@ -82,3 +84,18 @@ def deleteCommentById(commentId, serviceId):
         print(e)
         return make_response(jsonify({"status": "Could not delete"}), status.HTTP_409_CONFLICT)
     return make_response(jsonify({"status": "Deleted", "newRating": newRating}), status.HTTP_200_OK)
+
+
+@app.route("/comments/forService/<serviceId>/withRatingStars/<ratingCriteria>/getIdsBetween/"
+           "offset/<offset>/limit/<limit>", methods=['GET'])
+def getCommentsIdsBetweenWithRatingStarForService(serviceId, ratingCriteria, offset, limit):
+    if (int(ratingCriteria) == 0):
+        serviceAllCommentsId = [i[0] for i in
+                                Comment.query.with_entities(Comment.id).filter_by(serviceId=serviceId).order_by(
+                                    desc(Comment.creationTime)).offset(offset).limit(limit).all()]
+    else:
+        serviceAllCommentsId = [i[0] for i in
+                                Comment.query.with_entities(Comment.id).filter_by(serviceId=serviceId,
+                                                                                  rating=ratingCriteria).order_by(
+                                    desc(Comment.creationTime)).offset(offset).limit(limit).all()]
+    return make_response(jsonify({"Ids": serviceAllCommentsId}), status.HTTP_200_OK)

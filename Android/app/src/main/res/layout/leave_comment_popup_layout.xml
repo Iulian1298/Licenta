@@ -24,6 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/givenRating"
             android:layout_centerHorizontal="true"
+            android:maxLength="250"
             android:layout_margin="5dp"
             android:hint="@string/leaveComment"
             android:inputType="text"

@@ -13,6 +13,8 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.gson.JsonObject;
 import com.licenta.YCM.R;
 import com.licenta.YCM.SharedPreferencesManager;
@@ -56,11 +58,14 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
                 .load("http://10.0.2.2:5000/services/getImageById/3")
                 //.load(http://i.imgur.com/DvpvklR.png)
                 .into(viewHolder.mImage);
+        */
         Glide.with(mContext)
                 .asBitmap()
-                .load("http://10.0.2.2:5000/services/getImageById/34b64501-9f9a-4bcf-8a60-810d889d84f6")
-                .into(viewHolder.mImage);*/
-        viewHolder.mImage.setImageBitmap(serviceAuto.getImage());
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .load(serviceAuto.getImage())
+                .into(viewHolder.mImage);
+        //viewHolder.mImage.setImageBitmap(serviceAuto.getImage());
         viewHolder.mName.setText(serviceAuto.getName());
         if (serviceAuto.getDescription().length() > 100) {
             viewHolder.mDescription.setText(String.format("%s...", serviceAuto.getDescription().substring(0, 97)));
@@ -80,7 +85,7 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
             viewHolder.mDistance.setVisibility(View.GONE);
             viewHolder.mDistanceIcon.setVisibility(View.GONE);
         }
-        viewHolder.mAddress.setText(serviceAuto.getAddress());
+        viewHolder.mAddress.setText(serviceAuto.getCity() + ", " + serviceAuto.getAddress());
         viewHolder.mRatingBar.setRating(serviceAuto.getRating());
     }
 

@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Base64;
@@ -26,6 +27,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.gson.JsonObject;
 import com.koushikdutta.ion.Ion;
 import com.koushikdutta.ion.Response;
@@ -51,6 +57,9 @@ public class Register implements Authentication {
     private AlertDialog mRegisterPopUp;
     private SharedPreferencesManager mPreferencesManager;
     private boolean mUseDefaultPhoto;
+    private Uri mUserImageUri;
+    private Button confirm;
+    private Button cancel;
 
     public Register(Context ctx) {
         Log.i(TAG, "Register: Create register worker");
@@ -101,7 +110,8 @@ public class Register implements Authentication {
         mRegisterPopUp.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                final Button confirm = mRegisterPopUp.getButton(AlertDialog.BUTTON_POSITIVE);
+                confirm = mRegisterPopUp.getButton(AlertDialog.BUTTON_POSITIVE);
+                cancel = mRegisterPopUp.getButton(AlertDialog.BUTTON_NEGATIVE);
                 confirm.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -109,10 +119,7 @@ public class Register implements Authentication {
                         if (verifyInputOnClientSide()) {
                             try {
                                 if (verifyInputOnServerSide()) {
-                                    mRegisterPopUp.dismiss();
-                                    ((AuthenticationActivity) mCtx).finish();
                                 } else {
-                                    confirm.setError("Eroare!");
                                 }
                             } catch (ExecutionException e) {
                                 e.printStackTrace();
@@ -128,46 +135,93 @@ public class Register implements Authentication {
     }
 
     private boolean verifyInputOnServerSide() throws ExecutionException, InterruptedException {
+        setEnableFields(false);
         Log.i(TAG, "verifyInputOnServerSide: Register");
-        boolean resultOk = true;
-        JsonObject jsonBody = new JsonObject();
+        final boolean[] resultOk = {true};
+        final JsonObject jsonBody = new JsonObject();
         if (mUseDefaultPhoto) {
             mProfileImage.setImageURI(Uri.parse("android.resource://" + mCtx.getPackageName() + "/drawable/" + "default_profile_image"));
+            mUserImageUri = Uri.parse("android.resource://" + mCtx.getPackageName() + "/drawable/" + "default_profile_image");
         }
-        BitmapDrawable drawable = (BitmapDrawable) mProfileImage.getDrawable();
-        Bitmap bitmap = drawable.getBitmap();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        String image = Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP);
         jsonBody.addProperty("email", mEmail.getText().toString().trim());
         jsonBody.addProperty("phoneNumber", mPhoneNumber.getText().toString().trim());
         jsonBody.addProperty("password", mPassword.getText().toString().trim());
         jsonBody.addProperty("fullName", mFullName.getText().toString().trim());
-        jsonBody.addProperty("imageEncoded", image);
 
-        Response<JsonObject> response = Ion.with(mCtx)
-                .load("POST", mRegisterUrl)
-                .setJsonObjectBody(jsonBody)
-                .asJsonObject()
-                .withResponse()
-                .get();
-        if (response.getHeaders().code() == 201) {
-            System.out.println(response.getResult());
-            mPreferencesManager.setToken(response.getResult().get("token").getAsString());
-            mPreferencesManager.setImage(image);
-            mPreferencesManager.setUsername(response.getResult().get("user").getAsJsonObject().get("fullName").getAsString());
-            mPreferencesManager.setUserId(response.getResult().get("user").getAsJsonObject().get("id").getAsString());
-            mPreferencesManager.setUserMail(response.getResult().get("user").getAsJsonObject().get("email").getAsString());
-        } else {
-            if (response.getHeaders().code() == 409) {
-                resultOk = false;
-                Toast.makeText(mCtx, "Acest email a fost deja inregistrat!", Toast.LENGTH_SHORT).show();
-            } else {
-                resultOk = false;
-                Toast.makeText(mCtx, "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("user_image");
+        final StorageReference imageFilePath = storageReference.child(mUserImageUri.getLastPathSegment());
+        imageFilePath.putFile(mUserImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                imageFilePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        String imageDownlaodLink = uri.toString();
+                        jsonBody.addProperty("imageDownloadLink", imageDownlaodLink);
+
+                        Response<JsonObject> response = null;
+                        try {
+                            response = Ion.with(mCtx)
+                                    .load("POST", mRegisterUrl)
+                                    .setJsonObjectBody(jsonBody)
+                                    .asJsonObject()
+                                    .withResponse()
+                                    .get();
+
+                            if (response.getHeaders().code() == 201) {
+                                System.out.println(response.getResult());
+                                mPreferencesManager.setToken(response.getResult().get("token").getAsString());
+                                mPreferencesManager.setImage(imageDownlaodLink);
+                                mPreferencesManager.setUsername(response.getResult().get("user").getAsJsonObject().get("fullName").getAsString());
+                                mPreferencesManager.setUserId(response.getResult().get("user").getAsJsonObject().get("id").getAsString());
+                                mPreferencesManager.setUserMail(response.getResult().get("user").getAsJsonObject().get("email").getAsString());
+                                mPreferencesManager.setUserPhone(response.getResult().get("user").getAsJsonObject().get("phoneNumber").getAsString());
+                                mRegisterPopUp.dismiss();
+                                ((AuthenticationActivity) mCtx).finish();
+                            } else {
+                                if (response.getHeaders().code() == 409) {
+                                    confirm.setEnabled(true);
+                                    cancel.setEnabled(true);
+                                    Toast.makeText(mCtx, "Acest email a fost deja inregistrat!", Toast.LENGTH_SHORT).show();
+                                    resultOk[0] = false;
+                                } else {
+                                    setEnableFields(true);
+                                    Toast.makeText(mCtx, "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
+                                    resultOk[0] = false;
+                                }
+                            }
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        setEnableFields(true);
+                        // something goes wrong uploading picture
+                        Log.e(TAG, "onFailure: Something goes wrong to put image on firebase");
+                        Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                        resultOk[0] = false;
+                    }
+                });
             }
-        }
-        return resultOk;
+        });
+
+
+        return resultOk[0];
+    }
+
+    private void setEnableFields(boolean value) {
+        mEmail.setEnabled(value);
+        mPhoneNumber.setEnabled(value);
+        mPassword.setEnabled(value);
+        mRePassword.setEnabled(value);
+        mFullName.setEnabled(value);
+        mProfileImage.setEnabled(value);
+        confirm.setEnabled(value);
+        cancel.setEnabled(value);
     }
 
     private boolean verifyInputOnClientSide() {
@@ -223,8 +277,8 @@ public class Register implements Authentication {
     public void onActivityResult(int requestCode, int resultCode, Intent result) {
         Log.i(TAG, "onActivityResult: ");
         if (result != null) {
-            Uri chosenImageByUser = result.getData();
-            mProfileImage.setImageURI(chosenImageByUser);
+            mUserImageUri = result.getData();
+            mProfileImage.setImageURI(mUserImageUri);
             mUseDefaultPhoto = false;
         }
     }

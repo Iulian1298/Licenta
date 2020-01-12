@@ -99,22 +99,22 @@
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/range"
+                    android:id="@+id/addressFilter"
                     android:layout_width="125dp"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:layout_margin="5dp"
-                    android:text="@string/range" />
+                    android:text="@string/addressFilter" />
 
                 <EditText
-                    android:id="@+id/rangeInputFilter"
+                    android:id="@+id/addressInputFilter"
                     android:layout_width="150dp"
                     android:layout_height="wrap_content"
-                    android:maxLength="50"
                     android:layout_margin="5dp"
-                    android:layout_toEndOf="@id/range"
-                    android:inputType="number" />
+                    android:layout_toEndOf="@id/addressFilter"
+                    android:inputType="number"
+                    android:maxLength="50" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -138,6 +138,52 @@
                     android:layout_toEndOf="@id/cityFilter"
                     android:maxLength="50" />
             </RelativeLayout>
+
+            <HorizontalScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <CheckBox
+                        android:id="@+id/repairServiceCheckFilter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:layout_marginEnd="10dp"
+                        android:text="@string/repairService" />
+
+                    <CheckBox
+                        android:id="@+id/serviceTireCheckFilter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:text="@string/serviceTire" />
+
+                    <CheckBox
+                        android:id="@+id/serviceChassisCheckFilter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:text="@string/serviceChassis" />
+
+                    <CheckBox
+                        android:id="@+id/serviceItpCheckFilter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:text="@string/serviceItp" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
 
             <RelativeLayout
                 android:layout_width="wrap_content"

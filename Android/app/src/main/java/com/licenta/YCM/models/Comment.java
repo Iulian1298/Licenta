@@ -1,13 +1,14 @@
 package com.licenta.YCM.models;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
 
 public class Comment {
     private String mId;
-    private Bitmap mProfileImage;
+    private Uri mProfileImage;
     private String mComment;
     private String mOwnerUsername;
     private Float mRating;
@@ -16,7 +17,7 @@ public class Comment {
     private String mOwnerId;
 
     public Comment(String id,
-                   Bitmap profileImage,
+                   Uri profileImage,
                    String comment,
                    String ownerUsername,
                    Float rating,
@@ -33,18 +34,12 @@ public class Comment {
         this.mOwnerId = ownerId;
     }
 
-    public String getImageAsString() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        mProfileImage.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        byte[] b = baos.toByteArray();
-        return Base64.encodeToString(b, Base64.DEFAULT);
-    }
 
     public String getId() {
         return mId;
     }
 
-    public Bitmap getProfileImage() {
+    public Uri getProfileImage() {
         return mProfileImage;
     }
 

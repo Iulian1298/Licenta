@@ -51,6 +51,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:singleLine="true"
+                    android:textColor="@color/colorWhite"
                     android:text="@string/distanceFromYou"
                     android:textSize="12sp" />
 
@@ -75,7 +76,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="115dp"
                 android:layout_margin="5dp"
-
                 android:orientation="vertical">
 
                 <TextView

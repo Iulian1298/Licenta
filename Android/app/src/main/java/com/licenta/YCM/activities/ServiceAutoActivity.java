@@ -16,6 +16,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -41,11 +42,21 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -58,6 +69,7 @@ import com.roomorama.caldroid.CaldroidFragment;
 import com.roomorama.caldroid.CaldroidListener;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
@@ -102,6 +114,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private AlertDialog mEditServicePopUp;
     private EditText mEditServiceName;
     private EditText mEditServiceAddress;
+    private EditText mEditServiceCity;
     private EditText mEditServicePhone;
     private EditText mEditServiceEmail;
     private EditText mEditServiceDescription;
@@ -109,8 +122,13 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private CheckBox mEditRepairServiceCheck;
     private CheckBox mEditServiceTireCheck;
     private CheckBox mEditServiceChassisCheck;
+    private CheckBox mEditServiceItpCheck;
     private ImageView mEditServiceImage;
     private String mUrl;
+    private ProgressBar mEditServiceProgressBar;
+    private LinearLayout mEditLinearLayout;
+    private Button mConfirm;
+    private Button mCancel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,10 +167,11 @@ public class ServiceAutoActivity extends AppCompatActivity {
         Intent intent = getIntent();
         mServiceAuto = new ServiceAuto(
                 intent.getStringExtra("serviceId"),
-                createBitmapFromLocalImage(intent.getStringExtra("logoImage")),
+                Uri.parse(intent.getStringExtra("logoImage")),
                 intent.getStringExtra("serviceName"),
                 intent.getStringExtra("description"),
                 intent.getStringExtra("address"),
+                intent.getStringExtra("city"),
                 intent.getFloatExtra("rating", 0),
                 intent.getStringExtra("contactPhoneNumber"),
                 intent.getStringExtra("contactEmail"),
@@ -474,6 +493,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         View editServiceView = getLayoutInflater().inflate(R.layout.edit_service_popup_layout, null);
         mEditServiceName = editServiceView.findViewById(R.id.editServiceName);
         mEditServiceAddress = editServiceView.findViewById(R.id.editServiceAddress);
+        mEditServiceCity = editServiceView.findViewById(R.id.editServiceCity);
         mEditServicePhone = editServiceView.findViewById(R.id.editServicePhone);
         mEditServiceEmail = editServiceView.findViewById(R.id.editServiceEmail);
         mEditServiceDescription = editServiceView.findViewById(R.id.editServiceDescription);
@@ -481,9 +501,13 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mEditRepairServiceCheck = editServiceView.findViewById(R.id.editRepairServiceCheck);
         mEditServiceTireCheck = editServiceView.findViewById(R.id.editServiceTireCheck);
         mEditServiceChassisCheck = editServiceView.findViewById(R.id.editServiceChassisCheck);
+        mEditServiceItpCheck = editServiceView.findViewById(R.id.editServiceItpCheck);
         mEditServiceImage = editServiceView.findViewById(R.id.editServiceImage);
+        mEditServiceProgressBar = editServiceView.findViewById(R.id.editServiceProgressBar);
+        mEditLinearLayout = editServiceView.findViewById(R.id.editLinearLayout);
         mEditServiceName.setText(mServiceAuto.getName());
         mEditServiceAddress.setText(mServiceAuto.getAddress());
+        mEditServiceCity.setText(mServiceAuto.getCity());
         mEditServicePhone.setText(mServiceAuto.getContactPhoneNumber());
         mEditServiceEmail.setText(mServiceAuto.getContactEmail());
         mEditServiceDescription.setText(mServiceAuto.getDescription());
@@ -497,7 +521,14 @@ public class ServiceAutoActivity extends AppCompatActivity {
         if ((mServiceAuto.getType() & 4) == 4) {
             mEditServiceChassisCheck.setChecked(true);
         }
-        mEditServiceImage.setImageBitmap(mServiceAuto.getImage());
+        if ((mServiceAuto.getType() & 8) == 8) {
+            mEditServiceItpCheck.setChecked(true);
+        }
+        Glide.with(mCtx)
+                .asBitmap()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .load(mServiceAuto.getImage())
+                .into(mEditServiceImage);
         mEditServiceImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -520,59 +551,19 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mEditServicePopUp.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                final Button confirm = mEditServicePopUp.getButton(DialogInterface.BUTTON_POSITIVE);
-                confirm.setOnClickListener(new View.OnClickListener() {
+                mConfirm = mEditServicePopUp.getButton(DialogInterface.BUTTON_POSITIVE);
+                mCancel = mEditServicePopUp.getButton(DialogInterface.BUTTON_NEGATIVE);
+                mConfirm.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Log.i(TAG, "onClick: Confirma edit");
+                        mEditServiceProgressBar.setVisibility(View.VISIBLE);
+                        mEditLinearLayout.setBackground(new ColorDrawable(Color.parseColor("#75676767")));
                         if (verifyInputOnClientSide()) {
                             try {
                                 if (verifyInputOnServerSide()) {
-                                    int type = 0;
-                                    if (mEditRepairServiceCheck.isChecked()) {
-                                        type |= 1;
-                                    }
-                                    if (mEditServiceTireCheck.isChecked()) {
-                                        type |= 2;
-                                    }
-                                    if (mEditServiceChassisCheck.isChecked()) {
-                                        type |= 4;
-                                    }
-                                    mServiceAuto.setName(mEditServiceName.getText().toString().trim());
-                                    mServiceAuto.setAddress(mEditServiceAddress.getText().toString().trim());
-                                    mServiceAuto.setContactPhoneNumber(mEditServicePhone.getText().toString().trim());
-                                    mServiceAuto.setContactEmail(mEditServiceEmail.getText().toString().trim());
-                                    mServiceAuto.setDescription(mEditServiceDescription.getText().toString().trim());
-                                    mServiceAuto.setAcceptedBrands(mEditServiceAcceptedBrand.getText().toString().trim());
-                                    mServiceAuto.setType(type);
-                                    if (mPreferencesManager.getPermissionLocation()) {
-                                        mServiceAuto.setLongitude(mPreferencesManager.getUserLongitude());
-                                        mServiceAuto.setLatitude(mPreferencesManager.getUserLatitude());
-                                    } else {
-                                        mServiceAuto.setLongitude(mServiceAuto.getLongitude());
-                                        mServiceAuto.setLatitude(mServiceAuto.getLatitude());
-                                    }
-                                    mServiceAuto.setImage(((BitmapDrawable) mEditServiceImage.getDrawable()).getBitmap());
-                                    populateActivity();
-                                    mEditServicePopUp.dismiss();
-                                    setResult(3, mReturnIntent);
-                                    mReturnIntent.putExtra("newServiceName", mEditServiceName.getText().toString().trim());
-                                    mReturnIntent.putExtra("newServicePhone", mEditServicePhone.getText().toString().trim());
-                                    mReturnIntent.putExtra("newServiceAddress", mEditServiceAddress.getText().toString().trim());
-                                    mReturnIntent.putExtra("newServiceEmail", mEditServiceEmail.getText().toString().trim());
-                                    mReturnIntent.putExtra("newServiceDescription", mEditServiceDescription.getText().toString().trim());
-                                    mReturnIntent.putExtra("newServiceAcceptedBrand", mEditServiceAcceptedBrand.getText().toString().trim());
-                                    mReturnIntent.putExtra("newServiceType", type);
-                                    mReturnIntent.putExtra("newLogoImage", createLocalImageFromBitmap(((BitmapDrawable) mEditServiceImage.getDrawable()).getBitmap()));
-                                    if (mPreferencesManager.getPermissionLocation()) {
-                                        mReturnIntent.putExtra("newLongitude", (double) mPreferencesManager.getUserLongitude());
-                                        mReturnIntent.putExtra("newLatitude", (double) mPreferencesManager.getUserLatitude());
-                                    } else {
-                                        mReturnIntent.putExtra("newLongitude", mServiceAuto.getLongitude());
-                                        mReturnIntent.putExtra("newLatitude", mServiceAuto.getLatitude());
-                                    }
                                 } else {
-                                    confirm.setError("Eroare!");
+                                    mConfirm.setError("Eroare!");
                                 }
                             } catch (ExecutionException e) {
                                 e.printStackTrace();
@@ -587,20 +578,69 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mEditServicePopUp.show();
     }
 
-    private String createLocalImageFromBitmap(Bitmap bitmap) {
-        Log.i(TAG, "createLocalImageFromBitmap: ");
-        String fileName = "myImage";
-        try {
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-            FileOutputStream fo = mCtx.openFileOutput(fileName, Context.MODE_PRIVATE);
-            fo.write(bytes.toByteArray());
-            fo.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            fileName = null;
+    private void setEnableFields(boolean value) {
+        mEditServiceName.setEnabled(value);
+        mEditServiceAddress.setEnabled(value);
+        mEditServiceCity.setEnabled(value);
+        mEditServicePhone.setEnabled(value);
+        mEditServiceEmail.setEnabled(value);
+        mEditServiceDescription.setEnabled(value);
+        mEditServiceAcceptedBrand.setEnabled(value);
+        mConfirm.setEnabled(value);
+        mCancel.setEnabled(value);
+        mEditRepairServiceCheck.setEnabled(value);
+        mEditServiceTireCheck.setEnabled(value);
+        mEditServiceChassisCheck.setEnabled(value);
+        mEditServiceItpCheck.setEnabled(value);
+        mEditServiceImage.setEnabled(value);
+    }
+
+    private void updateUi() {
+        int type = 0;
+        if (mEditRepairServiceCheck.isChecked()) {
+            type |= 1;
         }
-        return fileName;
+        if (mEditServiceTireCheck.isChecked()) {
+            type |= 2;
+        }
+        if (mEditServiceChassisCheck.isChecked()) {
+            type |= 4;
+        }
+        if (mEditServiceItpCheck.isChecked()) {
+            type |= 8;
+        }
+        mServiceAuto.setName(mEditServiceName.getText().toString().trim());
+        mServiceAuto.setAddress(mEditServiceAddress.getText().toString().trim());
+        mServiceAuto.setCity(mEditServiceCity.getText().toString().trim());
+        mServiceAuto.setContactPhoneNumber(mEditServicePhone.getText().toString().trim());
+        mServiceAuto.setContactEmail(mEditServiceEmail.getText().toString().trim());
+        mServiceAuto.setDescription(mEditServiceDescription.getText().toString().trim());
+        mServiceAuto.setAcceptedBrands(mEditServiceAcceptedBrand.getText().toString().trim());
+        mServiceAuto.setType(type);
+        if (mPreferencesManager.getPermissionLocation()) {
+            mServiceAuto.setLongitude(mPreferencesManager.getUserLongitude());
+            mServiceAuto.setLatitude(mPreferencesManager.getUserLatitude());
+        } else {
+            mServiceAuto.setLongitude(mServiceAuto.getLongitude());
+            mServiceAuto.setLatitude(mServiceAuto.getLatitude());
+        }
+
+        setResult(3, mReturnIntent);
+        mReturnIntent.putExtra("newServiceName", mEditServiceName.getText().toString().trim());
+        mReturnIntent.putExtra("newServicePhone", mEditServicePhone.getText().toString().trim());
+        mReturnIntent.putExtra("newServiceAddress", mEditServiceAddress.getText().toString().trim());
+        mReturnIntent.putExtra("newServiceCity", mEditServiceCity.getText().toString().trim());
+        mReturnIntent.putExtra("newServiceEmail", mEditServiceEmail.getText().toString().trim());
+        mReturnIntent.putExtra("newServiceDescription", mEditServiceDescription.getText().toString().trim());
+        mReturnIntent.putExtra("newServiceAcceptedBrand", mEditServiceAcceptedBrand.getText().toString().trim());
+        mReturnIntent.putExtra("newServiceType", type);
+        if (mPreferencesManager.getPermissionLocation()) {
+            mReturnIntent.putExtra("newLongitude", (double) mPreferencesManager.getUserLongitude());
+            mReturnIntent.putExtra("newLatitude", (double) mPreferencesManager.getUserLatitude());
+        } else {
+            mReturnIntent.putExtra("newLongitude", mServiceAuto.getLongitude());
+            mReturnIntent.putExtra("newLatitude", mServiceAuto.getLatitude());
+        }
     }
 
     private boolean verifyInputOnClientSide() {
@@ -612,6 +652,10 @@ public class ServiceAutoActivity extends AppCompatActivity {
         }
         if (mEditServiceAddress.getText().toString().trim().isEmpty()) {
             mEditServiceAddress.setError("Completeaza campul!");
+            resultOk = false;
+        }
+        if (mEditServiceCity.getText().toString().trim().isEmpty()) {
+            mEditServiceCity.setError("Completeaza campul!");
             resultOk = false;
         }
         if (mEditServicePhone.getText().toString().trim().isEmpty()) {
@@ -640,7 +684,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
             mEditServiceAcceptedBrand.setError("Completeaza campul!");
             resultOk = false;
         }
-        if (!mEditRepairServiceCheck.isChecked() && !mEditServiceTireCheck.isChecked() && !mEditServiceChassisCheck.isChecked()) {
+        if (!mEditRepairServiceCheck.isChecked() && !mEditServiceTireCheck.isChecked() && !mEditServiceChassisCheck.isChecked() && !mEditServiceItpCheck.isChecked()) {
             mEditRepairServiceCheck.setChecked(true);
         }
         return resultOk;
@@ -648,13 +692,9 @@ public class ServiceAutoActivity extends AppCompatActivity {
 
     private boolean verifyInputOnServerSide() throws ExecutionException, InterruptedException {
         Log.i(TAG, "verifyInputOnServerSide: verify edit service");
+        setEnableFields(false);
         boolean resultOk = true;
-        JsonObject jsonBody = new JsonObject();
-        BitmapDrawable drawable = (BitmapDrawable) mEditServiceImage.getDrawable();
-        Bitmap bitmap = drawable.getBitmap();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        String image = Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP);
+        final JsonObject jsonBody = new JsonObject();
         int type = 0;
         if (mEditRepairServiceCheck.isChecked()) {
             type |= 1;
@@ -665,8 +705,12 @@ public class ServiceAutoActivity extends AppCompatActivity {
         if (mEditServiceChassisCheck.isChecked()) {
             type |= 4;
         }
+        if (mEditServiceItpCheck.isChecked()) {
+            type |= 8;
+        }
         jsonBody.addProperty("serviceName", mEditServiceName.getText().toString().trim());
         jsonBody.addProperty("serviceAddress", mEditServiceAddress.getText().toString().trim());
+        jsonBody.addProperty("serviceCity", mEditServiceAddress.getText().toString().trim());
         jsonBody.addProperty("servicePhone", mEditServicePhone.getText().toString().trim());
         jsonBody.addProperty("serviceEmail", mEditServiceEmail.getText().toString().trim());
         jsonBody.addProperty("serviceAcceptedBrand", mEditServiceAcceptedBrand.getText().toString().trim());
@@ -679,23 +723,74 @@ public class ServiceAutoActivity extends AppCompatActivity {
             jsonBody.addProperty("longitude", mServiceAuto.getLongitude());
             jsonBody.addProperty("latitude", mServiceAuto.getLatitude());
         }
-        jsonBody.addProperty("imageEncoded", image);
         jsonBody.addProperty("serviceOwner", mServiceAuto.getOwnerId());
         jsonBody.addProperty("serviceId", mServiceAuto.getServiceId());
-        Response<JsonObject> response = Ion.with(mCtx)
-                .load("PUT", mUrl + "/service/editService")
-                .setHeader("Authorization", mPreferencesManager.getToken())
-                .setJsonObjectBody(jsonBody)
-                .asJsonObject()
-                .withResponse()
-                .get();
-        if (response.getHeaders().code() == 200) {
-            Log.i(TAG, "verifyInputOnServerSide: Service edited!");
-            Toast.makeText(mCtx, "Service editat cu succes!", Toast.LENGTH_SHORT).show();
-        } else {
-            Log.i(TAG, "verifyInputOnServerSide: Service not edited! err code: " + response.getHeaders().code());
-            Toast.makeText(mCtx, "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
-        }
+        final StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("service_image");
+        StorageReference imageToDelete = FirebaseStorage.getInstance().getReferenceFromUrl(mServiceAuto.getImage().toString());
+        imageToDelete.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Bitmap bitmap = ((BitmapDrawable) mEditServiceImage.getDrawable()).getBitmap();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] data = baos.toByteArray();
+
+
+                final StorageReference newImagePath = storageReference.child(mServiceAuto.getServiceId());
+                newImagePath.putBytes(data).addOnSuccessListener(
+                        new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                newImagePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
+                                        String newImageDownloadLink = uri.toString();
+                                        jsonBody.addProperty("imagePath", newImageDownloadLink);
+                                        Response<JsonObject> response = null;
+                                        try {
+                                            response = Ion.with(mCtx)
+                                                    .load("PUT", mUrl + "/service/editService")
+                                                    .setHeader("Authorization", mPreferencesManager.getToken())
+                                                    .setJsonObjectBody(jsonBody)
+                                                    .asJsonObject()
+                                                    .withResponse()
+                                                    .get();
+
+                                            if (response.getHeaders().code() == 200) {
+                                                Log.i(TAG, "verifyInputOnServerSide: Service edited!");
+                                                Toast.makeText(mCtx, "Service editat cu succes!", Toast.LENGTH_SHORT).show();
+                                                updateUi();
+                                                mServiceAuto.setImage(Uri.parse(newImageDownloadLink));
+                                                mReturnIntent.putExtra("newLogoImage", newImageDownloadLink);
+                                                populateActivity();
+                                                mEditServiceProgressBar.setVisibility(View.GONE);
+                                                mEditServicePopUp.dismiss();
+                                            } else {
+                                                setEnableFields(true);
+                                                Log.i(TAG, "verifyInputOnServerSide: Service not edited! err code: " + response.getHeaders().code());
+                                                Toast.makeText(mCtx, "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
+                                            }
+                                        } catch (ExecutionException e) {
+                                            e.printStackTrace();
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                );
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e(TAG, "onFailure: Fail to add image to firebase");
+                Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                setEnableFields(true);
+            }
+        });
+
+
         return resultOk;
     }
 
@@ -1060,7 +1155,11 @@ public class ServiceAutoActivity extends AppCompatActivity {
         TextView toolbarTitle = findViewById(R.id.toolbarTitle);
         toolbarTitle.setText(String.format("%s - %s", mServiceAuto.getName(), mServiceAuto.getAddress()));
         getSupportActionBar().setTitle("");
-        mLogoImage.setImageBitmap(mServiceAuto.getImage());
+        Glide.with(mCtx)
+                .asBitmap()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .load(mServiceAuto.getImage())
+                .into(mLogoImage);
         mRatingBar.setRating(mServiceAuto.getRating());
         mDescription.setText(mServiceAuto.getDescription());
         mContactPhoneNumber.setText(mServiceAuto.getContactPhoneNumber());
@@ -1083,6 +1182,9 @@ public class ServiceAutoActivity extends AppCompatActivity {
         }
         if ((mServiceAuto.getType() & 4) == 4) {
             offeredServices.append("Tinichigerie, ");
+        }
+        if ((mServiceAuto.getType() & 8) == 8) {
+            offeredServices.append("ITP, ");
         }
         SpannableStringBuilder spannable = new SpannableStringBuilder(String.format("Servicii oferite: %s", offeredServices.subSequence(0, offeredServices.length() - 2)));
         ForegroundColorSpan color = new ForegroundColorSpan(Color.parseColor("#001952"));

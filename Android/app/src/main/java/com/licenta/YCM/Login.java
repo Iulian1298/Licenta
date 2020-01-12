@@ -35,6 +35,7 @@ public class Login implements Authentication {
     private EditText mPassword;
     private View mLoginView;
     private TextView mLoginTitle;
+    private TextView mWrongCredidentials;
     private AlertDialog mLoginPopUp;
 
     public Login(Context ctx) {
@@ -53,6 +54,8 @@ public class Login implements Authentication {
         mLoginTitle.setPadding(10, 10, 10, 10);
         mLoginTitle.setTextSize(18);
         mLoginTitle.setTextColor(Color.DKGRAY);
+        mWrongCredidentials = mLoginView.findViewById(R.id.wrongCredidentials);
+        mWrongCredidentials.setVisibility(View.GONE);
     }
 
     @Override
@@ -79,7 +82,7 @@ public class Login implements Authentication {
                                     ((AuthenticationActivity) mCtx).finish();
                                 } else {
                                     mPassword.setText("");
-                                    confirm.setError("Parola sau email gresit!");
+                                    mWrongCredidentials.setVisibility(View.VISIBLE);
                                 }
                             } catch (ExecutionException e) {
                                 e.printStackTrace();
@@ -110,10 +113,11 @@ public class Login implements Authentication {
             System.out.println(response.getResult());
             try {
                 mPreferencesManager.setToken(response.getResult().get("token").getAsString());
-                mPreferencesManager.setImage(response.getResult().get("user").getAsJsonObject().get("imageEncoded").getAsString());
+                mPreferencesManager.setImage(response.getResult().get("user").getAsJsonObject().get("imagePath").getAsString());
                 mPreferencesManager.setUsername(response.getResult().get("user").getAsJsonObject().get("fullName").getAsString());
                 mPreferencesManager.setUserId(response.getResult().get("user").getAsJsonObject().get("id").getAsString());
                 mPreferencesManager.setUserMail(response.getResult().get("user").getAsJsonObject().get("email").getAsString());
+                mPreferencesManager.setUserPhone(response.getResult().get("user").getAsJsonObject().get("phoneNumber").getAsString());
             } catch (Exception e) {
                 e.printStackTrace();
             }

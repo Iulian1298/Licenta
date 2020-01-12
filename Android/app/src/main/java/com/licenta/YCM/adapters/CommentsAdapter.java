@@ -17,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.licenta.YCM.R;
 import com.licenta.YCM.SharedPreferencesManager;
 import com.licenta.YCM.models.Comment;
@@ -46,8 +48,13 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, final int pos) {
         final Comment comment = mCommentsList.get(pos);
-
-        viewHolder.mProfileImage.setImageBitmap(comment.getProfileImage());
+        Glide.with(mContext)
+                .asBitmap()
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .load(comment.getProfileImage())
+                .into(viewHolder.mProfileImage);
+        //viewHolder.mProfileImage.setImageBitmap(comment.getProfileImage());
         if (comment.getComment().length() > 100) {
             SpannableStringBuilder spannable = new SpannableStringBuilder(String.format("%s... Vezi tot!", comment.getComment().substring(0, 89)));
             ForegroundColorSpan color = new ForegroundColorSpan(Color.parseColor("#ff0099cc"));

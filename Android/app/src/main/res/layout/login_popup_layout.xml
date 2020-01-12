@@ -35,6 +35,13 @@
             android:maxLength="50"
             android:textAlignment="center"
             android:textSize="30sp" />
+        <TextView
+            android:id="@+id/wrongCredidentials"
+            android:text="@string/wrongCredidentials"
+            android:textColor="@color/colorRed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
 
     </LinearLayout>
 </RelativeLayout>

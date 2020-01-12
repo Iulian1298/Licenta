@@ -5,6 +5,7 @@
     <string name="app_description">Masina ta conteaza. Gaseste cel mai apropiat service si fa o programare direct din aplicatie.</string>
     <string name="email">Emailul tau..</string>
     <string name="password">Parola ta..</string>
+    <string name="passwordCode">******</string>
     <string name="fullName">Numele tau..</string>
     <string name="rePassword">Reintrodu parola..</string>
     <string name="menuHomeButton">Acasa</string>
@@ -30,9 +31,10 @@
     <string name="ratingMin">Rating-ul minim:</string>
     <string name="ratingMax">Rating-ul maxim:</string>
     <string name="nameFilter">Nume service:</string>
-    <string name="range">Nu mai departe de:</string>
+    <string name="addressFilter">Adresa:</string>
+    <string name="serviceTypeFilter">Servicii oferite:</string>
     <string name="cityFilter">Oras:</string>
-    <string name="resetFilter">Reseteaza</string>
+    <string name="resetFilter">Reseteaza filtre</string>
     <string name="workingTime">o sa fie schimbat</string>
     <string name="viewComments">Comentarii</string>
     <string name="leaveComment">Lasa un comentariu</string>
@@ -71,6 +73,16 @@
     <string name="repairService">Service</string>
     <string name="serviceTire">Vulcanizare</string>
     <string name="serviceChassis">Tinichigerie</string>
-    <string name="offeredServices">Servicii oferite: Service, Vulcanizare, Tinichigerie</string>
+    <string name="offeredServices">Servicii oferite</string>
     <string name="acceptedBrands">Branduri acceptate: BMW, Mercedes, Grupul VAG, BMW, Mercedes, Grupul VAG, BMW, Mercedes, Grupul VAG</string>
+    <string name="wrongCredidentials">Parola sau email gresit!</string>
+    <string name="loadMore">Incarca mai mult</string>
+    <string name="city">Oras service</string>
+    <string name="serviceItp">ITP</string>
+    <string name="newEmail">Email</string>
+    <string name="newPhone">Nr. de telefon</string>
+    <string name="newFullName">Numele tau</string>
+    <string name="newRePassword">Reintrodu noua parola</string>
+    <string name="newPasword">Noua parola</string>
+    <string name="newOldPassword">Introdu vechea parola</string>
 </resources>

@@ -7,17 +7,26 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+
         <LinearLayout
-            android:id="@+id/editLinearLayout"
+            android:id="@+id/editMyProfileLinearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/editMyProfileImage"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/chose_a_image"
+                android:scaleType="centerCrop" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="30dp"
-                android:text="@string/serviceName"
+                android:text="@string/newEmail"
                 android:textSize="12sp" />
 
             <android.support.design.widget.CoordinatorLayout
@@ -28,13 +37,13 @@
                 android:orientation="horizontal">
 
                 <EditText
-                    android:id="@+id/editServiceName"
+                    android:id="@+id/editMyProfileEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="24dp"
                     android:backgroundTint="@color/colorBlack"
-                    android:hint="@string/serviceName"
-                    android:inputType="text"
+                    android:hint="@string/newEmail"
+                    android:inputType="textEmailAddress"
                     android:maxLength="50" />
 
                 <ImageView
@@ -48,7 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="30dp"
-                android:text="@string/address"
+                android:text="@string/newPhone"
                 android:textSize="12sp" />
 
             <android.support.design.widget.CoordinatorLayout
@@ -59,108 +68,13 @@
                 android:orientation="horizontal">
 
                 <EditText
-                    android:id="@+id/editServiceAddress"
+                    android:id="@+id/editMyProfilePhone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="24dp"
                     android:backgroundTint="@color/colorBlack"
-                    android:hint="@string/address"
-                    android:inputType="text"
-                    android:maxLength="50"
-                    android:padding="8dp" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:src="@drawable/ic_close_black_24dp" />
-            </android.support.design.widget.CoordinatorLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:text="@string/city"
-                android:textSize="12sp" />
-
-            <android.support.design.widget.CoordinatorLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/editServiceCity"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:backgroundTint="@color/colorBlack"
-                    android:hint="@string/city"
-                    android:inputType="text"
-                    android:maxLength="50"
-                    android:padding="8dp" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:src="@drawable/ic_close_black_24dp" />
-            </android.support.design.widget.CoordinatorLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:text="@string/servicePhone"
-                android:textSize="12sp" />
-
-            <android.support.design.widget.CoordinatorLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/editServicePhone"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:backgroundTint="@color/colorBlack"
-                    android:hint="@string/servicePhone"
+                    android:hint="@string/newPhone"
                     android:inputType="phone"
-                    android:padding="8dp" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:src="@drawable/ic_close_black_24dp" />
-            </android.support.design.widget.CoordinatorLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:text="@string/serviceEmail"
-                android:textSize="12sp" />
-
-            <android.support.design.widget.CoordinatorLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/editServiceEmail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:backgroundTint="@color/colorBlack"
-                    android:hint="@string/serviceEmail"
-                    android:inputType="textEmailAddress"
                     android:maxLength="50"
                     android:padding="8dp" />
 
@@ -175,7 +89,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="30dp"
-                android:text="@string/serviceDescription"
+                android:text="@string/newFullName"
                 android:textSize="12sp" />
 
             <android.support.design.widget.CoordinatorLayout
@@ -186,46 +100,14 @@
                 android:orientation="horizontal">
 
                 <EditText
-                    android:id="@+id/editServiceDescription"
+                    android:id="@+id/editMyProfileFullName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="24dp"
                     android:backgroundTint="@color/colorBlack"
-                    android:hint="@string/serviceDescription"
-                    android:inputType="textMultiLine"
-                    android:maxLength="5000"
-                    android:padding="8dp" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:src="@drawable/ic_close_black_24dp" />
-            </android.support.design.widget.CoordinatorLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:text="@string/acceptedBrand"
-                android:textSize="12sp" />
-
-            <android.support.design.widget.CoordinatorLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/editServiceAcceptedBrand"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:backgroundTint="@color/colorBlack"
-                    android:hint="@string/acceptedBrand"
+                    android:hint="@string/newFullName"
                     android:inputType="text"
-                    android:maxLength="100"
+                    android:maxLength="50"
                     android:padding="8dp" />
 
                 <ImageView
@@ -239,55 +121,105 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="30dp"
-                android:text="@string/offeredServices"
+                android:text="@string/newOldPassword"
                 android:textSize="12sp" />
 
-            <LinearLayout
+            <android.support.design.widget.CoordinatorLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/colorBlack"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:padding="8dp">
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:orientation="horizontal">
 
-                <CheckBox
-                    android:id="@+id/editRepairServiceCheck"
+                <EditText
+                    android:id="@+id/editOldPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:backgroundTint="@color/colorBlack"
+                    android:hint="@string/passwordCode"
+                    android:inputType="textPassword"
+                    android:maxLength="50"
+                    android:padding="8dp" />
+
+                <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/repairService" />
+                    android:layout_gravity="end"
+                    android:src="@drawable/ic_close_black_24dp" />
+            </android.support.design.widget.CoordinatorLayout>
 
-                <CheckBox
-                    android:id="@+id/editServiceTireCheck"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/serviceTire" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="30dp"
+                android:text="@string/newPasword"
+                android:textSize="12sp" />
 
-                <CheckBox
-                    android:id="@+id/editServiceChassisCheck"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/serviceChassis" />
-                <CheckBox
-                    android:id="@+id/editServiceItpCheck"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/serviceItp" />
-
-            </LinearLayout>
-
-            <ImageView
-                android:id="@+id/editServiceImage"
+            <android.support.design.widget.CoordinatorLayout
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_margin="10dp"
-                android:background="@drawable/chose_a_image"
-                android:scaleType="centerCrop" />
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/editPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:backgroundTint="@color/colorBlack"
+                    android:hint="@string/passwordCode"
+                    android:inputType="textPassword"
+                    android:maxLength="50"
+                    android:padding="8dp" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:src="@drawable/ic_close_black_24dp" />
+            </android.support.design.widget.CoordinatorLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="30dp"
+                android:text="@string/newRePassword"
+                android:textSize="12sp" />
+
+            <android.support.design.widget.CoordinatorLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/editPasswordRe"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:backgroundTint="@color/colorBlack"
+                    android:hint="@string/passwordCode"
+                    android:inputType="textPassword"
+                    android:maxLength="50"
+                    android:padding="8dp" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:src="@drawable/ic_close_black_24dp" />
+            </android.support.design.widget.CoordinatorLayout>
+
 
         </LinearLayout>
+
     </ScrollView>
 
     <ProgressBar
-        android:id="@+id/editServiceProgressBar"
+        android:id="@+id/editMyProfileProgressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"

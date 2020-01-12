@@ -25,6 +25,7 @@ public class SharedPreferencesManager {
     private static final String KEY_IS_LOGGED = "isLogged";
     private static final String KEY_TOKEN = "token";
     private static final String KEY_USER_MAIL = "userMail";
+    private static final String KEY_USER_PHONE = "userPhone";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_IMAGE = "image";
     private static final String KEY_USER_ID = "userID";
@@ -134,6 +135,17 @@ public class SharedPreferencesManager {
         return sharedPreferences.getString(KEY_USERNAME, null);
     }
 
+    public void setUserPhone(String userPhone) {
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(KEY_USER_PHONE, userPhone);
+        editor.apply();
+    }
+
+    public String getUserPhone() {
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(KEY_USER_PHONE, null);
+    }
 
     public void setUserMail(String userMail) {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
@@ -205,5 +217,6 @@ public class SharedPreferencesManager {
         editor.clear();
         editor.apply();
     }
+
 
 }

@@ -2,6 +2,7 @@ package com.licenta.YCM;
 
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,7 +47,7 @@ public class AsyncHttpRequest extends AsyncTask<String, Void, Void> {
 
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod(params[0]);
-
+            connection.setChunkedStreamingMode(0);
 
             if (params[0].equals("POST") || params[0].equals("PUT")) {
                 connection.setDoInput(true);
@@ -73,8 +74,11 @@ public class AsyncHttpRequest extends AsyncTask<String, Void, Void> {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            Log.e("AsyncHttpRequest", "doInBackground: error retrieving data from server (content length)");
             e.printStackTrace();
-            responseOutput = new StringBuilder("{code : 99}");
+            Log.e("AsyncHttpRequest", "doInBackground: content: " + responseOutput);
+            responseOutput.append("}");
+            //responseOutput = new StringBuilder("{code : 99}");
         }
         return null;
     }

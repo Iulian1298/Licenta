@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,12 +15,16 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 import com.koushikdutta.ion.Response;
 import com.licenta.YCM.AsyncHttpRequest;
@@ -39,14 +46,17 @@ public class CommentsActivity extends AppCompatActivity {
     private ArrayList<Comment> mCommentsList;
     private CommentsAdapter mCommentsAdapter;
     private RecyclerView mCommentsRecyclerView;
-    private String mAllCommentsIdUrl;
-    private String mCommentByIdUrl;
-    private String mDeleteCommentByIdUrl;
+    private String mUrl;
     private String mServiceId;
-    private ArrayList<RatingBar> mRatingBarsForFilterAction;
+    private ArrayList<LinearLayout> mRatingBarsForFilterAction;
     private TextView mSeeAllComments;
     private Intent mReturnIntent;
     private Context mCtx;
+    private int mCommentsLimit;
+    private int mCommentsOffset;
+    private ProgressBar mGetNewCommentsFromDatabase;
+    private Button mLoadMoreComments;
+    private boolean mExistMoreComments;
 
     private SharedPreferencesManager mPreferencesManager;
 
@@ -76,15 +86,18 @@ public class CommentsActivity extends AppCompatActivity {
         mCommentsRecyclerView = findViewById(R.id.commentsList);
         mCommentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRatingBarsForFilterAction = new ArrayList<>();
-        mRatingBarsForFilterAction.add((RatingBar) findViewById(R.id.ratingOneStar));
-        mRatingBarsForFilterAction.add((RatingBar) findViewById(R.id.ratingTwoStar));
-        mRatingBarsForFilterAction.add((RatingBar) findViewById(R.id.ratingThreeStar));
-        mRatingBarsForFilterAction.add((RatingBar) findViewById(R.id.ratingFourStar));
-        mRatingBarsForFilterAction.add((RatingBar) findViewById(R.id.ratingFiveStar));
+        mRatingBarsForFilterAction.add((LinearLayout) findViewById(R.id.ratingOneStar));
+        mRatingBarsForFilterAction.add((LinearLayout) findViewById(R.id.ratingTwoStar));
+        mRatingBarsForFilterAction.add((LinearLayout) findViewById(R.id.ratingThreeStar));
+        mRatingBarsForFilterAction.add((LinearLayout) findViewById(R.id.ratingFourStar));
+        mRatingBarsForFilterAction.add((LinearLayout) findViewById(R.id.ratingFiveStar));
+        mGetNewCommentsFromDatabase = findViewById(R.id.getNewCommentsFromDatabase);
+        mLoadMoreComments = findViewById(R.id.loadMoreComments);
+        mExistMoreComments = true;
+        mCommentsOffset = 0;
+        mCommentsLimit = 17;
         mSeeAllComments = findViewById(R.id.seeAllComments);
-        mAllCommentsIdUrl = "http://10.0.2.2:5000/comments/getAllIds/";
-        mCommentByIdUrl = "http://10.0.2.2:5000/comments/getById/";
-        mDeleteCommentByIdUrl = "http://10.0.2.2:5000/comments/deleteById/";
+        mUrl = "http://10.0.2.2:5000";
         Intent intent = getIntent();
         mServiceId = intent.getStringExtra("serviceId");
         getSupportActionBar().setTitle("Pareri si comentarii!");
@@ -93,7 +106,8 @@ public class CommentsActivity extends AppCompatActivity {
         mCommentsAdapter = new CommentsAdapter(this, mCommentsList);
         mCommentsRecyclerView.setAdapter(mCommentsAdapter);
         try {
-            populateCommentList();
+            String url = mUrl + "/comments/forService/" + mServiceId + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
+            populateCommentList(url);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -102,13 +116,57 @@ public class CommentsActivity extends AppCompatActivity {
         mReturnIntent = new Intent();
         setResult(RESULT_CANCELED, mReturnIntent);
 
+        mLoadMoreComments.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mLoadMoreComments.setVisibility(View.GONE);
+                mGetNewCommentsFromDatabase.setVisibility(View.VISIBLE);
+                mCommentsOffset += 17;
+                try {
+                    String url = mUrl + "/comments/forService/" + mServiceId + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
+                    populateCommentList(url);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mGetNewCommentsFromDatabase.setVisibility(View.GONE);
+                    }
+                }, 2000);
+            }
+        });
+        mCommentsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            private int mPreviousTotal = 0;
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                int visibleItemCount = recyclerView.getChildCount();
+                int totalItemCount = recyclerView.getLayoutManager().getItemCount();
+                int firstVisibleItem = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
+
+                if (dy < 0) {
+                    mLoadMoreComments.setVisibility(View.GONE);
+                }
+                Log.i(TAG, String.format("onScrolled: dy: %d totalItemCount: %d firstVisibleItemCount: %d visibleItemCount: %d previousTotal: %d", dy, totalItemCount, firstVisibleItem, visibleItemCount, mPreviousTotal));
+                if ((totalItemCount - visibleItemCount) <= (firstVisibleItem + 2)) {
+                    if (dy > 0 & mExistMoreComments) {
+                        mLoadMoreComments.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+        });
         //set listeners
         mCommentsAdapter.setDeleteClickListener(new CommentsAdapter.OnDeleteClickListener() {
             @Override
             public void onDeleteClick(View view, int pos) throws ExecutionException, InterruptedException {
                 Log.i(TAG, "onDeleteClick: delete comment at pos: " + pos);
+                String url = mUrl + "/comments/deleteById/" + mCommentsList.get(pos).getId() + "/serviceId/" + mCommentsList.get(pos).getServiceId();
                 Response<JsonObject> response = Ion.with(mCtx)
-                        .load("DELETE", mDeleteCommentByIdUrl + mCommentsList.get(pos).getId() + "/serviceId/" + mCommentsList.get(pos).getServiceId())
+                        .load("DELETE", url)
                         .setHeader("Authorization", mPreferencesManager.getToken())
                         .asJsonObject()
                         .withResponse()
@@ -122,27 +180,53 @@ public class CommentsActivity extends AppCompatActivity {
                 }
             }
         });
+        setListenersForFilterByRating();
     }
 
-    private Bitmap stringToBitmap(String imageEncoded) {
-        Log.i(TAG, "stringToBitmap: ");
-        try {
-            String cleanImage = imageEncoded.
-                    replace("dataimage/pngbase64", "").
-                    replace("dataimage/jpegbase64", "");
-            //Log.i(TAG, "stringToBitmap: " + cleanImage);
-            byte[] encodeByte = Base64.decode(cleanImage, Base64.DEFAULT);
-            return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
-        } catch (Exception e) {
-            e.getMessage();
-            return null;
+
+    private void setListenersForFilterByRating() {
+        for (int i = 1; i <= 5; i++) {
+            final int finalI = i;
+            mRatingBarsForFilterAction.get(i - 1).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mCommentsOffset = 0;
+                    mCommentsList.clear();
+                    mCommentsAdapter.notifyDataSetChanged();
+                    String url = mUrl + "/comments/forService/" + mServiceId + "/withRatingStars/" + finalI + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
+                    try {
+                        populateCommentList(url);
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
+        mSeeAllComments.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCommentsOffset = 0;
+                mCommentsList.clear();
+                mCommentsAdapter.notifyDataSetChanged();
+                String url = mUrl + "/comments/forService/" + mServiceId + "/withRatingStars/" + 0 + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
+                try {
+                    populateCommentList(url);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
-    private void populateCommentList() throws ExecutionException, InterruptedException {
+
+    private void populateCommentList(String url) throws ExecutionException, InterruptedException {
         Log.i(TAG, "populateCommentList: ");
         final Response<JsonObject> response = Ion.with(mCtx)
-                .load("GET", mAllCommentsIdUrl + mServiceId)
+                .load("GET", url)
                 .asJsonObject()
                 .withResponse()
                 .get();
@@ -150,15 +234,12 @@ public class CommentsActivity extends AppCompatActivity {
             Log.i(TAG, "populateCommentList: comments Ids received");
             if (response.getResult() != null) {
                 final JsonArray commentsId = response.getResult().get("Ids").getAsJsonArray();
-               /* new Thread(new Runnable() {
-                    @Override
-                    public void run() {*/
+                if (commentsId.size() != 17) {
+                    mExistMoreComments = false;
+                } else {
+                    mExistMoreComments = true;
+                }
                 for (int i = 0; i < commentsId.size(); i++) {
-                           /* try {
-                                Thread.sleep(250);
-                            } catch (InterruptedException e1) {
-                                e1.printStackTrace();
-                            }*/
                     final String commentId = commentsId.get(i).getAsString();
                     Log.i(TAG, "populateCommentList: add comment with Id: " + commentId);
                     final AsyncHttpRequest httpGetService = new AsyncHttpRequest(new AsyncHttpRequest.Listener() {
@@ -170,7 +251,7 @@ public class CommentsActivity extends AppCompatActivity {
                                     JSONObject comment = new JSONObject(result).getJSONObject("comment");
                                     mCommentsList.add(new Comment(
                                             comment.getString("id"),
-                                            stringToBitmap(comment.getString("imageEncoded")),
+                                            Uri.parse(comment.getString("profileImage")),
                                             comment.getString("comment"),
                                             comment.getString("ownerName"),
                                             Float.valueOf(comment.getString("rating")),
@@ -187,10 +268,9 @@ public class CommentsActivity extends AppCompatActivity {
                             }
                         }
                     });
-                    httpGetService.execute("GET", mCommentByIdUrl + commentId);
+                    String urlComment = mUrl + "/comments/getById/" + commentId;
+                    httpGetService.execute("GET", urlComment);
                 }
-                // }
-                //}).start();
             } else {
                 Log.e(TAG, "populateCommentList: All Ids not received");
             }

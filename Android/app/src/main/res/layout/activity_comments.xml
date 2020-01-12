@@ -35,60 +35,88 @@
                     android:textColor="@color/colorBlack"
                     android:textSize="12sp" />
 
-                <RatingBar
+                <LinearLayout
                     android:id="@+id/ratingOneStar"
-                    style="?android:attr/ratingBarStyleSmall"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:isIndicator="true"
-                    android:numStars="5"
-                    android:progressTint="@color/colorGolden"
-                    android:rating="1" />
+                    android:layout_height="wrap_content">
 
-                <RatingBar
+                    <RatingBar
+                        style="?android:attr/ratingBarStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:isIndicator="true"
+                        android:numStars="5"
+                        android:progressTint="@color/colorGolden"
+                        android:rating="1" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/ratingTwoStar"
-                    style="?android:attr/ratingBarStyleSmall"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:isIndicator="true"
-                    android:numStars="5"
-                    android:progressTint="@color/colorGolden"
-                    android:rating="2" />
+                    android:layout_height="wrap_content">
 
-                <RatingBar
+                    <RatingBar
+                        style="?android:attr/ratingBarStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:isIndicator="true"
+                        android:numStars="5"
+                        android:progressTint="@color/colorGolden"
+                        android:rating="2" />
+                </LinearLayout>
+
+
+                <LinearLayout
                     android:id="@+id/ratingThreeStar"
-                    style="?android:attr/ratingBarStyleSmall"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:isIndicator="true"
-                    android:numStars="5"
-                    android:progressTint="@color/colorGolden"
-                    android:rating="3" />
+                    android:layout_height="wrap_content">
 
-                <RatingBar
+                    <RatingBar
+                        style="?android:attr/ratingBarStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:isIndicator="true"
+                        android:numStars="5"
+                        android:progressTint="@color/colorGolden"
+                        android:rating="3" />
+                </LinearLayout>
+
+
+                <LinearLayout
                     android:id="@+id/ratingFourStar"
-                    style="?android:attr/ratingBarStyleSmall"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:isIndicator="true"
-                    android:numStars="5"
-                    android:progressTint="@color/colorGolden"
-                    android:rating="4" />
+                    android:layout_height="wrap_content">
 
-                <RatingBar
+                    <RatingBar
+                        style="?android:attr/ratingBarStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:isIndicator="true"
+                        android:numStars="5"
+                        android:progressTint="@color/colorGolden"
+                        android:rating="4" />
+                </LinearLayout>
+
+
+                <LinearLayout
                     android:id="@+id/ratingFiveStar"
-                    style="?android:attr/ratingBarStyleSmall"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:isIndicator="true"
-                    android:numStars="5"
-                    android:progressTint="@color/colorGolden"
-                    android:rating="5" />
+                    android:layout_height="wrap_content">
+
+                    <RatingBar
+                        style="?android:attr/ratingBarStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:isIndicator="true"
+                        android:numStars="5"
+                        android:progressTint="@color/colorGolden"
+                        android:rating="5" />
+                </LinearLayout>
 
 
             </LinearLayout>
@@ -103,7 +131,34 @@
                 android:id="@+id/commentsList"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_above="@id/loadMoreCommentsLayout"
                 android:scrollbars="vertical" />
+
+            <LinearLayout
+                android:id="@+id/loadMoreCommentsLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:orientation="horizontal">
+
+                <ProgressBar
+                    android:id="@+id/getNewCommentsFromDatabase"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_gravity="center"
+                    android:theme="@style/ProgressBarStyle"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/loadMoreComments"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:text="@string/loadMore"
+                    android:visibility="gone" />
+            </LinearLayout>
         </RelativeLayout>
 
 

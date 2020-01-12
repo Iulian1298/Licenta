@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -21,6 +22,16 @@
         android:layout_height="wrap_content"
         android:background="@color/colorBlueWhite"
         android:hint="@string/address"
+        android:inputType="text"
+        android:maxLength="50"
+        android:padding="8dp" />
+
+    <EditText
+        android:id="@+id/addServiceCity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorBlueWhite"
+        android:hint="@string/city"
         android:inputType="text"
         android:maxLength="50"
         android:padding="8dp" />
@@ -51,7 +62,7 @@
         android:background="@color/colorBlueWhite"
         android:hint="@string/serviceDescriptionAdd"
         android:inputType="text"
-        android:maxLength="5000"
+        android:maxLength="1500"
         android:padding="8dp" />
 
     <EditText
@@ -91,6 +102,12 @@
             android:layout_height="wrap_content"
             android:text="@string/serviceChassis" />
 
+        <CheckBox
+            android:id="@+id/serviceItpCheck"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/serviceItp" />
+
     </LinearLayout>
 
     <android.support.design.widget.CoordinatorLayout
@@ -113,6 +130,15 @@
             app:backgroundTint="@color/colorBlue"
             app:fabSize="mini" />
 
+        <ProgressBar
+            android:id="@+id/addServiceProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:progressTint="@color/colorBlue"
+            android:visibility="invisible" />
+
     </android.support.design.widget.CoordinatorLayout>
 
 </LinearLayout>
+

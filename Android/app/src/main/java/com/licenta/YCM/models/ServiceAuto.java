@@ -1,16 +1,18 @@
 package com.licenta.YCM.models;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
 
 public class ServiceAuto {
     private String mServiceId;
-    private Bitmap mImage;
+    private Uri mImageUri;
     private String mName;
     private String mDescription;
     private String mAddress;
+    private String mCity;
     private float mRating;
     private String mContactPhoneNumber;
     private String mContactEmail;
@@ -21,10 +23,11 @@ public class ServiceAuto {
     private String mAcceptedBrands;
 
     public ServiceAuto(String serviceId,
-                       Bitmap image,
+                       Uri imageUri,
                        String name,
                        String description,
                        String address,
+                       String city,
                        float rating,
                        String phoneNumber,
                        String email,
@@ -34,10 +37,11 @@ public class ServiceAuto {
                        int type,
                        String acceptedBrands) {
         this.mServiceId = serviceId;
-        this.mImage = image;
+        this.mImageUri = imageUri;
         this.mName = name;
         this.mDescription = description;
         this.mAddress = address;
+        this.mCity = city;
         this.mRating = rating;
         this.mContactPhoneNumber = phoneNumber;
         this.mContactEmail = email;
@@ -56,19 +60,12 @@ public class ServiceAuto {
         mServiceId = newServiceId;
     }
 
-    public Bitmap getImage() {
-        return mImage;
+    public Uri getImage() {
+        return mImageUri;
     }
 
-    public void setImage(Bitmap newImage) {
-        mImage = newImage;
-    }
-
-    public String getImageAsString() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        mImage.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        byte[] b = baos.toByteArray();
-        return Base64.encodeToString(b, Base64.DEFAULT);
+    public void setImage(Uri newImageUri) {
+        mImageUri = newImageUri;
     }
 
     public String getName() {
@@ -93,6 +90,14 @@ public class ServiceAuto {
 
     public void setAddress(String newAddress) {
         mAddress = newAddress;
+    }
+
+    public String getCity() {
+        return mCity;
+    }
+
+    public void setCity(String newCity) {
+        mCity = newCity;
     }
 
     public float getRating() {
@@ -167,9 +172,8 @@ public class ServiceAuto {
             double long1 = Math.toRadians(mLongitude);
             lat2 = Math.toRadians(lat2);
             long2 = Math.toRadians(long2);
-            double earthRadius = 6371.01; //Kilometers
-            double distance = earthRadius * Math.acos(Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(long1 - long2));
-            return distance;
+            double earthRadius = 6371.01;
+            return earthRadius * Math.acos(Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(long1 - long2));
         }
     }
 

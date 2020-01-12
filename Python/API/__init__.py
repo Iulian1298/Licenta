@@ -9,8 +9,9 @@ from pip._vendor.appdirs import unicode
 from werkzeug.utils import secure_filename
 import base64
 from datetime import date
+import math
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "secret"
-app.config['IMAGE_FOLDER'] = "..\\"
+app.config['IMAGE_FOLDER'] = ""

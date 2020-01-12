@@ -21,17 +21,12 @@ def authRegister():
     # ToDo: user profile image convert from base64 to image and save
     try:
         userId = unicode(uuid.uuid4())
-        image = base64.b64decode(request.json['imageEncoded'])
-        print(image)
-        imagePath = os.path.join("Images", request.json['email'] + userId + ".png")
-        f = open(imagePath, 'wb')
-        f.write(image)
         user = User(id=userId,
                     email=request.json['email'],
                     phoneNumber=request.json['phoneNumber'],
                     fullName=request.json['fullName'],
                     password=request.json['password'],
-                    imagePath=imagePath)
+                    imagePath=request.json['imageDownloadLink'])
         print(user)
         db.session.add(user)
         db.session.commit()
@@ -58,10 +53,6 @@ def authLogin():
             print(user.first().toDict())
             imageEncoded = ""
             userDict = user.first().toDict()
-            with open(userDict["imagePath"], "rb") as image:
-                imageEncoded = base64.b64encode(image.read()).decode('utf-8')
-                userDict["imageEncoded"] = imageEncoded
-            del userDict["imagePath"]
             # print(userDict)
             return make_response(jsonify({"status": "Found",
                                           "token": getJWT(repr(user)),

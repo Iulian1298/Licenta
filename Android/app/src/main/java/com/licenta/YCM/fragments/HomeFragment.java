@@ -10,24 +10,21 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import android.support.v7.widget.Toolbar;
-import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.Gravity;
@@ -37,16 +34,24 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
@@ -64,15 +69,12 @@ import com.licenta.YCM.models.ServiceAuto;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
@@ -92,6 +94,7 @@ public class HomeFragment extends Fragment {
     private Dialog mAddService;
     private EditText mAddServiceName;
     private EditText mAddServiceAddress;
+    private EditText mAddServiceCity;
     private EditText mAddServicePhone;
     private EditText mAddServiceEmail;
     private EditText mAddServiceDescription;
@@ -99,10 +102,21 @@ public class HomeFragment extends Fragment {
     private CheckBox mRepairServiceCheck;
     private CheckBox mServiceTireCheck;
     private CheckBox mServiceChassisCheck;
+    private CheckBox mServiceItpCheck;
     private ImageView mAddServiceImage;
     private boolean mUseDefaultServiceImage;
     private int mLastElementClickedPosition;
     private View mFragmentView;
+    private Uri mAddServiceImageUri;
+    private ProgressBar mAddServiceProgressBar;
+    private FloatingActionButton mAddServiceButton;
+    private int mServiceAutoOffset;
+    private int mServiceAutoLimit;
+    private ProgressBar mGetNewServicesFromDatabase;
+    private Button mLoadMoreServices;
+    private boolean mExistMoreServices;
+    private String mCompleteUrl;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -112,6 +126,8 @@ public class HomeFragment extends Fragment {
         mCtx = getContext();
         mPreferencesManager = SharedPreferencesManager.getInstance(mCtx);
         mShowOnlyMyServices = mPreferencesManager.getOnlyMyServices();
+
+
         Log.i(TAG, "onCreateView: show only my services: " + mShowOnlyMyServices);
         try {
             mIsLoggedIn = mPreferencesManager.isLoggedIn();
@@ -124,7 +140,7 @@ public class HomeFragment extends Fragment {
         refreshComments.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                init(fragmentView);
+                refreshPage();
                 refreshComments.setRefreshing(false);
             }
         });
@@ -140,26 +156,82 @@ public class HomeFragment extends Fragment {
 
     public void refreshPage() {
         Log.i(TAG, "refreshPage: called refresh page");
-        //crash some time on instant build (apply changes)
-        init(mFragmentView);
+        //crash some time on instant build (apply changes) -> now most probably no
+        mServiceAutoOffset = 0;
+        if (mServiceAutoList != null && mServiceAutoAdapter != null) {
+            mServiceAutoList.clear();
+            mServiceAutoAdapter.notifyDataSetChanged();
+            populateServiceAutoList();
+        }
     }
 
     private void init(View v) {
         Log.i(TAG, "init: ");
         mServiceAutoRecyclerView = v.findViewById(R.id.servicesList);
         mAddServiceFloatingButton = v.findViewById(R.id.addServiceFloatingButton);
+        mGetNewServicesFromDatabase = v.findViewById(R.id.getNewServicesFromDatabase);
         mServiceAutoRecyclerView.setLayoutManager(new LinearLayoutManager(mCtx));
         mUrl = "http://10.0.2.2:5000";
         mServiceAutoList = new ArrayList<>();
         mServiceAutoAdapter = new ServiceAutoAdapter(mCtx, mServiceAutoList);
         //mServiceAutoRecyclerView.addItemDecoration(new DividerItemDecoration(mCtx, DividerItemDecoration.VERTICAL));
         mServiceAutoRecyclerView.setAdapter(mServiceAutoAdapter);
+        mLoadMoreServices = v.findViewById(R.id.loadMoreServices);
+        mExistMoreServices = true;
         mLastElementClickedPosition = 0;
+        mServiceAutoLimit = 11;
+        mServiceAutoOffset = 0;
         if (mShowOnlyMyServices) {
-            populateServiceAutoListWithMy();
+            mCompleteUrl = mUrl + "/services/getIdsBetweenForMyServices/" + mPreferencesManager.getUserId() + "/offset/" + mServiceAutoOffset + "/limit/"
+                    + mServiceAutoLimit;
         } else {
-            populateServiceAutoListWithAll();
+            mCompleteUrl = mUrl + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
+                    + mServiceAutoLimit;
         }
+        populateServiceAutoList();
+        mLoadMoreServices.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mLoadMoreServices.setVisibility(View.GONE);
+                mGetNewServicesFromDatabase.setVisibility(View.VISIBLE);
+                mServiceAutoOffset += 11;
+                if (mShowOnlyMyServices) {
+                    mCompleteUrl = mUrl + "/services/getIdsBetweenForMyServices/" + mPreferencesManager.getUserId() + "/offset/" + mServiceAutoOffset + "/limit/"
+                            + mServiceAutoLimit;
+                } else {
+                    mCompleteUrl = mUrl + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
+                            + mServiceAutoLimit;
+                }
+                populateServiceAutoList();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mGetNewServicesFromDatabase.setVisibility(View.GONE);
+                    }
+                }, 2000);
+            }
+        });
+        mServiceAutoRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            private int mPreviousTotal = 0;
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                int visibleItemCount = recyclerView.getChildCount();
+                int totalItemCount = recyclerView.getLayoutManager().getItemCount();
+                int firstVisibleItem = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
+
+                if (dy < 0) {
+                    mLoadMoreServices.setVisibility(View.GONE);
+                }
+                Log.i(TAG, String.format("onScrolled: dy: %d mServiceAutoLimit: %d firstVisibleItemCount: %d visibleItemCount: %d previousTotal: %d", dy, mServiceAutoLimit, firstVisibleItem, visibleItemCount, mPreviousTotal));
+                if ((totalItemCount - visibleItemCount) <= (firstVisibleItem + 2)) {
+                    if (dy > 0 & mExistMoreServices) {
+                        mLoadMoreServices.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+        });
         initAddServicePopUp();
         mServiceAutoAdapter.setClickListener(new ServiceAutoAdapter.OnItemServiceAutoClickListener() {
             @Override
@@ -170,12 +242,13 @@ public class HomeFragment extends Fragment {
                 Intent intent = new Intent(mCtx, ServiceAutoActivity.class);
                 ServiceAuto serviceAuto = mServiceAutoAdapter.getElemInFilteredListAtPos(pos);
                 intent.putExtra("serviceId", serviceAuto.getServiceId());
-                intent.putExtra("logoImage", createLocalImageFromBitmap(serviceAuto.getImage()));
+                intent.putExtra("logoImage", serviceAuto.getImage().toString());
                 intent.putExtra("serviceName", serviceAuto.getName());
                 intent.putExtra("description", serviceAuto.getDescription());
                 intent.putExtra("latitude", serviceAuto.getLatitude());
                 intent.putExtra("longitude", serviceAuto.getLongitude());
                 intent.putExtra("address", serviceAuto.getAddress());
+                intent.putExtra("city", serviceAuto.getCity());
                 intent.putExtra("rating", serviceAuto.getRating());
                 intent.putExtra("contactPhoneNumber", serviceAuto.getContactPhoneNumber());
                 intent.putExtra("contactEmail", serviceAuto.getContactEmail());
@@ -222,14 +295,17 @@ public class HomeFragment extends Fragment {
         mAddService.getWindow().getAttributes().gravity = Gravity.TOP;
         mAddServiceName = mAddService.findViewById(R.id.addServiceName);
         mAddServiceAddress = mAddService.findViewById(R.id.addServiceAddress);
+        mAddServiceCity = mAddService.findViewById(R.id.addServiceCity);
         mAddServicePhone = mAddService.findViewById(R.id.addServicePhone);
         mAddServiceEmail = mAddService.findViewById(R.id.addServiceEmail);
         mAddServiceDescription = mAddService.findViewById(R.id.addServiceDescription);
         mAddServiceImage = mAddService.findViewById(R.id.addServiceImage);
         mAddServiceAcceptedBrand = mAddService.findViewById(R.id.addServiceAcceptedBrand);
         mServiceChassisCheck = mAddService.findViewById(R.id.serviceChassisCheck);
+        mServiceItpCheck = mAddService.findViewById(R.id.serviceItpCheck);
         mServiceTireCheck = mAddService.findViewById(R.id.serviceTireCheck);
         mRepairServiceCheck = mAddService.findViewById(R.id.repairServiceCheck);
+        mAddServiceProgressBar = mAddService.findViewById(R.id.addServiceProgressBar);
         mAddServiceImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -243,18 +319,17 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
-        FloatingActionButton addServiceButton = mAddService.findViewById(R.id.addService);
-        addServiceButton.setOnClickListener(new View.OnClickListener() {
+        mAddServiceButton = mAddService.findViewById(R.id.addService);
+        mAddServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mAddServiceProgressBar.setVisibility(View.VISIBLE);
+                mAddServiceButton.hide();
                 Log.i(TAG, "onClick: add button pressed");
                 if (verifyInputOnClientSide()) {
                     try {
                         if (verifyInputOnServerSide()) {
-                            mAddService.dismiss();
-                            if (mShowOnlyMyServices) {
-                                populateServiceAutoListWithMy();
-                            }
+
                         } else {
                         }
                     } catch (ExecutionException e) {
@@ -262,6 +337,9 @@ public class HomeFragment extends Fragment {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                } else {
+                    mAddServiceProgressBar.setVisibility(View.GONE);
+                    mAddServiceButton.show();
                 }
             }
         });
@@ -269,16 +347,13 @@ public class HomeFragment extends Fragment {
 
     private boolean verifyInputOnServerSide() throws ExecutionException, InterruptedException {
         Log.i(TAG, "verifyInputOnServerSide: Add service");
-        boolean resultOk = true;
-        JsonObject jsonBody = new JsonObject();
+        setEnableFields(false);
+        final boolean[] resultOk = {true};
+        final JsonObject jsonBody = new JsonObject();
         if (mUseDefaultServiceImage) {
             mAddServiceImage.setImageURI(Uri.parse("android.resource://" + mCtx.getPackageName() + "/drawable/" + "default_service_image"));
+            mAddServiceImageUri = Uri.parse("android.resource://" + mCtx.getPackageName() + "/drawable/" + "default_service_image");
         }
-        BitmapDrawable drawable = (BitmapDrawable) mAddServiceImage.getDrawable();
-        Bitmap bitmap = drawable.getBitmap();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        String image = Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP);
         int type = 0;
         if (mRepairServiceCheck.isChecked()) {
             type |= 1;
@@ -289,8 +364,12 @@ public class HomeFragment extends Fragment {
         if (mServiceChassisCheck.isChecked()) {
             type |= 4;
         }
+        if (mServiceItpCheck.isChecked()) {
+            type |= 8;
+        }
         jsonBody.addProperty("serviceName", mAddServiceName.getText().toString().trim());
         jsonBody.addProperty("serviceAddress", mAddServiceAddress.getText().toString().trim());
+        jsonBody.addProperty("serviceCity", mAddServiceCity.getText().toString().trim());
         jsonBody.addProperty("servicePhone", mAddServicePhone.getText().toString().trim());
         jsonBody.addProperty("serviceEmail", mAddServiceEmail.getText().toString().trim());
         jsonBody.addProperty("serviceAcceptedBrand", mAddServiceAcceptedBrand.getText().toString().trim());
@@ -298,26 +377,95 @@ public class HomeFragment extends Fragment {
         jsonBody.addProperty("serviceType", type);
         jsonBody.addProperty("longitude", mPreferencesManager.getUserLongitude());
         jsonBody.addProperty("latitude", mPreferencesManager.getUserLatitude());
-        jsonBody.addProperty("imageEncoded", image);
         jsonBody.addProperty("serviceOwner", mPreferencesManager.getUserId());
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("service_image");
+        final StorageReference imageFilePath = storageReference.child(mAddServiceImageUri.getLastPathSegment());
+        imageFilePath.putFile(mAddServiceImageUri).addOnSuccessListener(
+                new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-        Response<JsonObject> response = Ion.with(mCtx)
-                .load("POST", mUrl + "/services/addService")
-                .setHeader("Authorization", mPreferencesManager.getToken())
-                .setJsonObjectBody(jsonBody)
-                .asJsonObject()
-                .withResponse()
-                .get();
-        if (response.getHeaders().code() == 201) {
-            Log.i(TAG, "verifyInputOnServerSide: Service added to database!");
-            Toast.makeText(mCtx, "Service adaugat cu succes!", Toast.LENGTH_SHORT).show();
-        } else {
-            Log.i(TAG, "verifyInputOnServerSide: Service not added to database! err code: " + response.getHeaders().code());
-            Toast.makeText(mCtx, "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
-        }
+                        imageFilePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                String imageDownlaodLink = uri.toString();
+                                jsonBody.addProperty("imageDownloadLink", imageDownlaodLink);
+
+                                Response<JsonObject> response = null;
+                                try {
+                                    response = Ion.with(mCtx)
+                                            .load("POST", mUrl + "/services/addService")
+                                            .setHeader("Authorization", mPreferencesManager.getToken())
+                                            .setJsonObjectBody(jsonBody)
+                                            .asJsonObject()
+                                            .withResponse()
+                                            .get();
+                                    if (response.getHeaders().code() == 201) {
+                                        Log.i(TAG, "verifyInputOnServerSide: Service added to database!");
+                                        Toast.makeText(mCtx, "Service adaugat cu succes!", Toast.LENGTH_SHORT).show();
+                                        mServiceAutoList.clear();
+                                        mServiceAutoOffset = 0;
+                                        mServiceAutoAdapter.notifyDataSetChanged();
+                                        if (mShowOnlyMyServices) {
+                                            mCompleteUrl = mUrl + "/services/getIdsBetweenForMyServices/" + mPreferencesManager.getUserId() + "/offset/" + mServiceAutoOffset + "/limit/"
+                                                    + mServiceAutoLimit;
+                                        } else {
+                                            mCompleteUrl = mUrl + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
+                                                    + mServiceAutoLimit;
+                                        }
+                                        populateServiceAutoList();
+
+                                        mAddServiceProgressBar.setVisibility(View.INVISIBLE);
+                                        mAddService.dismiss();
+                                    } else {
+                                        Log.i(TAG, "verifyInputOnServerSide: Service not added to database! err code: " + response.getHeaders().code());
+                                        Toast.makeText(mCtx, "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
+                                        setEnableFields(true);
+                                        mAddServiceProgressBar.setVisibility(View.INVISIBLE);
+                                        mAddServiceButton.show();
+                                        resultOk[0] = false;
+                                    }
+                                } catch (ExecutionException e) {
+                                    e.printStackTrace();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // something goes wrong uploading picture
+                                Log.e(TAG, "onFailure: Something goes wrong to put image on firebase");
+                                Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                                setEnableFields(true);
+                                mAddServiceProgressBar.setVisibility(View.INVISIBLE);
+                                mAddServiceButton.show();
+                                resultOk[0] = false;
+                            }
+                        });
+                    }
+                });
+
+
         //Log.i(TAG, "verifyInputOnServerSide: " + jsonBody);
 
-        return resultOk;
+        return resultOk[0];
+    }
+
+    private void setEnableFields(boolean value) {
+        mAddServiceName.setEnabled(value);
+        mAddServiceAddress.setEnabled(value);
+        mAddServiceCity.setEnabled(value);
+        mAddServicePhone.setEnabled(value);
+        mAddServiceEmail.setEnabled(value);
+        mAddServiceDescription.setEnabled(value);
+        mAddServiceImage.setEnabled(value);
+        mAddServiceAcceptedBrand.setEnabled(value);
+        mServiceChassisCheck.setEnabled(value);
+        mServiceItpCheck.setEnabled(value);
+        mServiceTireCheck.setEnabled(value);
+        mRepairServiceCheck.setEnabled(value);
     }
 
     private boolean verifyInputOnClientSide() {
@@ -329,6 +477,10 @@ public class HomeFragment extends Fragment {
         }
         if (mAddServiceAddress.getText().toString().trim().isEmpty()) {
             mAddServiceAddress.setError("Completeaza campul!");
+            resultOk = false;
+        }
+        if (mAddServiceCity.getText().toString().trim().isEmpty()) {
+            mAddServiceCity.setError("Completeaza campul!");
             resultOk = false;
         }
         if (mAddServicePhone.getText().toString().trim().isEmpty()) {
@@ -357,26 +509,10 @@ public class HomeFragment extends Fragment {
             mAddServiceAcceptedBrand.setError("Completeaza campul!");
             resultOk = false;
         }
-        if (!mRepairServiceCheck.isChecked() && !mServiceTireCheck.isChecked() && !mServiceChassisCheck.isChecked()) {
+        if (!mRepairServiceCheck.isChecked() && !mServiceTireCheck.isChecked() && !mServiceChassisCheck.isChecked() && !mServiceItpCheck.isChecked()) {
             mRepairServiceCheck.setChecked(true);
         }
         return resultOk;
-    }
-
-    private String createLocalImageFromBitmap(Bitmap bitmap) {
-        Log.i(TAG, "createLocalImageFromBitmap: ");
-        String fileName = "myImage";
-        try {
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-            FileOutputStream fo = mCtx.openFileOutput(fileName, Context.MODE_PRIVATE);
-            fo.write(bytes.toByteArray());
-            fo.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            fileName = null;
-        }
-        return fileName;
     }
 
     private void showPopUpNotLogged() {
@@ -407,23 +543,79 @@ public class HomeFragment extends Fragment {
         notLoggedPopUp.show();
     }
 
-    private Bitmap stringToBitmap(String imageEncoded) {
-        Log.i(TAG, "stringToBitmap: ");
-        try {
-            String cleanImage = imageEncoded.
-                    replace("dataimage/pngbase64", "").
-                    replace("dataimage/jpegbase64", "");
-            //Log.i(TAG, "stringToBitmap: " + cleanImage);
-            byte[] encodeByte = Base64.decode(cleanImage, Base64.DEFAULT);
-            return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
-        } catch (Exception e) {
-            e.getMessage();
-            return null;
-        }
-    }
 
     private void populateServiceAutoListWithMy() {
         Log.i(TAG, "populateServiceAutoListWithMy: ");
+        /*
+
+        Log.i(TAG, "populateServiceAutoListWithMy: ");
+        final RequestQueue queue = Volley.newRequestQueue(mCtx);
+        JsonObjectRequest idList = new JsonObjectRequest(com.android.volley.Request.Method.GET,
+                mUrl + "/services/getAllIdsForMyServices/" + mPreferencesManager.getUserId(), null,
+                new com.android.volley.Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.i(TAG, "populateServiceAutoList: services Ids received");
+                        try {
+                            final JSONArray servicesId = response.getJSONArray("ids");
+                            for (int i = 0; i < servicesId.length(); i++) {
+
+                                final String finalI = servicesId.get(i).toString().substring(2,servicesId.get(i).toString().length()-2);
+                                Log.i(TAG, "populateServiceAutoList: add services with ID: " + finalI);
+                                JsonObjectRequest service = new JsonObjectRequest(com.android.volley.Request.Method.GET,
+                                        mUrl + "/services/getById/" + finalI, null,
+                                        new com.android.volley.Response.Listener<JSONObject>() {
+                                            @Override
+                                            public void onResponse(JSONObject response) {
+                                                if (response != null) {
+                                                    try {
+                                                        Log.i(TAG, "onResult: Received service with id: " + finalI);
+                                                        JSONObject service = response.getJSONObject("service");
+                                                        mServiceAutoList.add(new ServiceAuto(
+                                                                service.getString("id"),
+                                                                Uri.parse(service.getString("logoPath")),
+                                                                service.getString("name"),
+                                                                service.getString("description"),
+                                                                service.getString("address"),
+                                                                Float.valueOf(service.getString("rating")),
+                                                                service.getString("phoneNumber"),
+                                                                service.getString("email"),
+                                                                Double.valueOf(service.getString("latitude")),
+                                                                Double.valueOf(service.getString("longitude")),
+                                                                service.getString("owner"),
+                                                                service.getInt("serviceType"),
+                                                                service.getString("acceptedBrand")));
+                                                        mServiceAutoAdapter.notifyDataSetChanged();
+                                                    } catch (JSONException e1) {
+                                                        e1.printStackTrace();
+                                                        Log.e(TAG, "onResult: NoResult");
+                                                    }
+                                                } else {
+                                                    Log.e(TAG, "onResult: Service with id: " + finalI + "not received!");
+                                                }
+
+                                            }
+                                        }, new com.android.volley.Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        System.out.println("error is = " + error);
+                                    }
+                                });
+                                queue.add(service);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                }, new com.android.volley.Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.println("error is = " + error);
+            }
+        });
+        queue.add(idList);
+        */
         Ion.with(mCtx)
                 .load("GET", mUrl + "/services/getAllIdsForMyServices/" + mPreferencesManager.getUserId())
                 .asJsonObject()
@@ -435,15 +627,12 @@ public class HomeFragment extends Fragment {
                             if (response.getHeaders().code() == 200) {
                                 Log.i(TAG, "populateServiceAutoList: services Ids received");
                                 final JsonArray servicesId = response.getResult().get("ids").getAsJsonArray();
-                                /*new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {*/
+                                if (servicesId.size() != 11) {
+                                    mExistMoreServices = false;
+                                } else {
+                                    mExistMoreServices = true;
+                                }
                                 for (int i = 0; i < servicesId.size(); i++) {
-                                            /*try {
-                                                Thread.sleep(250);
-                                            } catch (InterruptedException e1) {
-                                                e1.printStackTrace();
-                                            }*/
                                     final String finalI = servicesId.get(i).getAsString();
                                     Log.i(TAG, "populateServiceAutoList: add services with ID: " + finalI);
                                     final AsyncHttpRequest httpGetService = new AsyncHttpRequest(new AsyncHttpRequest.Listener() {
@@ -455,10 +644,11 @@ public class HomeFragment extends Fragment {
                                                     JSONObject service = new JSONObject(result).getJSONObject("service");
                                                     mServiceAutoList.add(new ServiceAuto(
                                                             service.getString("id"),
-                                                            stringToBitmap(service.getString("imageEncoded")),
+                                                            Uri.parse(service.getString("logoPath")),
                                                             service.getString("name"),
                                                             service.getString("description"),
                                                             service.getString("address"),
+                                                            service.getString("city"),
                                                             Float.valueOf(service.getString("rating")),
                                                             service.getString("phoneNumber"),
                                                             service.getString("email"),
@@ -491,10 +681,10 @@ public class HomeFragment extends Fragment {
                 });
     }
 
-    private void populateServiceAutoListWithAll() {
+    private void populateServiceAutoList() {
         Log.i(TAG, "populateServiceAutoListWithAll: ");
         Ion.with(mCtx)
-                .load("GET", mUrl + "/services/getAllIds")
+                .load("GET", mCompleteUrl)
                 .asJsonObject()
                 .withResponse()
                 .setCallback(new FutureCallback<Response<JsonObject>>() {
@@ -504,30 +694,29 @@ public class HomeFragment extends Fragment {
                             if (response.getHeaders().code() == 200) {
                                 Log.i(TAG, "populateServiceAutoList: services Ids received");
                                 final JsonArray servicesId = response.getResult().get("ids").getAsJsonArray();
-                                /*new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {*/
+                                if (servicesId.size() != 11) {
+                                    mExistMoreServices = false;
+                                } else {
+                                    mExistMoreServices = true;
+                                }
                                 for (int i = 0; i < servicesId.size(); i++) {
-                                            /*try {
-                                                Thread.sleep(250);
-                                            } catch (InterruptedException e1) {
-                                                e1.printStackTrace();
-                                            }*/
-                                    final String finalI = servicesId.get(i).getAsString();
-                                    Log.i(TAG, "populateServiceAutoList: add services with ID: " + finalI);
+                                    final String id = servicesId.get(i).getAsString();
+                                    Log.i(TAG, "populateServiceAutoList: add services with ID: " + id);
+                                    final int finalI = i;
                                     final AsyncHttpRequest httpGetService = new AsyncHttpRequest(new AsyncHttpRequest.Listener() {
                                         @Override
                                         public void onResult(String result) {
                                             if (!result.isEmpty()) {
                                                 try {
-                                                    Log.i(TAG, "onResult: Received service with id: " + finalI);
+                                                    Log.i(TAG, "onResult: Received service with id: " + id);
                                                     JSONObject service = new JSONObject(result).getJSONObject("service");
                                                     mServiceAutoList.add(new ServiceAuto(
                                                             service.getString("id"),
-                                                            stringToBitmap(service.getString("imageEncoded")),
+                                                            Uri.parse(service.getString("logoPath")),
                                                             service.getString("name"),
                                                             service.getString("description"),
                                                             service.getString("address"),
+                                                            service.getString("city"),
                                                             Float.valueOf(service.getString("rating")),
                                                             service.getString("phoneNumber"),
                                                             service.getString("email"),
@@ -542,112 +731,14 @@ public class HomeFragment extends Fragment {
                                                     Log.e(TAG, "onResult: NoResult");
                                                 }
                                             } else {
-                                                Log.e(TAG, "onResult: Service with id: " + finalI + "not received!");
+                                                Log.e(TAG, "onResult: Service with id: " + id + "not received!");
                                             }
                                         }
                                     });
-                                    httpGetService.execute("GET", mUrl + "/services/getById/" + finalI);
+                                    httpGetService.execute("GET", mUrl + "/services/getById/" + id);
                                 }
                                 // }
                                 //}).start();
-                            } else {
-                                Toast.makeText(mCtx, "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
-                            }
-                        } else {
-                            Log.e(TAG, "onCompleted: null response");
-                        }
-                    }
-                });
-    }
-
-    private void populateServiceAutoList2() {
-        Log.i(TAG, "populateServiceAutoList: ");
-        Ion.with(mCtx)
-                .load("GET", mUrl + "/services/getAllIds")
-                .asJsonObject()
-                .withResponse()
-                .setCallback(new FutureCallback<Response<JsonObject>>() {
-                    @Override
-                    public void onCompleted(Exception e, Response<JsonObject> response) {
-                        if (response != null) {
-                            if (response.getHeaders().code() == 200) {
-                                Log.i(TAG, "populateServiceAutoList: services Ids received");
-                                final JsonArray servicesId = response.getResult().get("ids").getAsJsonArray();
-                                for (int i = 0; i < servicesId.size(); i++) {
-                                    final String finalI = servicesId.get(i).getAsString();
-                                    Log.i(TAG, "populateServiceAutoList: add services with ID: " + finalI);
-
-                                    OkHttpClient client = new OkHttpClient();
-                                    Request request = new Request.Builder()
-                                            .url(mUrl + "/services/getById/" + finalI)
-                                            .get()
-                                            .build();
-                                    try {
-                                        okhttp3.Response res = client.newCall(request).execute();
-                                        System.out.println(res.body().toString());
-                                    } catch (IOException ex) {
-                                        ex.printStackTrace();
-                                    }
-                                }
-                            } else {
-                                Toast.makeText(mCtx, "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
-                            }
-                        } else {
-                            Log.e(TAG, "onCompleted: null response");
-                        }
-                    }
-                });
-    }
-
-    private void populateServiceAutoList1() {
-        Log.i(TAG, "populateServiceAutoList: ");
-        Ion.with(mCtx)
-                .load("GET", mUrl + "/services/getAllIds")
-                .asJsonObject()
-                .withResponse()
-                .setCallback(new FutureCallback<Response<JsonObject>>() {
-                    @Override
-                    public void onCompleted(Exception e, Response<JsonObject> response) {
-                        if (response != null) {
-                            if (response.getHeaders().code() == 200) {
-                                Log.i(TAG, "populateServiceAutoList: services Ids received");
-                                final JsonArray servicesId = response.getResult().get("ids").getAsJsonArray();
-                                for (int i = 0; i < servicesId.size(); i++) {
-                                    final String finalI = servicesId.get(i).getAsString();
-                                    Log.i(TAG, "populateServiceAutoList: add services with ID: " + finalI);
-                                    AsyncHttpRequest httpGetService = new AsyncHttpRequest(new AsyncHttpRequest.Listener() {
-                                        @Override
-                                        public void onResult(String result) {
-                                            if (!result.isEmpty()) {
-                                                try {
-                                                    Log.i(TAG, "onResult: Received service with id: " + finalI);
-                                                    JSONObject service = new JSONObject(result).getJSONObject("service");
-                                                    mServiceAutoList.add(new ServiceAuto(
-                                                            service.getString("id"),
-                                                            null,
-                                                            service.getString("name"),
-                                                            service.getString("description"),
-                                                            service.getString("address"),
-                                                            Float.valueOf(service.getString("rating")),
-                                                            service.getString("phoneNumber"),
-                                                            service.getString("email"),
-                                                            Double.valueOf(service.getString("latitude")),
-                                                            Double.valueOf(service.getString("longitude")),
-                                                            service.getString("owner"),
-                                                            service.getInt("serviceType"),
-                                                            service.getString("acceptedBrand")));
-                                                    mServiceAutoAdapter.notifyDataSetChanged();
-                                                } catch (JSONException e1) {
-                                                    e1.printStackTrace();
-                                                    Log.e(TAG, "onResult: NoResult");
-                                                }
-                                            } else {
-                                                Log.e(TAG, "onResult: Service with id: " + finalI + "not received!");
-                                            }
-                                        }
-                                    });
-                                    httpGetService.execute("GET", mUrl + "/services/getById/" + finalI);
-                                }
                             } else {
                                 Toast.makeText(mCtx, "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
                             }
@@ -685,15 +776,15 @@ public class HomeFragment extends Fragment {
                 serviceAuto.setType(data.getIntExtra("newServiceType", 1));
                 serviceAuto.setLatitude(data.getDoubleExtra("newLatitude", 0));
                 serviceAuto.setLongitude(data.getDoubleExtra("newLongitude", 0));
-                serviceAuto.setImage(createBitmapFromLocalImage(data.getStringExtra("newLogoImage")));
+                serviceAuto.setImage(Uri.parse(data.getStringExtra("newLogoImage")));
                 mServiceAutoList.set(mLastElementClickedPosition, serviceAuto);
                 mServiceAutoAdapter.notifyDataSetChanged();
             }
         }
         if (requestCode == 2) {
             if (data != null) {
-                Uri chosenImageByUser = data.getData();
-                mAddServiceImage.setImageURI(chosenImageByUser);
+                mAddServiceImageUri = data.getData();
+                mAddServiceImage.setImageURI(mAddServiceImageUri);
                 mUseDefaultServiceImage = false;
             }
         }
@@ -738,82 +829,113 @@ public class HomeFragment extends Fragment {
                 final RatingBar ratingMinBar = advancedFilterView.findViewById(R.id.ratingBarMinFilter);
                 final RatingBar ratingMaxBar = advancedFilterView.findViewById(R.id.ratingBarMaxFilter);
                 final EditText givenNameFilter = advancedFilterView.findViewById(R.id.givenNameFilter);
-                final EditText rangeInput = advancedFilterView.findViewById(R.id.rangeInputFilter);
+                final EditText addressInput = advancedFilterView.findViewById(R.id.addressInputFilter);
                 final EditText cityInput = advancedFilterView.findViewById(R.id.cityInputFilter);
+                final CheckBox repairServiceCheckFilter = advancedFilterView.findViewById(R.id.repairServiceCheckFilter);
+                final CheckBox serviceChassisCheckFilter = advancedFilterView.findViewById(R.id.serviceChassisCheckFilter);
+                final CheckBox serviceTireCheckFilter = advancedFilterView.findViewById(R.id.serviceTireCheckFilter);
+                final CheckBox serviceItpCheckFilter = advancedFilterView.findViewById(R.id.serviceItpCheckFilter);
                 final CheckBox resetFilterCheck = advancedFilterView.findViewById(R.id.resetFilterCheck);
-                if (!mPreferencesManager.getPermissionLocation()) {
-                    TextView rangeInputLabel = advancedFilterView.findViewById(R.id.range);
-                    rangeInputLabel.setVisibility(View.GONE);
-                    rangeInput.setVisibility(View.GONE);
-                }
                 TextView filterTitle = new TextView(getContext());
                 filterTitle.setText("Filtrare avansata!");
                 filterTitle.setGravity(Gravity.CENTER);
                 filterTitle.setPadding(10, 10, 10, 10);
                 filterTitle.setTextSize(18);
                 filterTitle.setTextColor(Color.DKGRAY);
-                AlertDialog advancedFilterPopUp = new AlertDialog.Builder(mCtx)
+                final AlertDialog advancedFilterPopUp = new AlertDialog.Builder(mCtx)
                         .setCustomTitle(filterTitle)
                         .setView(advancedFilterView)
-                        .setPositiveButton("Filtreaza", new DialogInterface.OnClickListener() {
+                        .setPositiveButton("Filtreaza", null)
+                        .setNegativeButton("Anuleaza", null)
+                        .create();
+                advancedFilterPopUp.setOnShowListener(new DialogInterface.OnShowListener() {
+                    @Override
+                    public void onShow(DialogInterface dialog) {
+                        Button filter = advancedFilterPopUp.getButton(AlertDialog.BUTTON_POSITIVE);
+                        filter.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                if (ratingMinBar.getRating() > ratingMaxBar.getRating()) {
-                                    Toast.makeText(getActivity(), "Rating-ul minim trebuie sa fie mai mic ca rating-ul maxim!", Toast.LENGTH_SHORT).show();
+                            public void onClick(View v) {
+                                if (resetFilterCheck.isChecked()) {
+                                    mServiceAutoOffset = 0;
+                                    mCompleteUrl = mUrl + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
+                                            + mServiceAutoLimit;
+                                    mServiceAutoOffset = 0;
+                                    mServiceAutoList.clear();
+                                    mServiceAutoAdapter.notifyDataSetChanged();
+                                    populateServiceAutoList();
+                                    advancedFilterPopUp.dismiss();
                                 } else {
-                                    if (resetFilterCheck.isChecked()) {
-                                        mServiceAutoAdapter.getFilter(null).filter("");
+                                    if (ratingMinBar.getRating() > ratingMaxBar.getRating()) {
+                                        Toast.makeText(getActivity(), "Rating-ul minim trebuie sa fie mai mic ca rating-ul maxim!", Toast.LENGTH_SHORT).show();
                                     } else {
                                         if (!(ratingMinBar.getRating() == 0
-                                                && ratingMaxBar.getRating() == 0
+                                                && ratingMaxBar.getRating() == 0)
                                                 && givenNameFilter.getText().toString().isEmpty()
-                                                && rangeInput.getText().toString().isEmpty()
-                                                && cityInput.getText().toString().isEmpty())) {
-                                            JsonObject advFilterParams = new JsonObject();
-                                            advFilterParams.addProperty("minRating", Float.toString(ratingMinBar.getRating()));
-                                            advFilterParams.addProperty("maxRating", Float.toString(ratingMaxBar.getRating()));
-                                            advFilterParams.addProperty("givenNameFilter", givenNameFilter.getText().toString());
-                                            advFilterParams.addProperty("distanceInput", rangeInput.getText().toString());
-                                            advFilterParams.addProperty("cityInput", cityInput.getText().toString());
-                                            advFilterParams.addProperty("longitute", mPreferencesManager.getUserLongitude());
-                                            advFilterParams.addProperty("latitude", mPreferencesManager.getUserLatitude());
-                                            try {
-                                                Response<JsonObject> response = Ion.with(mCtx)
-                                                        .load("GET", mUrl + "/services/getIdsFilterBy/")
-                                                        .setJsonObjectBody(advFilterParams)
-                                                        .asJsonObject()
-                                                        .withResponse()
-                                                        .get();
-                                            } catch (ExecutionException e) {
-                                                e.printStackTrace();
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
+                                                && addressInput.getText().toString().isEmpty()
+                                                && cityInput.getText().toString().isEmpty()) {
+                                            int type = 0;
+                                            if (repairServiceCheckFilter.isChecked()) {
+                                                type |= 1;
                                             }
-                                            //ToDo: move filter on server
-                                            mServiceAutoAdapter.getFilter(advFilterParams).filter("");
+                                            if (serviceTireCheckFilter.isChecked()) {
+                                                type |= 2;
+                                            }
+                                            if (serviceChassisCheckFilter.isChecked()) {
+                                                type |= 4;
+                                            }
+                                            if (serviceItpCheckFilter.isChecked()) {
+                                                type |= 8;
+                                            }
+                                            if (type == 0) {
+                                                type = 1;
+                                            }
+                                            mServiceAutoOffset = 0;
+                                            String name;
+                                            String address;
+                                            String city;
+
+                                            if (givenNameFilter.getText().toString().isEmpty()) {
+                                                name = "empty";
+                                            } else {
+                                                name = givenNameFilter.getText().toString();
+                                            }
+                                            if (addressInput.getText().toString().isEmpty()) {
+                                                address = "empty";
+                                            } else {
+                                                address = addressInput.getText().toString();
+                                            }
+                                            if (cityInput.getText().toString().isEmpty()) {
+                                                city = "empty";
+                                            } else {
+                                                city = cityInput.getText().toString();
+                                            }
+                                            mCompleteUrl = mUrl
+                                                    + "/services/getIdsBetweenWithFilter/offset/" + mServiceAutoOffset
+                                                    + "/limit/" + mServiceAutoLimit
+                                                    + "/minRating/" + (int) ratingMinBar.getRating()
+                                                    + "/maxRating/" + (int) ratingMaxBar.getRating()
+                                                    + "/name/" + name
+                                                    + "/address/" + address
+                                                    + "/city/" + city
+                                                    + "/type/" + type;
+                                            mServiceAutoOffset = 0;
+                                            mServiceAutoList.clear();
+                                            mServiceAutoAdapter.notifyDataSetChanged();
+                                            populateServiceAutoList();
+                                            advancedFilterPopUp.dismiss();
+                                        } else {
+                                            Toast.makeText(getActivity(), "Nu ai completat niciun camp", Toast.LENGTH_SHORT).show();
                                         }
                                     }
                                 }
                             }
-                        })
-                        .setNegativeButton("Anuleaza", null)
-                        .create();
+                        });
+                    }
+                });
                 advancedFilterPopUp.show();
                 return true;
         }
         return super.onOptionsItemSelected(menuItem);
-    }
-
-    private Bitmap createBitmapFromLocalImage(String name) {
-        Log.i(TAG, "createBitmapFromLocalImage: ");
-        Bitmap bitmap = null;
-        try {
-            bitmap = BitmapFactory.decodeStream(mCtx
-                    .openFileInput(name));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return bitmap;
     }
 
     public HomeFragment() {
