@@ -40,6 +40,10 @@
         android:text="@string/headerMenuMail"
         android:textColor="@color/colorBlack"
         android:textSize="14sp" />
+    <!--<TextView
+        android:id="@+id/test"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />-->
 
     <View
         android:layout_width="match_parent"

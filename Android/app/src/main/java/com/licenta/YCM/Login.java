@@ -29,7 +29,8 @@ public class Login implements Authentication {
     private static final String TAG = "Login";
     private Context mCtx;
     private SharedPreferencesManager mPreferencesManager;
-    private String mLoginUrl;
+    private String mUrl;
+    private String mUrlHeroku;
 
     private EditText mEmail;
     private EditText mPassword;
@@ -41,7 +42,8 @@ public class Login implements Authentication {
     public Login(Context ctx) {
         Log.i(TAG, "Login: Create login worker");
         mCtx = ctx;
-        mLoginUrl = "http://10.0.2.2:5000/login";
+        mUrlHeroku = "https://agile-harbor-57300.herokuapp.com";
+        mUrl = "http://10.0.2.2:5000";
         mPreferencesManager = SharedPreferencesManager.getInstance(mCtx);
 
         LayoutInflater inflater = (LayoutInflater) mCtx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -104,7 +106,8 @@ public class Login implements Authentication {
         jsonBody.addProperty("email", mEmail.getText().toString().trim());
         jsonBody.addProperty("password", mPassword.getText().toString().trim());
         Response<JsonObject> response = Ion.with(mCtx)
-                .load("POST", mLoginUrl)
+                //.load("POST", mUrl + "/login")
+                .load("POST", mUrlHeroku + "/login")
                 .setJsonObjectBody(jsonBody)
                 .asJsonObject()
                 .withResponse()

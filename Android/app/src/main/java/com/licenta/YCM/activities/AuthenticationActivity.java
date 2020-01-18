@@ -1,5 +1,6 @@
 package com.licenta.YCM.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -25,6 +26,7 @@ public class AuthenticationActivity extends AppCompatActivity {
     private static final String TAG = "AuthenticationActivity";
     private Button mLoginButton;
     private Button mRegisterButton;
+    private Context mCtx;
     private Authentication mAuthenticationWorker;
 
     @Override
@@ -32,19 +34,20 @@ public class AuthenticationActivity extends AppCompatActivity {
         Log.i(TAG, "onCreate: Create Activity Authentication");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authentication);
+        mCtx=getApplicationContext();
 
         doInit();
-        requestReadExternalStoragePermision();
+        requestReadExternalStoragePermission();
     }
 
-    private void requestReadExternalStoragePermision() {
+    private void requestReadExternalStoragePermission() {
         Log.i(TAG, "requestReadExternalStoragePermision: ");
         int result = ContextCompat.checkSelfPermission(getApplicationContext(), READ_EXTERNAL_STORAGE);
         if (result != PackageManager.PERMISSION_GRANTED) {
-            Log.i(TAG, "requestLocationPermission: request permission");
+            Log.i(TAG, "requestReadExternalStoragePermision: request permission");
             ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE}, 95);
         } else {
-            Log.i(TAG, "requestLocationPermission: permission already granted");
+            Log.i(TAG, "requestReadExternalStoragePermision: permission already granted");
         }
     }
 

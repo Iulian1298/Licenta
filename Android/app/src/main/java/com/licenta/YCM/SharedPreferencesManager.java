@@ -18,7 +18,9 @@ import java.util.concurrent.ExecutionException;
 public class SharedPreferencesManager {
 
     private static final String TAG = "SharedPreferencesManager";
-    private static final String isLoggedInURL = "http://10.0.2.2:5000/isLoggedIn";
+    private static final String mUrl = "http://10.0.2.2:5000";
+    private static final String mUrlHeroku = "https://agile-harbor-57300.herokuapp.com";
+
 
 
     private static final String SHARED_PREF_NAME = "YCM";
@@ -31,7 +33,7 @@ public class SharedPreferencesManager {
     private static final String KEY_USER_ID = "userID";
     private static final String KEY_LONGITUDE = "longitude";
     private static final String KEY_LATITUDE = "latitude";
-    private static final String KEY_PERMISION_LOCATION = "location";
+    private static final String KEY_PERMISSION_LOCATION = "location";
     private static final String KEY_ONLY_MY_SERVICES = "onlyMyServices";
 
 
@@ -62,15 +64,11 @@ public class SharedPreferencesManager {
         editor.apply();
     }
 
-    public boolean getPermissionLocation() {
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getBoolean(KEY_PERMISION_LOCATION, false);
-    }
 
-    public void setPermissionLocation(boolean permision) {
+    public void setPermissionLocation(boolean permission) {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(KEY_PERMISION_LOCATION, permision);
+        editor.putBoolean(KEY_PERMISSION_LOCATION, permission);
         editor.apply();
     }
 
@@ -180,15 +178,15 @@ public class SharedPreferencesManager {
         Log.i(TAG, "isLoggedIn()");
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
         if (sharedPreferences.getString(KEY_IS_LOGGED, null) != null) {
-            final SharedPreferences.Editor editor = sharedPreferences.edit();
             Response<JsonObject> response = Ion.with(mContext)
-                    .load("GET", isLoggedInURL)
+                    //.load("GET", mUrl + "/isLoggedIn")
+                    .load("GET", mUrlHeroku + "/auth/checkLogged")
                     .setHeader("Authorization", getToken())
                     .asJsonObject()
                     .withResponse()
                     .get();
 
-            if (response.getHeaders().code() == 202) {
+            if (response.getHeaders().code() == 202 || response.getHeaders().code() == 200) {
                 Log.i(TAG, "isLoggedIn()->token still valid");
                 //System.out.println(response.getResult());
                 if (response.getResult() != null) {
@@ -200,8 +198,7 @@ public class SharedPreferencesManager {
                 if (response.getHeaders().code() == 403) {
                     Log.i(TAG, "isLoggedIn()->token not valid");
                     Log.i(TAG, response.getResult().toString());
-                    editor.clear();
-                    editor.apply();
+                    logout();
                 } else {
                     Toast.makeText(mContext, "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
                 }
@@ -214,8 +211,13 @@ public class SharedPreferencesManager {
         Log.i(TAG, "SharedPreferenceManager::logout()");
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
+        //do not clear location(lat, long), need data in order to display distance
+        float userLatitude = mInstance.getUserLatitude();
+        float userLongitude = mInstance.getUserLongitude();
         editor.clear();
         editor.apply();
+        mInstance.setUserLatitude(userLatitude);
+        mInstance.setUserLongitude(userLongitude);
     }
 
 

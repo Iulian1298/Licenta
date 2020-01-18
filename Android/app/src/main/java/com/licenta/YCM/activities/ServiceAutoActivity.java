@@ -4,6 +4,7 @@ package com.licenta.YCM.activities;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,6 +22,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -78,6 +80,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+
 
 public class ServiceAutoActivity extends AppCompatActivity {
     private static final String TAG = "ServiceAutoActivity";
@@ -93,7 +97,6 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private ImageView mDistanceFromYouIcon;
     private boolean mShowOnlyMyServices;
     private Context mCtx;
-    private String mAddCommentURL;
     private Intent mReturnIntent;
     private CaldroidFragment mDialogCaldroidFragment;
     private FloatingActionButton mMenuServiceFloatingButton;
@@ -125,10 +128,12 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private CheckBox mEditServiceItpCheck;
     private ImageView mEditServiceImage;
     private String mUrl;
+    private String mUrlHeroku;
     private ProgressBar mEditServiceProgressBar;
     private LinearLayout mEditLinearLayout;
     private Button mConfirm;
     private Button mCancel;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,6 +148,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
 
     private void init() {
         Log.i(TAG, "init: ");
+        mUrlHeroku = "https://agile-harbor-57300.herokuapp.com";
         mUrl = "http://10.0.2.2:5000";
         mShowOnlyMyServices = mPreferencesManager.getOnlyMyServices();
         mFabMenuExpanded = false;
@@ -159,11 +165,11 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mServiceToolbar = findViewById(R.id.serviceToolbar);
         setSupportActionBar(mServiceToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        if (!mPreferencesManager.getPermissionLocation()) {
+        if (ContextCompat.checkSelfPermission(mCtx, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             mDistanceFromYou.setVisibility(View.GONE);
             mDistanceFromYouIcon.setVisibility(View.GONE);
         }
-        mAddCommentURL = "http://10.0.2.2:5000/comments/addComment";
+
         Intent intent = getIntent();
         mServiceAuto = new ServiceAuto(
                 intent.getStringExtra("serviceId"),
@@ -187,11 +193,29 @@ public class ServiceAutoActivity extends AppCompatActivity {
             mShowOnlyMyServices = true;
         }
         populateActivity();
+        mLogoImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "onClick: expand logo image");
+                Dialog dialog = new Dialog(ServiceAutoActivity.this);
+                dialog.setContentView(R.layout.show_full_image_popup_layout);
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(0xD9272727));
+                dialog.getWindow().setLayout(Toolbar.LayoutParams.MATCH_PARENT, Toolbar.LayoutParams.MATCH_PARENT);
+                dialog.getWindow().getAttributes().gravity = Gravity.CENTER;
+                ImageView fullImage = dialog.findViewById(R.id.serviceImageFullScreen);
+                Glide.with(mCtx)
+                        .asBitmap()
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .load(mServiceAuto.getImage())
+                        .into(fullImage);
+                dialog.show();
+
+            }
+        });
         mReturnIntent = new Intent();
         setResult(RESULT_CANCELED, mReturnIntent);
 
         setFloatingButtonsMenu();
-
     }
 
     private void setFloatingButtonsMenu() {
@@ -443,7 +467,8 @@ public class ServiceAutoActivity extends AppCompatActivity {
                                 jsonBody.addProperty("rating", givenRating.getRating());
                                 try {
                                     Response<JsonObject> response = Ion.with(getApplicationContext())
-                                            .load("POST", mAddCommentURL)
+                                            //.load("POST", mUrl + "/comments/addComment")
+                                            .load("POST", mUrlHeroku + "/comments/addComment")
                                             .setHeader("Authorization", mPreferencesManager.getToken())
                                             .setJsonObjectBody(jsonBody)
                                             .asJsonObject()
@@ -480,6 +505,58 @@ public class ServiceAutoActivity extends AppCompatActivity {
         Intent intentViewComments = new Intent(getApplicationContext(), CommentsActivity.class);
         intentViewComments.putExtra("serviceId", mServiceAuto.getServiceId());
         startActivityForResult(intentViewComments, 1);
+    }
+
+    private void setOnClearTextListeners(View editServiceView) {
+        ImageView clearEditServiceName = editServiceView.findViewById(R.id.clearEditServiceName);
+        ImageView clearEditServiceAddress = editServiceView.findViewById(R.id.clearEditServiceAddress);
+        ImageView clearEditServiceCity = editServiceView.findViewById(R.id.clearEditServiceCity);
+        ImageView clearEditServicePhone = editServiceView.findViewById(R.id.clearEditServicePhone);
+        ImageView clearEditServiceEmail = editServiceView.findViewById(R.id.clearEditServiceEmail);
+        ImageView clearEditServiceDescription = editServiceView.findViewById(R.id.clearEditServiceDescription);
+        ImageView clearEditServiceAcceptedBrands = editServiceView.findViewById(R.id.clearEditServiceAcceptedBrands);
+        clearEditServiceName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditServiceName.setText("");
+            }
+        });
+        clearEditServiceAddress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditServiceAddress.setText("");
+            }
+        });
+        clearEditServiceCity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditServiceCity.setText("");
+            }
+        });
+        clearEditServicePhone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditServicePhone.setText("");
+            }
+        });
+        clearEditServiceEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditServiceEmail.setText("");
+            }
+        });
+        clearEditServiceDescription.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditServiceDescription.setText("");
+            }
+        });
+        clearEditServiceAcceptedBrands.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditServiceAcceptedBrand.setText("");
+            }
+        });
     }
 
     private void editService() {
@@ -524,6 +601,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         if ((mServiceAuto.getType() & 8) == 8) {
             mEditServiceItpCheck.setChecked(true);
         }
+        setOnClearTextListeners(editServiceView);
         Glide.with(mCtx)
                 .asBitmap()
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -557,18 +635,12 @@ public class ServiceAutoActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         Log.i(TAG, "onClick: Confirma edit");
-                        mEditServiceProgressBar.setVisibility(View.VISIBLE);
-                        mEditLinearLayout.setBackground(new ColorDrawable(Color.parseColor("#75676767")));
                         if (verifyInputOnClientSide()) {
-                            try {
-                                if (verifyInputOnServerSide()) {
-                                } else {
-                                    mConfirm.setError("Eroare!");
-                                }
-                            } catch (ExecutionException e) {
-                                e.printStackTrace();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+                            mEditServiceProgressBar.setVisibility(View.VISIBLE);
+                            mEditLinearLayout.setBackground(new ColorDrawable(Color.parseColor("#75676767")));
+                            if (verifyInputOnServerSide()) {
+                            } else {
+                                mConfirm.setError("Eroare!");
                             }
                         }
                     }
@@ -617,7 +689,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mServiceAuto.setDescription(mEditServiceDescription.getText().toString().trim());
         mServiceAuto.setAcceptedBrands(mEditServiceAcceptedBrand.getText().toString().trim());
         mServiceAuto.setType(type);
-        if (mPreferencesManager.getPermissionLocation()) {
+        if (ContextCompat.checkSelfPermission(mCtx, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mServiceAuto.setLongitude(mPreferencesManager.getUserLongitude());
             mServiceAuto.setLatitude(mPreferencesManager.getUserLatitude());
         } else {
@@ -634,7 +706,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mReturnIntent.putExtra("newServiceDescription", mEditServiceDescription.getText().toString().trim());
         mReturnIntent.putExtra("newServiceAcceptedBrand", mEditServiceAcceptedBrand.getText().toString().trim());
         mReturnIntent.putExtra("newServiceType", type);
-        if (mPreferencesManager.getPermissionLocation()) {
+        if (ContextCompat.checkSelfPermission(mCtx, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mReturnIntent.putExtra("newLongitude", (double) mPreferencesManager.getUserLongitude());
             mReturnIntent.putExtra("newLatitude", (double) mPreferencesManager.getUserLatitude());
         } else {
@@ -690,7 +762,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         return resultOk;
     }
 
-    private boolean verifyInputOnServerSide() throws ExecutionException, InterruptedException {
+    private boolean verifyInputOnServerSide() {
         Log.i(TAG, "verifyInputOnServerSide: verify edit service");
         setEnableFields(false);
         boolean resultOk = true;
@@ -716,7 +788,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         jsonBody.addProperty("serviceAcceptedBrand", mEditServiceAcceptedBrand.getText().toString().trim());
         jsonBody.addProperty("serviceDescription", mEditServiceDescription.getText().toString().trim());
         jsonBody.addProperty("serviceType", type);
-        if (mPreferencesManager.getPermissionLocation()) {
+        if (ContextCompat.checkSelfPermission(mCtx, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             jsonBody.addProperty("longitude", mPreferencesManager.getUserLongitude());
             jsonBody.addProperty("latitude", mPreferencesManager.getUserLatitude());
         } else {
@@ -725,63 +797,66 @@ public class ServiceAutoActivity extends AppCompatActivity {
         }
         jsonBody.addProperty("serviceOwner", mServiceAuto.getOwnerId());
         jsonBody.addProperty("serviceId", mServiceAuto.getServiceId());
-        final StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("service_image");
-        StorageReference imageToDelete = FirebaseStorage.getInstance().getReferenceFromUrl(mServiceAuto.getImage().toString());
-        imageToDelete.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Bitmap bitmap = ((BitmapDrawable) mEditServiceImage.getDrawable()).getBitmap();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                byte[] data = baos.toByteArray();
 
+        Bitmap bitmap = ((BitmapDrawable) mEditServiceImage.getDrawable()).getBitmap();
+        //need something more efficient, possibility of crash!! same on edit profile
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
 
-                final StorageReference newImagePath = storageReference.child(mServiceAuto.getServiceId());
-                newImagePath.putBytes(data).addOnSuccessListener(
-                        new OnSuccessListener<UploadTask.TaskSnapshot>() {
+        Log.i(TAG, "verifyInputOnServerSide: getLastPathSegment: " + mServiceAuto.getImage().getLastPathSegment());
+        final StorageReference newImagePath = FirebaseStorage.getInstance().getReference().child(mServiceAuto.getImage().getLastPathSegment());
+        newImagePath.putBytes(data).addOnSuccessListener(
+                new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        newImagePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
-                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                newImagePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        String newImageDownloadLink = uri.toString();
-                                        jsonBody.addProperty("imagePath", newImageDownloadLink);
-                                        Response<JsonObject> response = null;
-                                        try {
-                                            response = Ion.with(mCtx)
-                                                    .load("PUT", mUrl + "/service/editService")
-                                                    .setHeader("Authorization", mPreferencesManager.getToken())
-                                                    .setJsonObjectBody(jsonBody)
-                                                    .asJsonObject()
-                                                    .withResponse()
-                                                    .get();
+                            public void onSuccess(Uri uri) {
+                                String newImageDownloadLink = uri.toString();
+                                jsonBody.addProperty("imagePath", newImageDownloadLink);
+                                Response<JsonObject> response = null;
+                                try {
+                                    response = Ion.with(mCtx)
+                                            //.load("PUT", mUrl + "/service/editService")
+                                            .load("PUT", mUrlHeroku + "/service/editService")
+                                            .setHeader("Authorization", mPreferencesManager.getToken())
+                                            .setJsonObjectBody(jsonBody)
+                                            .asJsonObject()
+                                            .withResponse()
+                                            .get();
 
-                                            if (response.getHeaders().code() == 200) {
-                                                Log.i(TAG, "verifyInputOnServerSide: Service edited!");
-                                                Toast.makeText(mCtx, "Service editat cu succes!", Toast.LENGTH_SHORT).show();
-                                                updateUi();
-                                                mServiceAuto.setImage(Uri.parse(newImageDownloadLink));
-                                                mReturnIntent.putExtra("newLogoImage", newImageDownloadLink);
-                                                populateActivity();
-                                                mEditServiceProgressBar.setVisibility(View.GONE);
-                                                mEditServicePopUp.dismiss();
-                                            } else {
-                                                setEnableFields(true);
-                                                Log.i(TAG, "verifyInputOnServerSide: Service not edited! err code: " + response.getHeaders().code());
-                                                Toast.makeText(mCtx, "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
-                                            }
-                                        } catch (ExecutionException e) {
-                                            e.printStackTrace();
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
+                                    if (response.getHeaders().code() == 200) {
+                                        Log.i(TAG, "verifyInputOnServerSide: Service edited!");
+                                        Toast.makeText(mCtx, "Service editat cu succes!", Toast.LENGTH_SHORT).show();
+                                        updateUi();
+                                        mServiceAuto.setImage(Uri.parse(newImageDownloadLink));
+                                        mReturnIntent.putExtra("newLogoImage", newImageDownloadLink);
+                                        populateActivity();
+                                        mEditServiceProgressBar.setVisibility(View.GONE);
+                                        mEditServicePopUp.dismiss();
+                                    } else {
+                                        setEnableFields(true);
+                                        Log.i(TAG, "verifyInputOnServerSide: Service not edited! err code: " + response.getHeaders().code());
+                                        Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
                                     }
-                                });
+                                } catch (ExecutionException e) {
+                                    e.printStackTrace();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
                             }
-                        }
-                );
-            }
-        }).addOnFailureListener(new OnFailureListener() {
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.i(TAG, "onFailure: fail to get download link");
+                                setEnableFields(true);
+                                Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+        ).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Log.e(TAG, "onFailure: Fail to add image to firebase");
@@ -789,7 +864,6 @@ public class ServiceAutoActivity extends AppCompatActivity {
                 setEnableFields(true);
             }
         });
-
 
         return resultOk;
     }
@@ -1164,7 +1238,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mDescription.setText(mServiceAuto.getDescription());
         mContactPhoneNumber.setText(mServiceAuto.getContactPhoneNumber());
         mContactEmail.setText(mServiceAuto.getContactEmail());
-        if (mPreferencesManager.getPermissionLocation()) {
+        if (ContextCompat.checkSelfPermission(mCtx, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             Log.i(TAG, "populateActivity: permission are granted");
             double distance = mServiceAuto.calculateDistance(mPreferencesManager.getUserLatitude(), mPreferencesManager.getUserLongitude());
             if (distance < 1) {
@@ -1203,7 +1277,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
 
         if (requestCode == 3) {
             Log.i(TAG, "onActivityResult: out from login intent");
-            if (mPreferencesManager.getPermissionLocation()) {
+            if (ContextCompat.checkSelfPermission(mCtx, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 mDistanceFromYou.setVisibility(View.VISIBLE);
                 mDistanceFromYouIcon.setVisibility(View.VISIBLE);
             }

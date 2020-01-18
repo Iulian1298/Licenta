@@ -3,8 +3,11 @@ package com.licenta.YCM.adapters;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +24,8 @@ import com.licenta.YCM.SharedPreferencesManager;
 import com.licenta.YCM.models.ServiceAuto;
 
 import java.util.ArrayList;
+
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.ViewHolder> {
 
@@ -61,8 +66,8 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
         */
         Glide.with(mContext)
                 .asBitmap()
-                .skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                //.skipMemoryCache(true)
+                //.diskCacheStrategy(DiskCacheStrategy.NONE)
                 .load(serviceAuto.getImage())
                 .into(viewHolder.mImage);
         //viewHolder.mImage.setImageBitmap(serviceAuto.getImage());
@@ -72,7 +77,9 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
         } else {
             viewHolder.mDescription.setText(serviceAuto.getDescription());
         }
-        if (mPreferencesManager.getPermissionLocation() && !mPreferencesManager.getOnlyMyServices()) {
+        if (ContextCompat.checkSelfPermission(mContext, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && !mPreferencesManager.getOnlyMyServices()) {
+            Log.i("ServiceAutoAdapter", "onBindViewHolder: location permission available");
             viewHolder.mDistance.setVisibility(View.VISIBLE);
             viewHolder.mDistanceIcon.setVisibility(View.VISIBLE);
             double distance = serviceAuto.calculateDistance(mPreferencesManager.getUserLatitude(), mPreferencesManager.getUserLongitude());

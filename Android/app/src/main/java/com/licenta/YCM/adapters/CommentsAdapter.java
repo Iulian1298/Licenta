@@ -50,8 +50,8 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ViewHo
         final Comment comment = mCommentsList.get(pos);
         Glide.with(mContext)
                 .asBitmap()
-                .skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                //.skipMemoryCache(true)
+                //.diskCacheStrategy(DiskCacheStrategy.NONE)
                 .load(comment.getProfileImage())
                 .into(viewHolder.mProfileImage);
         //viewHolder.mProfileImage.setImageBitmap(comment.getProfileImage());

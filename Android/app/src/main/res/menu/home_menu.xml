@@ -6,10 +6,6 @@
             android:icon="@drawable/ic_home_black_24dp"
             android:title="@string/menuHomeButton" />
         <item
-            android:id="@+id/menuProfile"
-            android:icon="@drawable/ic_person_black_24dp"
-            android:title="@string/menuProfileButton" />
-        <item
             android:id="@+id/menuMyRequestOffer"
             android:icon="@drawable/ic_done_black_24dp"
             android:title="@string/menuMyRequestOffer" />

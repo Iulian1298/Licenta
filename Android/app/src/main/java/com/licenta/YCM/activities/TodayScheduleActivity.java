@@ -43,6 +43,7 @@ public class TodayScheduleActivity extends AppCompatActivity {
     private ScheduledHourAdapter mScheduledHourAdapter;
     private RecyclerView mScheduledHourRecyclerView;
     private String mUrl;
+    private String mUrlHeroku;
     private String mServiceId;
     private Context mCtx;
     private SharedPreferencesManager mPreferencesManager;
@@ -76,6 +77,7 @@ public class TodayScheduleActivity extends AppCompatActivity {
         SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy");
         mCurrentDay.setText(format.format(currentDate));
         mScheduledHourRecyclerView.setLayoutManager(new LinearLayoutManager(mCtx));
+        mUrlHeroku = "https://agile-harbor-57300.herokuapp.com";
         mUrl = "http://10.0.2.2:5000";
         mScheduledHourList = new ArrayList<>();
         mScheduledHourAdapter = new ScheduledHourAdapter(mCtx, mScheduledHourList);
@@ -98,7 +100,8 @@ public class TodayScheduleActivity extends AppCompatActivity {
     private void populateScheduledHourList() {
         Log.i(TAG, "populateScheduledHourList: ");
         Ion.with(mCtx)
-                .load("GET", mUrl + "/getLockedHoursForTodayForService/" + mServiceId)
+                //.load("GET", mUrl + "/getLockedHoursForTodayForService/" + mServiceId)
+                .load("GET", mUrlHeroku + "/getLockedHoursForTodayForService/" + mServiceId)
                 .asJsonObject()
                 .withResponse()
                 .setCallback(new FutureCallback<Response<JsonObject>>() {

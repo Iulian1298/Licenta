@@ -38,6 +38,7 @@
                     android:maxLength="50" />
 
                 <ImageView
+                    android:id="@+id/clearEditServiceName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -70,6 +71,7 @@
                     android:padding="8dp" />
 
                 <ImageView
+                    android:id="@+id/clearEditServiceAddress"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -102,6 +104,7 @@
                     android:padding="8dp" />
 
                 <ImageView
+                    android:id="@+id/clearEditServiceCity"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -133,6 +136,7 @@
                     android:padding="8dp" />
 
                 <ImageView
+                    android:id="@+id/clearEditServicePhone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -165,6 +169,7 @@
                     android:padding="8dp" />
 
                 <ImageView
+                    android:id="@+id/clearEditServiceEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -197,6 +202,7 @@
                     android:padding="8dp" />
 
                 <ImageView
+                    android:id="@+id/clearEditServiceDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -229,6 +235,7 @@
                     android:padding="8dp" />
 
                 <ImageView
+                    android:id="@+id/clearEditServiceAcceptedBrands"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -267,6 +274,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/serviceChassis" />
+
                 <CheckBox
                     android:id="@+id/editServiceItpCheck"
                     android:layout_width="wrap_content"

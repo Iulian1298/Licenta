@@ -47,6 +47,7 @@
                     android:maxLength="50" />
 
                 <ImageView
+                    android:id="@+id/clearEditEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -79,6 +80,7 @@
                     android:padding="8dp" />
 
                 <ImageView
+                    android:id="@+id/clearEditPhone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -111,6 +113,7 @@
                     android:padding="8dp" />
 
                 <ImageView
+                    android:id="@+id/clearEditFullName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -143,6 +146,7 @@
                     android:padding="8dp" />
 
                 <ImageView
+                    android:id="@+id/clearEditOldPassword"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -175,6 +179,7 @@
                     android:padding="8dp" />
 
                 <ImageView
+                    android:id="@+id/clearEditPassword"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -207,6 +212,7 @@
                     android:padding="8dp" />
 
                 <ImageView
+                    android:id="@+id/clearEditPasswordRe"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"

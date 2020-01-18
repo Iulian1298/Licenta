@@ -51,7 +51,6 @@ def authLogin():
     if user.first():
         if password == user.first().password:
             print(user.first().toDict())
-            imageEncoded = ""
             userDict = user.first().toDict()
             # print(userDict)
             return make_response(jsonify({"status": "Found",
@@ -60,3 +59,31 @@ def authLogin():
                                  status.HTTP_200_OK)
     return make_response(jsonify({"status": "Could not verify"}),
                          status.HTTP_401_UNAUTHORIZED)
+
+
+@app.route("/auth/changeProfile", methods=['PUT'])
+@check_token
+def changeProfile():
+    user = User.query.filter_by(id=request.json['userId'])
+    if user.first():
+        if user.first().password == request.json['userOldPassword']:
+            try:
+                newPassword = request.json['userNewPassword']
+                if newPassword == '':
+                    newPassword = user.first().password
+                db.session.query(User).filter(User.id == request.json['userId']).update(
+                    {User.fullName: request.json['newUserFullname'],
+                     User.email: request.json['newUserEmail'],
+                     User.phoneNumber: request.json['newUserPhone'],
+                     User.password: newPassword
+                     }, synchronize_session=False)
+                db.session.commit()
+
+            except Exception as e:
+                print(e)
+                return make_response(jsonify({"status": "Could not edit"}), status.HTTP_409_CONFLICT)
+            return make_response(jsonify({"status": "Updated"}),
+                                 status.HTTP_200_OK)
+        else:
+            return make_response(jsonify({"status": "Could not verify"}),
+                                 status.HTTP_401_UNAUTHORIZED)

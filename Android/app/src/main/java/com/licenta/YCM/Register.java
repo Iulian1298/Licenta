@@ -44,7 +44,8 @@ import java.util.concurrent.ExecutionException;
 public class Register implements Authentication {
     private static final String TAG = "Register";
     private Context mCtx;
-    private String mRegisterUrl;
+    private String mUrl;
+    private String mUrlHeroku;
 
     private EditText mEmail;
     private EditText mPassword;
@@ -64,7 +65,8 @@ public class Register implements Authentication {
     public Register(Context ctx) {
         Log.i(TAG, "Register: Create register worker");
         mCtx = ctx;
-        mRegisterUrl = "http://10.0.2.2:5000/register";
+        mUrlHeroku = "https://agile-harbor-57300.herokuapp.com";
+        mUrl = "http://10.0.2.2:5000";
         mPreferencesManager = SharedPreferencesManager.getInstance(mCtx);
 
         LayoutInflater inflater = (LayoutInflater) mCtx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -156,13 +158,14 @@ public class Register implements Authentication {
                 imageFilePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
                     public void onSuccess(Uri uri) {
-                        String imageDownlaodLink = uri.toString();
-                        jsonBody.addProperty("imageDownloadLink", imageDownlaodLink);
+                        String imageDownloadLink = uri.toString();
+                        jsonBody.addProperty("imageDownloadLink", imageDownloadLink);
 
                         Response<JsonObject> response = null;
                         try {
                             response = Ion.with(mCtx)
-                                    .load("POST", mRegisterUrl)
+                                    //.load("POST", mUrl + "/register")
+                                    .load("POST", mUrlHeroku + "/register")
                                     .setJsonObjectBody(jsonBody)
                                     .asJsonObject()
                                     .withResponse()
@@ -171,7 +174,7 @@ public class Register implements Authentication {
                             if (response.getHeaders().code() == 201) {
                                 System.out.println(response.getResult());
                                 mPreferencesManager.setToken(response.getResult().get("token").getAsString());
-                                mPreferencesManager.setImage(imageDownlaodLink);
+                                mPreferencesManager.setImage(imageDownloadLink);
                                 mPreferencesManager.setUsername(response.getResult().get("user").getAsJsonObject().get("fullName").getAsString());
                                 mPreferencesManager.setUserId(response.getResult().get("user").getAsJsonObject().get("id").getAsString());
                                 mPreferencesManager.setUserMail(response.getResult().get("user").getAsJsonObject().get("email").getAsString());
@@ -186,7 +189,7 @@ public class Register implements Authentication {
                                     resultOk[0] = false;
                                 } else {
                                     setEnableFields(true);
-                                    Toast.makeText(mCtx, "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
                                     resultOk[0] = false;
                                 }
                             }
@@ -200,12 +203,19 @@ public class Register implements Authentication {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         setEnableFields(true);
-                        // something goes wrong uploading picture
-                        Log.e(TAG, "onFailure: Something goes wrong to put image on firebase");
+                        Log.e(TAG, "onFailure: Something goes wrong to get image link");
                         Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
                         resultOk[0] = false;
                     }
                 });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                setEnableFields(true);
+                Log.e(TAG, "onFailure: Something goes wrong to put image on firebase");
+                Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                resultOk[0] = false;
             }
         });
 

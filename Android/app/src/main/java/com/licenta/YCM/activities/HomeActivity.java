@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationListener;
@@ -29,6 +30,14 @@ import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.google.gson.JsonObject;
+import com.koushikdutta.ion.Ion;
+import com.koushikdutta.ion.Response;
 import com.licenta.YCM.R;
 import com.licenta.YCM.SharedPreferencesManager;
 import com.licenta.YCM.fragments.HomeFragment;
@@ -48,6 +57,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.util.concurrent.ExecutionException;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -76,15 +86,17 @@ public class HomeActivity extends AppCompatActivity {
     private Button mCancel;
     private ProgressBar mEditMyProfileProgressBar;
     private LinearLayout mEditMyProfileLinearLayout;
+    private String mUrl;
+    private String mUrlHeroku;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i(TAG, "onCreate: Start-up");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        mPreferencesManager = SharedPreferencesManager.getInstance(this);
+        mCtx = getApplicationContext();
+        mPreferencesManager = SharedPreferencesManager.getInstance(mCtx);
         init();
-        setNavigationView();
-        setNavigationDrawer();
         //set startup fragment
 
         getSupportActionBar().setTitle("Acasa");
@@ -95,6 +107,9 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void init() {
+        Log.i(TAG, "init: ");
+        mUrlHeroku = "https://agile-harbor-57300.herokuapp.com";
+        mUrl = "http://10.0.2.2:5000";
         mPreferencesManager.setPermissionLocation(false);
         mCtx = getApplicationContext();
         mToolbar = findViewById(R.id.homeToolbar);
@@ -112,6 +127,8 @@ public class HomeActivity extends AppCompatActivity {
                 Log.i(TAG, "onLocationChanged: latitude: " + location.getLatitude() + " longitude: " + location.getLongitude());
                 mPreferencesManager.setUserLatitude((float) location.getLatitude());
                 mPreferencesManager.setUserLongitude((float) location.getLongitude());
+                //TextView test = mNavigationView.getHeaderView(0).findViewById(R.id.test);
+                //test.setText("Location: lat: " + location.getLatitude() + " long: " + location.getLongitude());
             }
 
             @Override
@@ -134,8 +151,9 @@ public class HomeActivity extends AppCompatActivity {
     private void setNavigationView() {
         Log.i(TAG, "setNavigationView: ");
         try {
-            setHeaderHomeMenu();
-            setHomeMenu();
+            boolean loginStatus = mPreferencesManager.isLoggedIn();
+            setHeaderHomeMenu(loginStatus);
+            setHomeMenu(loginStatus);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -143,30 +161,27 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private void setHomeMenu() throws ExecutionException, InterruptedException {
+    private void setHomeMenu(boolean loginStatus) {
         Log.i(TAG, "setHomeMenu: ");
         Menu menu = mNavigationView.getMenu();
         MenuItem logoutButton = menu.findItem(R.id.menuLogout);
         MenuItem authButton = menu.findItem(R.id.menuAuth);
-        MenuItem profileButton = menu.findItem(R.id.menuProfile);
         MenuItem myRequestOfferButton = menu.findItem(R.id.menuMyRequestOffer);
         MenuItem myServiceButton = menu.findItem(R.id.menuMyServices);
-        if (!mPreferencesManager.isLoggedIn()) {
+        if (!loginStatus) {
             logoutButton.setVisible(false);
             authButton.setVisible(true);
-            profileButton.setVisible(false);
             myRequestOfferButton.setVisible(false);
             myServiceButton.setVisible(false);
         } else {
             logoutButton.setVisible(true);
             authButton.setVisible(false);
-            profileButton.setVisible(true);
             myRequestOfferButton.setVisible(true);
             myServiceButton.setVisible(true);
         }
     }
 
-    private void setHeaderHomeMenu() throws ExecutionException, InterruptedException {
+    private void setHeaderHomeMenu(final boolean loginStatus) {
         Log.i(TAG, "setHeaderHomeMenu: ");
         View headerView = mNavigationView.getHeaderView(0);
         TextView headerMenuUsername = headerView.findViewById(R.id.headerMenuUsername);
@@ -176,12 +191,15 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.i(TAG, "onClick: edit profile");
-                editProfile();
+
+                if (loginStatus) {
+                    editProfile();
+                }
+
             }
         });
 
-
-        if (!mPreferencesManager.isLoggedIn()) {
+        if (!loginStatus) {
             headerMenuUserImage.setImageURI(Uri.parse("android.resource://com.licenta.YCM/drawable/" + mPreferencesManager.getImage()));
             headerMenuUserMail.setVisibility(View.GONE);
             headerMenuUsername.setVisibility(View.GONE);
@@ -209,11 +227,6 @@ public class HomeActivity extends AppCompatActivity {
                         getSupportActionBar().setTitle("Acasa");
                         mPreferencesManager.setOnlyMyServices(false);
                         getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment(), "Acasa").commit();
-                        mDrawerLayout.closeDrawer(GravityCompat.START);
-                        return true;
-                    case R.id.menuProfile:
-                        getSupportActionBar().setTitle("Profilul meu");
-                        //getSupportFragmentManager().beginTransaction().replace(R.id.homeDoctorsContainer, new ProfileFragment()).commit();
                         mDrawerLayout.closeDrawer(GravityCompat.START);
                         return true;
                     case R.id.menuMyServices:
@@ -341,6 +354,51 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    private void setOnClearTextListeners(View editMyProfileView) {
+        ImageView clearEditEmail = editMyProfileView.findViewById(R.id.clearEditEmail);
+        ImageView clearEditPhone = editMyProfileView.findViewById(R.id.clearEditPhone);
+        ImageView clearEditFullName = editMyProfileView.findViewById(R.id.clearEditFullName);
+        ImageView clearEditOldPassword = editMyProfileView.findViewById(R.id.clearEditOldPassword);
+        ImageView clearEditPassword = editMyProfileView.findViewById(R.id.clearEditPassword);
+        ImageView clearEditPasswordRe = editMyProfileView.findViewById(R.id.clearEditPasswordRe);
+        clearEditEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditEmail.setText("");
+            }
+        });
+        clearEditPhone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditPhone.setText("");
+            }
+        });
+        clearEditFullName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditFullName.setText("");
+            }
+        });
+        clearEditOldPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditOldPassword.setText("");
+            }
+        });
+        clearEditPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditNewPassword.setText("");
+            }
+        });
+        clearEditPasswordRe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditNewRePassword.setText("");
+            }
+        });
+    }
+
     private void editProfile() {
         Log.i(TAG, "editProfile: ");
         TextView editMyProfileTitle = new TextView(mCtx);
@@ -362,6 +420,7 @@ public class HomeActivity extends AppCompatActivity {
         mEditEmail.setText(mPreferencesManager.getUserMail());
         mEditPhone.setText(mPreferencesManager.getUserPhone());
         mEditFullName.setText(mPreferencesManager.getUsername());
+        setOnClearTextListeners(editMyProfileView);
         Glide.with(mCtx)
                 .asBitmap()
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -394,19 +453,13 @@ public class HomeActivity extends AppCompatActivity {
                 mConfirm.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.i(TAG, "onClick: Confirma edit");
-                        mEditMyProfileProgressBar.setVisibility(View.VISIBLE);
-                        mEditMyProfileLinearLayout.setBackground(new ColorDrawable(Color.parseColor("#75676767")));
+                        Log.i(TAG, "onClick: Confirm edit");
                         if (verifyInputOnClientSide()) {
-                            try {
-                                if (verifyInputOnServerSide()) {
-                                } else {
-                                    mConfirm.setError("Eroare!");
-                                }
-                            } catch (ExecutionException e) {
-                                e.printStackTrace();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+                            mEditMyProfileProgressBar.setVisibility(View.VISIBLE);
+                            mEditMyProfileLinearLayout.setBackground(new ColorDrawable(Color.parseColor("#75676767")));
+                            if (verifyInputOnServerSide()) {
+                            } else {
+                                mConfirm.setError("Eroare!");
                             }
                         }
                     }
@@ -449,22 +502,97 @@ public class HomeActivity extends AppCompatActivity {
             resultOk = false;
         }
         if (mEditNewPassword.getText().toString().trim().isEmpty()) {
-            mEditNewPassword.setError("Completeaza campul!");
-            resultOk = false;
-        } else if (mEditNewPassword.getText().toString().trim().length() < 6) {
-            mEditNewPassword.setError("Introdu minim 6 caractere!");
-            resultOk = false;
-        }
-        if (!mEditNewRePassword.getText().toString().trim().equals(mEditNewRePassword.getText().toString().trim())) {
-            mEditNewRePassword.setError("Parolele nu se potrivesc!");
-            resultOk = false;
+        } else {
+            if (mEditNewPassword.getText().toString().trim().length() < 6) {
+                mEditNewPassword.setError("Introdu minim 6 caractere!");
+                resultOk = false;
+            }
+            if (!mEditNewRePassword.getText().toString().trim().equals(mEditNewRePassword.getText().toString().trim())) {
+                mEditNewRePassword.setError("Parolele nu se potrivesc!");
+                resultOk = false;
+            }
         }
         return resultOk;
     }
 
-    private boolean verifyInputOnServerSide() throws ExecutionException, InterruptedException {
-        Log.i(TAG, "verifyInputOnServerSide: ");
+    private boolean verifyInputOnServerSide() {
+        Log.i(TAG, "verifyInputOnServerSide: verify edit profile");
+        setEnableFields(false);
         boolean resultOk = true;
+        final JsonObject jsonBody = new JsonObject();
+        jsonBody.addProperty("userId", mPreferencesManager.getUserId());
+        jsonBody.addProperty("newUserFullname", mEditFullName.getText().toString().trim());
+        jsonBody.addProperty("newUserEmail", mEditEmail.getText().toString().trim());
+        jsonBody.addProperty("newUserPhone", mEditPhone.getText().toString().trim());
+        jsonBody.addProperty("userOldPassword", mEditOldPassword.getText().toString().trim());
+        jsonBody.addProperty("userNewPassword", mEditNewPassword.getText().toString().trim());
+
+        Bitmap bitmap = ((BitmapDrawable) mEditImage.getDrawable()).getBitmap();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+        Log.i(TAG, "verifyInputOnServerSide: getLastPathSegment: " + Uri.parse(mPreferencesManager.getImage()).getLastPathSegment());
+        final StorageReference newImagePath = FirebaseStorage.getInstance().getReference().child(Uri.parse(mPreferencesManager.getImage()).getLastPathSegment());
+        newImagePath.putBytes(data).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                newImagePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        final String newImageDownloadLink = uri.toString();
+                        jsonBody.addProperty("newImagePath", newImageDownloadLink);
+                        Response<JsonObject> response = null;
+                        try {
+                            response = Ion.with(mCtx)
+                                    //.load("PUT", mUrl + "/auth/changeProfile")
+                                    .load("PUT", mUrlHeroku + "/auth/changeProfile")
+                                    .setHeader("Authorization", mPreferencesManager.getToken())
+                                    .setJsonObjectBody(jsonBody)
+                                    .asJsonObject()
+                                    .withResponse()
+                                    .get();
+                            if (response.getHeaders().code() == 200) {
+
+                                Log.i(TAG, "verifyInputOnServerSide: Profile edited");
+                                Toast.makeText(mCtx, "Profil editat cu succes!", Toast.LENGTH_SHORT).show();
+                                //updateUi check if need to update image on navView or will be auto
+                                mPreferencesManager.setImage(newImageDownloadLink);
+                                mPreferencesManager.setUserMail(mEditEmail.getText().toString().trim());
+                                mPreferencesManager.setUserPhone(mEditPhone.getText().toString().trim());
+                                mPreferencesManager.setUsername(mEditFullName.getText().toString().trim());
+                                setNavigationView();
+                                mEditMyProfileProgressBar.setVisibility(View.GONE);
+                                mEditMyProfilePopUp.dismiss();
+                            } else {
+                                setEnableFields(true);
+                                Log.i(TAG, "verifyInputOnServerSide: Profile not edited! err code: " + response.getHeaders().code());
+                                Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.i(TAG, "onFailure: fail to get download link");
+                        Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                        setEnableFields(true);
+                    }
+                });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.i(TAG, "onFailure: fail to get download link");
+                Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                setEnableFields(true);
+            }
+        });
+
 
         return resultOk;
     }
@@ -485,10 +613,18 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        Log.v(TAG, "Resuming");
+        requestLocationPermission();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.i(TAG, "onCreateOptionsMenu: ");
         //getMenuInflater().inflate(R.menu.other_page_main_menu, menu);
         setNavigationView();
+        setNavigationDrawer();
         return super.onCreateOptionsMenu(menu);
     }
 
