@@ -976,7 +976,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                                 requestDetails.addProperty("carVin", carVin.getText().toString());
                                 try {
                                     Response<JsonObject> response = Ion.with(mCtx)
-                                            .load("POST", "http://10.0.2.2:5000/requestedOffers/addRequestedOffer")
+                                            .load("POST", mUrl + "/requestedOffers/addRequestedOffer")
                                             .setHeader("Authorization", mPreferencesManager.getToken())
                                             .setJsonObjectBody(requestDetails)
                                             .asJsonObject()
@@ -1020,7 +1020,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         //get locked days from server
         try {
             Response<JsonObject> response = Ion.with(mCtx)
-                    .load("GET", "http://10.0.2.2:5000/getLockedDays/" + mServiceAuto.getServiceId())
+                    .load("GET", mUrl+"/getLockedDays/" + mServiceAuto.getServiceId())
                     .setHeader("Authorization", mPreferencesManager.getToken())
                     .asJsonObject()
                     .withResponse()
@@ -1047,7 +1047,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                 ArrayList<String> lockedHours = new ArrayList<>();
                 try {
                     Response<JsonObject> response = Ion.with(mCtx)
-                            .load("GET", "http://10.0.2.2:5000/getLockedHoursForDay/" + format.format(date) + "/serviceId/" + mServiceAuto.getServiceId())
+                            .load("GET", mUrl+"/getLockedHoursForDay/" + format.format(date) + "/serviceId/" + mServiceAuto.getServiceId())
                             .setHeader("Authorization", mPreferencesManager.getToken())
                             .asJsonObject()
                             .withResponse()
@@ -1156,7 +1156,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                 Log.i(TAG, "onItemClick: shortDescription: " + shortDescription);
                 try {
                     Response<JsonObject> response = Ion.with(getApplicationContext())
-                            .load("POST", "http://10.0.2.2:5000/addLockedPeriod")
+                            .load("POST", mUrl+"/addLockedPeriod")
                             .setHeader("Authorization", mPreferencesManager.getToken())
                             .setJsonObjectBody(jsonBody)
                             .asJsonObject()
