@@ -87,7 +87,6 @@ public class HomeFragment extends Fragment {
     private RecyclerView mServiceAutoRecyclerView;
     private SearchView mSearchView;
     private String mUrl;
-    private String mUrlHeroku;
     private Context mCtx;
     private boolean mIsLoggedIn;
     private boolean mShowOnlyMyServices;
@@ -137,12 +136,12 @@ public class HomeFragment extends Fragment {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }*/
-        final SwipeRefreshLayout refreshComments = mFragmentView.findViewById(R.id.refreshServices);
-        refreshComments.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        final SwipeRefreshLayout refreshServices = mFragmentView.findViewById(R.id.refreshServices);
+        refreshServices.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 refreshPage();
-                refreshComments.setRefreshing(false);
+                refreshServices.setRefreshing(false);
             }
         });
 
@@ -155,24 +154,17 @@ public class HomeFragment extends Fragment {
         return fragmentView;
     }
 
-    public void refreshPage() {
+    public void refreshLocation() {
+        mServiceAutoAdapter.notifyDataSetChanged();
+    }
+
+    private void refreshPage() {
         Log.i(TAG, "refreshPage: called refresh page");
         //crash some time on instant build (apply changes) -> now most probably no
         mServiceAutoOffset = 0;
         if (mServiceAutoList != null && mServiceAutoAdapter != null) {
             mServiceAutoList.clear();
             mServiceAutoAdapter.notifyDataSetChanged();
-            if (mShowOnlyMyServices) {
-                //mCompleteUrl = mUrl + "/services/getIdsBetweenForMyServices/" + mPreferencesManager.getUserId() + "/offset/" + mServiceAutoOffset + "/limit/"
-                //       + mServiceAutoLimit;
-                mCompleteUrl = mUrlHeroku + "/services/getIdsBetweenForMyServices/" + mPreferencesManager.getUserId() + "/offset/" + mServiceAutoOffset + "/limit/"
-                        + mServiceAutoLimit;
-            } else {
-                //mCompleteUrl = mUrl + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
-                //        + mServiceAutoLimit;
-                mCompleteUrl = mUrlHeroku + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
-                        + mServiceAutoLimit;
-            }
             populateServiceAutoList();
         }
     }
@@ -183,7 +175,7 @@ public class HomeFragment extends Fragment {
         mAddServiceFloatingButton = v.findViewById(R.id.addServiceFloatingButton);
         mGetNewServicesFromDatabase = v.findViewById(R.id.getNewServicesFromDatabase);
         mServiceAutoRecyclerView.setLayoutManager(new LinearLayoutManager(mCtx));
-        mUrlHeroku = "https://agile-harbor-57300.herokuapp.com";
+        //mUrl = "https://agile-harbor-57300.herokuapp.com";
         mUrl = "http://10.0.2.2:5000";
         mServiceAutoList = new ArrayList<>();
         mServiceAutoAdapter = new ServiceAutoAdapter(mCtx, mServiceAutoList);
@@ -195,14 +187,10 @@ public class HomeFragment extends Fragment {
         mServiceAutoLimit = 11;
         mServiceAutoOffset = 0;
         if (mShowOnlyMyServices) {
-            //mCompleteUrl = mUrl + "/services/getIdsBetweenForMyServices/" + mPreferencesManager.getUserId() + "/offset/" + mServiceAutoOffset + "/limit/"
-            //        + mServiceAutoLimit;
-            mCompleteUrl = mUrlHeroku + "/services/getIdsBetweenForMyServices/" + mPreferencesManager.getUserId() + "/offset/" + mServiceAutoOffset + "/limit/"
+            mCompleteUrl = mUrl + "/services/getIdsBetweenForMyServices/" + mPreferencesManager.getUserId() + "/offset/" + mServiceAutoOffset + "/limit/"
                     + mServiceAutoLimit;
         } else {
-            //mCompleteUrl = mUrl + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
-            //        + mServiceAutoLimit;
-            mCompleteUrl = mUrlHeroku + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
+            mCompleteUrl = mUrl + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
                     + mServiceAutoLimit;
         }
         populateServiceAutoList();
@@ -213,15 +201,12 @@ public class HomeFragment extends Fragment {
                 mGetNewServicesFromDatabase.setVisibility(View.VISIBLE);
                 mServiceAutoOffset += 11;
                 if (mShowOnlyMyServices) {
-                    //mCompleteUrl = mUrl + "/services/getIdsBetweenForMyServices/" + mPreferencesManager.getUserId() + "/offset/" + mServiceAutoOffset + "/limit/"
-                    //        + mServiceAutoLimit;
-                    mCompleteUrl = mUrlHeroku + "/services/getIdsBetweenForMyServices/" + mPreferencesManager.getUserId() + "/offset/" + mServiceAutoOffset + "/limit/"
+                    mCompleteUrl = mUrl + "/services/getIdsBetweenForMyServices/" + mPreferencesManager.getUserId() + "/offset/" + mServiceAutoOffset + "/limit/"
                             + mServiceAutoLimit;
                 } else {
-                    //mCompleteUrl = mUrl + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
-                    //        + mServiceAutoLimit;
-                    mCompleteUrl = mUrlHeroku + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
+                    mCompleteUrl = mUrl + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
                             + mServiceAutoLimit;
+
                 }
                 populateServiceAutoList();
                 new Handler().postDelayed(new Runnable() {
@@ -233,15 +218,12 @@ public class HomeFragment extends Fragment {
             }
         });
         mServiceAutoRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            private int mPreviousTotal = 0;
-
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 int visibleItemCount = recyclerView.getChildCount();
                 int totalItemCount = recyclerView.getLayoutManager().getItemCount();
                 int firstVisibleItem = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-
                 if (dy < -10) {
                     mAddServiceFloatingButton.show();
                 }
@@ -251,7 +233,7 @@ public class HomeFragment extends Fragment {
                 if (dy < 0) {
                     mLoadMoreServices.setVisibility(View.GONE);
                 }
-                Log.i(TAG, String.format("onScrolled: dy: %d mServiceAutoLimit: %d firstVisibleItemCount: %d visibleItemCount: %d previousTotal: %d", dy, mServiceAutoLimit, firstVisibleItem, visibleItemCount, mPreviousTotal));
+                Log.i(TAG, String.format("onScrolled: dy: %d mServiceAutoLimit: %d firstVisibleItemCount: %d visibleItemCount: %d", dy, mServiceAutoLimit, firstVisibleItem, visibleItemCount));
                 if ((totalItemCount - visibleItemCount) <= (firstVisibleItem + 2)) {
                     if (dy > 0 & mExistMoreServices) {
                         mLoadMoreServices.setVisibility(View.VISIBLE);
@@ -414,8 +396,7 @@ public class HomeFragment extends Fragment {
                                 Response<JsonObject> response = null;
                                 try {
                                     response = Ion.with(mCtx)
-                                            //.load("POST", mUrl + "/services/addService")
-                                            .load("POST", mUrlHeroku + "/services/addService")
+                                            .load("POST", mUrl + "/services/addService")
                                             .setHeader("Authorization", mPreferencesManager.getToken())
                                             .setJsonObjectBody(jsonBody)
                                             .asJsonObject()
@@ -428,14 +409,10 @@ public class HomeFragment extends Fragment {
                                         mServiceAutoOffset = 0;
                                         mServiceAutoAdapter.notifyDataSetChanged();
                                         if (mShowOnlyMyServices) {
-                                            //mCompleteUrl = mUrl + "/services/getIdsBetweenForMyServices/" + mPreferencesManager.getUserId() + "/offset/" + mServiceAutoOffset + "/limit/"
-                                            //       + mServiceAutoLimit;
-                                            mCompleteUrl = mUrlHeroku + "/services/getIdsBetweenForMyServices/" + mPreferencesManager.getUserId() + "/offset/" + mServiceAutoOffset + "/limit/"
+                                            mCompleteUrl = mUrl + "/services/getIdsBetweenForMyServices/" + mPreferencesManager.getUserId() + "/offset/" + mServiceAutoOffset + "/limit/"
                                                     + mServiceAutoLimit;
                                         } else {
-                                            //mCompleteUrl = mUrl + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
-                                            //        + mServiceAutoLimit;
-                                            mCompleteUrl = mUrlHeroku + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
+                                            mCompleteUrl = mUrl + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
                                                     + mServiceAutoLimit;
                                         }
                                         populateServiceAutoList();
@@ -651,8 +628,7 @@ public class HomeFragment extends Fragment {
         queue.add(idList);
         */
         Ion.with(mCtx)
-                //.load("GET", mUrl + "/services/getAllIdsForMyServices/" + mPreferencesManager.getUserId())
-                .load("GET", mUrlHeroku + "/services/getAllIdsForMyServices/" + mPreferencesManager.getUserId())
+                .load("GET", mUrl + "/services/getAllIdsForMyServices/" + mPreferencesManager.getUserId())
                 .asJsonObject()
                 .withResponse()
                 .setCallback(new FutureCallback<Response<JsonObject>>() {
@@ -702,8 +678,7 @@ public class HomeFragment extends Fragment {
                                             }
                                         }
                                     });
-                                    //httpGetService.execute("GET", mUrl + "/services/getById/" + finalI);
-                                    httpGetService.execute("GET", mUrlHeroku + "/services/getById/" + finalI);
+                                    httpGetService.execute("GET", mUrl + "/services/getById/" + finalI);
                                 }
                                 // }
                                 //}).start();
@@ -721,7 +696,7 @@ public class HomeFragment extends Fragment {
         Log.i(TAG, "populateServiceAutoListWithAll: ");
         Ion.with(mCtx)
                 .load("GET", mCompleteUrl)
-                .setHeader("Authorization",mPreferencesManager.getToken())
+                .setHeader("Authorization", mPreferencesManager.getToken())
                 .asJsonObject()
                 .withResponse()
                 .setCallback(new FutureCallback<Response<JsonObject>>() {
@@ -772,8 +747,7 @@ public class HomeFragment extends Fragment {
                                             }
                                         }
                                     });
-                                    //httpGetService.execute("GET", mUrl + "/services/getById/" + id);
-                                    httpGetService.execute("GET", mUrlHeroku + "/services/getById/" + id);
+                                    httpGetService.execute("GET", mUrl + "/services/getById/" + id);
                                 }
                                 // }
                                 //}).start();
@@ -895,9 +869,7 @@ public class HomeFragment extends Fragment {
                             public void onClick(View v) {
                                 if (resetFilterCheck.isChecked()) {
                                     mServiceAutoOffset = 0;
-                                    //mCompleteUrl = mUrl + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
-                                    //        + mServiceAutoLimit;
-                                    mCompleteUrl = mUrlHeroku + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
+                                    mCompleteUrl = mUrl + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
                                             + mServiceAutoLimit;
                                     mServiceAutoOffset = 0;
                                     mServiceAutoList.clear();
@@ -949,16 +921,7 @@ public class HomeFragment extends Fragment {
                                             } else {
                                                 city = cityInput.getText().toString();
                                             }
-                                            /*mCompleteUrl = mUrl
-                                                    + "/services/getIdsBetweenWithFilter/offset/" + mServiceAutoOffset
-                                                    + "/limit/" + mServiceAutoLimit
-                                                    + "/minRating/" + (int) ratingMinBar.getRating()
-                                                    + "/maxRating/" + (int) ratingMaxBar.getRating()
-                                                    + "/name/" + name
-                                                    + "/address/" + address
-                                                    + "/city/" + city
-                                                    + "/type/" + type;*/
-                                            mCompleteUrl = mUrlHeroku
+                                            mCompleteUrl = mUrl
                                                     + "/services/getIdsBetweenWithFilter/offset/" + mServiceAutoOffset
                                                     + "/limit/" + mServiceAutoLimit
                                                     + "/minRating/" + (int) ratingMinBar.getRating()

@@ -45,7 +45,6 @@ public class Register implements Authentication {
     private static final String TAG = "Register";
     private Context mCtx;
     private String mUrl;
-    private String mUrlHeroku;
 
     private EditText mEmail;
     private EditText mPassword;
@@ -65,7 +64,7 @@ public class Register implements Authentication {
     public Register(Context ctx) {
         Log.i(TAG, "Register: Create register worker");
         mCtx = ctx;
-        mUrlHeroku = "https://agile-harbor-57300.herokuapp.com";
+        //mUrl = "https://agile-harbor-57300.herokuapp.com";
         mUrl = "http://10.0.2.2:5000";
         mPreferencesManager = SharedPreferencesManager.getInstance(mCtx);
 
@@ -164,8 +163,7 @@ public class Register implements Authentication {
                         Response<JsonObject> response = null;
                         try {
                             response = Ion.with(mCtx)
-                                    //.load("POST", mUrl + "/register")
-                                    .load("POST", mUrlHeroku + "/register")
+                                    .load("POST", mUrl + "/register")
                                     .setJsonObjectBody(jsonBody)
                                     .asJsonObject()
                                     .withResponse()

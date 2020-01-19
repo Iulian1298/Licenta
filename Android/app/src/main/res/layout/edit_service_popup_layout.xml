@@ -198,7 +198,7 @@
                     android:backgroundTint="@color/colorBlack"
                     android:hint="@string/serviceDescription"
                     android:inputType="textMultiLine"
-                    android:maxLength="5000"
+                    android:maxLength="1500"
                     android:padding="8dp" />
 
                 <ImageView
@@ -249,39 +249,45 @@
                 android:text="@string/offeredServices"
                 android:textSize="12sp" />
 
-            <LinearLayout
+            <HorizontalScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/colorBlack"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:padding="8dp">
+                android:layout_height="wrap_content">
 
-                <CheckBox
-                    android:id="@+id/editRepairServiceCheck"
+                <LinearLayout
+                    android:layout_gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/repairService" />
+                    android:backgroundTint="@color/colorBlack"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:padding="8dp">
 
-                <CheckBox
-                    android:id="@+id/editServiceTireCheck"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/serviceTire" />
+                    <CheckBox
+                        android:id="@+id/editRepairServiceCheck"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/repairService" />
 
-                <CheckBox
-                    android:id="@+id/editServiceChassisCheck"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/serviceChassis" />
+                    <CheckBox
+                        android:id="@+id/editServiceTireCheck"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/serviceTire" />
 
-                <CheckBox
-                    android:id="@+id/editServiceItpCheck"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/serviceItp" />
+                    <CheckBox
+                        android:id="@+id/editServiceChassisCheck"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/serviceChassis" />
 
-            </LinearLayout>
+                    <CheckBox
+                        android:id="@+id/editServiceItpCheck"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/serviceItp" />
+
+                </LinearLayout>
+            </HorizontalScrollView>
 
             <ImageView
                 android:id="@+id/editServiceImage"

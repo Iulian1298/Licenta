@@ -4,11 +4,10 @@ from database import db
 from models.users import User
 
 
-@app.route("/isLoggedIn", methods=['GET'])
+@app.route("/auth/checkLogged", methods=['GET'])
 @check_token
-def isLoggedIn():
-    return make_response(jsonify({'response': "Token OK"}), status.HTTP_202_ACCEPTED)
-
+def check():
+    return make_response(jsonify({"response": "Token OK"}), status.HTTP_200_OK)
 
 def getJWT(user):
     token = jwt.encode({'user': user, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=180)},

@@ -87,7 +87,6 @@ public class HomeActivity extends AppCompatActivity {
     private ProgressBar mEditMyProfileProgressBar;
     private LinearLayout mEditMyProfileLinearLayout;
     private String mUrl;
-    private String mUrlHeroku;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +107,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private void init() {
         Log.i(TAG, "init: ");
-        mUrlHeroku = "https://agile-harbor-57300.herokuapp.com";
+        //mUrl = "https://agile-harbor-57300.herokuapp.com";
         mUrl = "http://10.0.2.2:5000";
         mPreferencesManager.setPermissionLocation(false);
         mCtx = getApplicationContext();
@@ -129,6 +128,10 @@ public class HomeActivity extends AppCompatActivity {
                 mPreferencesManager.setUserLongitude((float) location.getLongitude());
                 //TextView test = mNavigationView.getHeaderView(0).findViewById(R.id.test);
                 //test.setText("Location: lat: " + location.getLatitude() + " long: " + location.getLongitude());
+                HomeFragment fragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag("Acasa");
+                if (fragment != null) {
+                    fragment.refreshLocation();
+                }
             }
 
             @Override
@@ -241,8 +244,8 @@ public class HomeActivity extends AppCompatActivity {
                         mDrawerLayout.closeDrawer(GravityCompat.START);
                         return true;
                     case R.id.menuLogout:
-                        logout();
                         mDrawerLayout.closeDrawer(GravityCompat.START);
+                        logout();
                         return true;
                     case R.id.menuAuth:
                         Intent intent = new Intent(mCtx, AuthenticationActivity.class);
@@ -291,6 +294,9 @@ public class HomeActivity extends AppCompatActivity {
         Log.i(TAG, "logout: ");
         mPreferencesManager.logout();
         setNavigationView();
+        getSupportActionBar().setTitle("Acasa");
+        mPreferencesManager.setOnlyMyServices(false);
+        getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment(), "Acasa").commit();
         //ToDo: same as onActivityResult() or not(need investigation)
     }
 
@@ -302,12 +308,8 @@ public class HomeActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION}, 11);
         } else {
             Log.i(TAG, "requestLocationPermission: permission already granted");
-            mPreferencesManager.setPermissionLocation(true);
-            HomeFragment fragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag("Acasa");
-            if (fragment != null) {
-                fragment.refreshPage();
-            }
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 5, mLocationListener);
+            //mPreferencesManager.setPermissionLocation(true);
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 50, mLocationListener);
         }
     }
 
@@ -337,15 +339,11 @@ public class HomeActivity extends AppCompatActivity {
                                 .setNegativeButton("Cancel", null)
                                 .create()
                                 .show();
-                        mPreferencesManager.setPermissionLocation(false);
+                        //mPreferencesManager.setPermissionLocation(false);
                     }
                 } else {
                     Log.i(TAG, "onRequestPermissionsResult: apply changes");
-                    mPreferencesManager.setPermissionLocation(true);
-                    HomeFragment fragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag("Acasa");
-                    if (fragment != null) {
-                        fragment.refreshPage();
-                    }
+                    //mPreferencesManager.setPermissionLocation(true);
                     if (ContextCompat.checkSelfPermission(getApplicationContext(), ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 5, mLocationListener);
                     }
@@ -423,7 +421,7 @@ public class HomeActivity extends AppCompatActivity {
         setOnClearTextListeners(editMyProfileView);
         Glide.with(mCtx)
                 .asBitmap()
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                //.diskCacheStrategy(DiskCacheStrategy.NONE)
                 .load(mPreferencesManager.getImage())
                 .into(mEditImage);
         mEditImage.setOnClickListener(new View.OnClickListener() {
@@ -545,8 +543,7 @@ public class HomeActivity extends AppCompatActivity {
                         Response<JsonObject> response = null;
                         try {
                             response = Ion.with(mCtx)
-                                    //.load("PUT", mUrl + "/auth/changeProfile")
-                                    .load("PUT", mUrlHeroku + "/auth/changeProfile")
+                                    .load("PUT", mUrl + "/auth/changeProfile")
                                     .setHeader("Authorization", mPreferencesManager.getToken())
                                     .setJsonObjectBody(jsonBody)
                                     .asJsonObject()

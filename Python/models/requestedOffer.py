@@ -18,21 +18,29 @@ class RequestedOffer(db.Model):
     fixEndDate = db.Column(db.String)
     serviceAcceptance = db.Column(db.Integer)
     userAcceptance = db.Column(db.Integer)
+    addedDate = db.Column(db.String)
+    deletedByUser = db.Column(db.Boolean)
+    deletedByService = db.Column(db.Boolean)
+    seen = db.Column(db.Integer)
 
     def __repr__(self):
         return "id: {}, serviceId: {}, userId: {}, request: {}, withUserParts: {}, carType: {}, carModel: {}," \
                " carYear:{}, carVin: {}, serviceResponse: {}, servicePriceResponse: {}, fixStartDate: {}, " \
-               "fixEndDate: {}, serviceAcceptance: {}, userAcceptance: {}" \
+               "fixEndDate: {}, serviceAcceptance: {}, userAcceptance: {}, addedDate: {}, deletedByUser: {}, deletedByService: {}" \
+               ", seen: {}" \
             .format(self.id, self.serviceId, self.userId, self.request, self.withUserParts, self.carType, self.carModel,
                     self.carYear, self.carVin, self.serviceResponse, self.servicePriceResponse, self.fixStartDate,
-                    self.fixEndDate, self.serviceAcceptance, self.userAcceptance)
+                    self.fixEndDate, self.serviceAcceptance, self.userAcceptance, self.addedDate, self.deletedByUser,
+                    self.deletedByService, self.seen)
 
     def toDict(self):
-        return dict(zip(["id", "serviceId", "userId", "request", "withUserParts", "carModel", "carYear", "carVin",
-                         "serviceResponse", "servicePriceResponse", "fixStartDate", "fixEndDate", "serviceAcceptance",
-                         "userAcceptance"], self.toList()))
+        return dict(
+            zip(["id", "serviceId", "userId", "request", "withUserParts", "carType", "carModel", "carYear", "carVin",
+                 "serviceResponse", "servicePriceResponse", "fixStartDate", "fixEndDate", "serviceAcceptance",
+                 "userAcceptance", "addedDate", "deletedByUser", "deletedByService", "seen"], self.toList()))
 
     def toList(self):
         return [self.id, self.serviceId, self.userId, self.request, self.withUserParts, self.carType, self.carModel,
                 self.carYear, self.carVin, self.serviceResponse, self.servicePriceResponse, self.fixStartDate,
-                self.fixEndDate, self.serviceAcceptance, self.userAcceptance]
+                self.fixEndDate, self.serviceAcceptance, self.userAcceptance, self.addedDate, self.deletedByUser,
+                self.deletedByService, self.seen]

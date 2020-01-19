@@ -19,7 +19,7 @@ public class SharedPreferencesManager {
 
     private static final String TAG = "SharedPreferencesManager";
     private static final String mUrl = "http://10.0.2.2:5000";
-    private static final String mUrlHeroku = "https://agile-harbor-57300.herokuapp.com";
+    //private static final String mUrl = "https://agile-harbor-57300.herokuapp.com";
 
 
 
@@ -179,8 +179,7 @@ public class SharedPreferencesManager {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
         if (sharedPreferences.getString(KEY_IS_LOGGED, null) != null) {
             Response<JsonObject> response = Ion.with(mContext)
-                    //.load("GET", mUrl + "/isLoggedIn")
-                    .load("GET", mUrlHeroku + "/auth/checkLogged")
+                    .load("GET", mUrl + "/auth/checkLogged")
                     .setHeader("Authorization", getToken())
                     .asJsonObject()
                     .withResponse()

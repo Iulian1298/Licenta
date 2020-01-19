@@ -1,144 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <EditText
-        android:id="@+id/addServiceName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorBlueWhite"
-        android:hint="@string/serviceName"
-        android:inputType="text"
-        android:maxLength="50"
-        android:padding="8dp" />
-
-    <EditText
-        android:id="@+id/addServiceAddress"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorBlueWhite"
-        android:hint="@string/address"
-        android:inputType="text"
-        android:maxLength="50"
-        android:padding="8dp" />
-
-    <EditText
-        android:id="@+id/addServiceCity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorBlueWhite"
-        android:hint="@string/city"
-        android:inputType="text"
-        android:maxLength="50"
-        android:padding="8dp" />
-
-    <EditText
-        android:id="@+id/addServicePhone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorBlueWhite"
-        android:hint="@string/servicePhone"
-        android:inputType="phone"
-        android:padding="8dp" />
-
-    <EditText
-        android:id="@+id/addServiceEmail"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorBlueWhite"
-        android:hint="@string/serviceEmail"
-        android:inputType="textEmailAddress"
-        android:maxLength="50"
-        android:padding="8dp" />
-
-    <EditText
-        android:id="@+id/addServiceDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorBlueWhite"
-        android:hint="@string/serviceDescriptionAdd"
-        android:inputType="text"
-        android:maxLength="1500"
-        android:padding="8dp" />
-
-    <EditText
-        android:id="@+id/addServiceAcceptedBrand"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorBlueWhite"
-        android:hint="@string/acceptedBrand"
-        android:inputType="text"
-        android:maxLength="100"
-        android:padding="8dp" />
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorBlueWhite"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="8dp">
+        android:orientation="vertical">
 
-        <CheckBox
-            android:id="@+id/repairServiceCheck"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="@string/repairService" />
 
-        <CheckBox
-            android:id="@+id/serviceTireCheck"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/serviceTire" />
-
-        <CheckBox
-            android:id="@+id/serviceChassisCheck"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/serviceChassis" />
-
-        <CheckBox
-            android:id="@+id/serviceItpCheck"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/serviceItp" />
-
-    </LinearLayout>
-
-    <android.support.design.widget.CoordinatorLayout
-        android:layout_width="match_parent"
-        android:layout_height="222dp">
-
-        <ImageView
-            android:id="@+id/addServiceImage"
+        <EditText
+            android:id="@+id/addServiceName"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="@drawable/chose_a_image"
-            android:scaleType="centerCrop" />
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/addService"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
-            android:src="@drawable/ic_add_circle_outline_black_24dp"
-            app:backgroundTint="@color/colorBlue"
-            app:fabSize="mini" />
+            android:background="@color/colorBlueWhite"
+            android:hint="@string/serviceName"
+            android:inputType="text"
+            android:maxLength="50"
+            android:padding="8dp" />
 
-        <ProgressBar
-            android:id="@+id/addServiceProgressBar"
-            android:layout_width="wrap_content"
+        <EditText
+            android:id="@+id/addServiceAddress"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
-            android:progressTint="@color/colorBlue"
-            android:visibility="invisible" />
+            android:background="@color/colorBlueWhite"
+            android:hint="@string/address"
+            android:inputType="text"
+            android:maxLength="50"
+            android:padding="8dp" />
 
-    </android.support.design.widget.CoordinatorLayout>
+        <EditText
+            android:id="@+id/addServiceCity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorBlueWhite"
+            android:hint="@string/city"
+            android:inputType="text"
+            android:maxLength="50"
+            android:padding="8dp" />
 
-</LinearLayout>
+        <EditText
+            android:id="@+id/addServicePhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorBlueWhite"
+            android:hint="@string/servicePhone"
+            android:inputType="phone"
+            android:padding="8dp" />
+
+        <EditText
+            android:id="@+id/addServiceEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorBlueWhite"
+            android:hint="@string/serviceEmail"
+            android:inputType="textEmailAddress"
+            android:maxLength="50"
+            android:padding="8dp" />
+
+        <EditText
+            android:id="@+id/addServiceDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorBlueWhite"
+            android:hint="@string/serviceDescriptionAdd"
+            android:inputType="text"
+            android:maxLength="1500"
+            android:padding="8dp" />
+
+        <EditText
+            android:id="@+id/addServiceAcceptedBrand"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorBlueWhite"
+            android:hint="@string/acceptedBrand"
+            android:inputType="text"
+            android:maxLength="100"
+            android:padding="8dp" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorBlueWhite">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <CheckBox
+                    android:id="@+id/repairServiceCheck"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/repairService" />
+
+                <CheckBox
+                    android:id="@+id/serviceTireCheck"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/serviceTire" />
+
+                <CheckBox
+                    android:id="@+id/serviceChassisCheck"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/serviceChassis" />
+
+                <CheckBox
+                    android:id="@+id/serviceItpCheck"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/serviceItp" />
+
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <android.support.design.widget.CoordinatorLayout
+            android:layout_width="match_parent"
+            android:layout_height="222dp">
+
+            <ImageView
+                android:id="@+id/addServiceImage"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:background="@drawable/chose_a_image"
+                android:scaleType="centerCrop" />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/addService"
+                app:backgroundTint="@color/colorBlue"
+                app:fabSize="mini"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:src="@drawable/ic_add_circle_outline_black_24dp" />
+
+            <ProgressBar
+                android:id="@+id/addServiceProgressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:progressTint="@color/colorBlue"
+                android:visibility="invisible" />
+
+        </android.support.design.widget.CoordinatorLayout>
+    </LinearLayout>
+</ScrollView>
 

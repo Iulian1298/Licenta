@@ -1,3 +1,5 @@
+from sqlalchemy import asc
+
 from API import *
 from API.api_check import check_token
 from database import db
@@ -27,7 +29,8 @@ def addLockedPeriod():
                                     dayId=lockedDay.first().toDict()['id'],
                                     ownerId=request.json['ownerId'],
                                     hour=request.json['hour'],
-                                    shortDescription=request.json['shortDescription'])
+                                    shortDescription=request.json['shortDescription'],
+                                    scheduleType=request.json['scheduleType'])
             lockedPeriod['lockedDay'] = lockedDay.first().toDict()
             lockedPeriod['lockedHour'] = lockedHour.toDict()
             db.session.add(lockedHour)
@@ -41,7 +44,8 @@ def addLockedPeriod():
                                     dayId=dayId,
                                     ownerId=request.json['ownerId'],
                                     hour=request.json['hour'],
-                                    shortDescription=request.json['shortDescription'])
+                                    shortDescription=request.json['shortDescription'],
+                                    scheduleType=request.json['scheduleType'])
             lockedPeriod['lockedDay'] = lockedDay.toDict()
             lockedPeriod['lockedHour'] = lockedHour.toDict()
             db.session.add(lockedDay)
@@ -80,13 +84,13 @@ def getLockedHoursForDay(day, serviceId):
 
 
 @app.route("/getLockedHoursForTodayForService/<serviceId>", methods=['GET'])
-# @check_token
+@check_token
 def getLockedHoursForToday(serviceId):
     day = date.today()
     dayId = LockedDay.query.with_entities(LockedDay.id).filter_by(day=day, serviceId=serviceId)
     result = []
     if dayId.first():
-        lockedHours = LockedHour.query.filter_by(dayId=dayId.first()[0]).all()
+        lockedHours = LockedHour.query.filter_by(dayId=dayId.first()[0]).order_by(asc(LockedHour.hour)).all()
         for i in lockedHours:
             content = {}
             content['username'] = User.query.with_entities(User.fullName).filter_by(id=i.toDict()['ownerId']).first()[0]
@@ -95,6 +99,7 @@ def getLockedHoursForToday(serviceId):
             content['hour'] = i.toDict()['hour']
             content['shortDescription'] = i.toDict()['shortDescription']
             content["dayId"] = i.toDict()['dayId']
+            content["scheduleType"] = i.toDict()['scheduleType']
             result.append(content)
         print((result))
     return make_response(jsonify({"lockedHours": result}), status.HTTP_200_OK)

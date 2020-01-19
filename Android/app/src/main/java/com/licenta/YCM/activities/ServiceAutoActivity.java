@@ -95,7 +95,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private TextView mContactEmail;
     private TextView mDistanceFromYou;
     private ImageView mDistanceFromYouIcon;
-    private boolean mShowOnlyMyServices;
+    private boolean isMyService;
     private Context mCtx;
     private Intent mReturnIntent;
     private CaldroidFragment mDialogCaldroidFragment;
@@ -128,7 +128,6 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private CheckBox mEditServiceItpCheck;
     private ImageView mEditServiceImage;
     private String mUrl;
-    private String mUrlHeroku;
     private ProgressBar mEditServiceProgressBar;
     private LinearLayout mEditLinearLayout;
     private Button mConfirm;
@@ -148,9 +147,8 @@ public class ServiceAutoActivity extends AppCompatActivity {
 
     private void init() {
         Log.i(TAG, "init: ");
-        mUrlHeroku = "https://agile-harbor-57300.herokuapp.com";
+        //mUrl = "https://agile-harbor-57300.herokuapp.com";
         mUrl = "http://10.0.2.2:5000";
-        mShowOnlyMyServices = mPreferencesManager.getOnlyMyServices();
         mFabMenuExpanded = false;
         mServiceAutoFloatingButtons = findViewById(R.id.serviceAutoFloatingButtons);
         mLogoImage = findViewById(R.id.logoImageFull);
@@ -190,7 +188,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
 
         //Objects.requireNonNull(getSupportActionBar()).setTitle(mServiceAuto.getName() + " - " + mServiceAuto.getAddress());
         if (mServiceAuto.getOwnerId().equals(mPreferencesManager.getUserId())) {
-            mShowOnlyMyServices = true;
+            isMyService = true;
         }
         populateActivity();
         mLogoImage.setOnClickListener(new View.OnClickListener() {
@@ -220,7 +218,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
 
     private void setFloatingButtonsMenu() {
         CoordinatorLayout floatingButtons;
-        if (mShowOnlyMyServices) {
+        if (isMyService) {
             floatingButtons = (CoordinatorLayout) View.inflate(ServiceAutoActivity.this, R.layout.floating_buttons_my_services_layout, null);
             mServiceAutoFloatingButtons.addView(floatingButtons);
             mViewCommentsFab = floatingButtons.findViewById(R.id.viewCommentsFab);
@@ -400,21 +398,31 @@ public class ServiceAutoActivity extends AppCompatActivity {
             scheduleDescriptionTitle.setPadding(10, 10, 10, 10);
             scheduleDescriptionTitle.setTextSize(18);
             scheduleDescriptionTitle.setTextColor(Color.DKGRAY);
-            final EditText scheduleDescriptionContent = new EditText(mCtx);
-            scheduleDescriptionContent.setGravity(Gravity.CENTER);
-            InputFilter[] maxLength = new InputFilter[1];
-            maxLength[0] = new InputFilter.LengthFilter(100);
-            scheduleDescriptionContent.setFilters(maxLength);
+            final View scheduleDescriptionContent = getLayoutInflater().inflate(R.layout.schedule_description_popup_layout, null);
+            final EditText scheduleDescriptionText = scheduleDescriptionContent.findViewById(R.id.scheduleDescriptionText);
+            final CheckBox scheduleRepairServiceCheck = scheduleDescriptionContent.findViewById(R.id.scheduleRepairServiceCheck);
+            final CheckBox scheduleServiceTireCheck = scheduleDescriptionContent.findViewById(R.id.scheduleServiceTireCheck);
+            final CheckBox scheduleServiceChassisCheck = scheduleDescriptionContent.findViewById(R.id.scheduleServiceChassisCheck);
+            final CheckBox scheduleServiceItpCheck = scheduleDescriptionContent.findViewById(R.id.scheduleServiceItpCheck);
             AlertDialog schedulePopUp = new AlertDialog.Builder(ServiceAutoActivity.this)
                     .setCustomTitle(scheduleDescriptionTitle)
                     .setView(scheduleDescriptionContent)
                     .setPositiveButton("Continua", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (scheduleDescriptionContent.getText().toString().trim().isEmpty()) {
-                                Toast.makeText(mCtx, "Trebuie completat campul din pop-up!", Toast.LENGTH_SHORT).show();
+                            if (scheduleDescriptionText.getText().toString().trim().isEmpty() ||
+                                    (!scheduleRepairServiceCheck.isChecked() &&
+                                            !scheduleServiceTireCheck.isChecked() &&
+                                            !scheduleServiceChassisCheck.isChecked() &&
+                                            !scheduleServiceItpCheck.isChecked())) {
+                                Toast.makeText(mCtx, "Trebuie completat campul din pop-up si cel putin o casuta bifata!", Toast.LENGTH_SHORT).show();
                             } else {
-                                showDatePicker(scheduleDescriptionContent.getText().toString().trim());
+                                showDatePicker(scheduleDescriptionText.getText().toString().trim(),
+                                        scheduleRepairServiceCheck.isChecked(),
+                                        scheduleServiceTireCheck.isChecked(),
+                                        scheduleServiceChassisCheck.isChecked(),
+                                        scheduleServiceItpCheck.isChecked()
+                                );
                             }
                         }
                     })
@@ -467,8 +475,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                                 jsonBody.addProperty("rating", givenRating.getRating());
                                 try {
                                     Response<JsonObject> response = Ion.with(getApplicationContext())
-                                            //.load("POST", mUrl + "/comments/addComment")
-                                            .load("POST", mUrlHeroku + "/comments/addComment")
+                                            .load("POST", mUrl + "/comments/addComment")
                                             .setHeader("Authorization", mPreferencesManager.getToken())
                                             .setJsonObjectBody(jsonBody)
                                             .asJsonObject()
@@ -818,8 +825,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                                 Response<JsonObject> response = null;
                                 try {
                                     response = Ion.with(mCtx)
-                                            //.load("PUT", mUrl + "/service/editService")
-                                            .load("PUT", mUrlHeroku + "/service/editService")
+                                            .load("PUT", mUrl + "/service/editService")
                                             .setHeader("Authorization", mPreferencesManager.getToken())
                                             .setJsonObjectBody(jsonBody)
                                             .asJsonObject()
@@ -884,7 +890,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
     }
 
     private void expandFloatingMenu() {
-        if (mShowOnlyMyServices) {
+        if (isMyService) {
             mEditServiceFab.show();
             mOfferRequestsFab.show();
             mTodayScheduleFab.show();
@@ -901,7 +907,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
     }
 
     private void closeFloatingMenu() {
-        if (mShowOnlyMyServices) {
+        if (isMyService) {
             mEditServiceFab.hide();
             mOfferRequestsFab.hide();
             mTodayScheduleFab.hide();
@@ -970,7 +976,8 @@ public class ServiceAutoActivity extends AppCompatActivity {
                                 requestDetails.addProperty("carVin", carVin.getText().toString());
                                 try {
                                     Response<JsonObject> response = Ion.with(mCtx)
-                                            .load("POST", "http://10.0.2.2:5000/addRequestedOffer")
+                                            .load("POST", "http://10.0.2.2:5000/requestedOffers/addRequestedOffer")
+                                            .setHeader("Authorization", mPreferencesManager.getToken())
                                             .setJsonObjectBody(requestDetails)
                                             .asJsonObject()
                                             .withResponse()
@@ -999,7 +1006,11 @@ public class ServiceAutoActivity extends AppCompatActivity {
         requestOfferPopUp.show();
     }
 
-    private void showDatePicker(final String shortDescription) {
+    private void showDatePicker(final String shortDescription,
+                                final boolean checkRepair,
+                                final boolean checkTire,
+                                final boolean checkChassis,
+                                final boolean checkItp) {
         mDialogCaldroidFragment = CaldroidFragment.newInstance("Alege data", Calendar.getInstance().get(Calendar.MONTH) + 1, Calendar.getInstance().get(Calendar.YEAR));
         ArrayList<String> lockedDays = new ArrayList<>();
         mDialogCaldroidFragment.setBackgroundDrawableForDate(new ColorDrawable(Color.parseColor("#3385ff")), Calendar.getInstance().getTime());
@@ -1048,7 +1059,13 @@ public class ServiceAutoActivity extends AppCompatActivity {
                             lockedHours.add(day.getAsString());
                         }
                     }
-                    showTimePicker(lockedHours, date, shortDescription);
+                    showTimePicker(lockedHours,
+                            date,
+                            shortDescription,
+                            checkRepair,
+                            checkTire,
+                            checkChassis,
+                            checkItp);
                     mDialogCaldroidFragment.dismiss();
                 } catch (ExecutionException e) {
                     e.printStackTrace();
@@ -1075,7 +1092,13 @@ public class ServiceAutoActivity extends AppCompatActivity {
         }
     }
 
-    private void showTimePicker(ArrayList<String> lockedHours, final Date date, final String shortDescription) {
+    private void showTimePicker(ArrayList<String> lockedHours,
+                                final Date date,
+                                final String shortDescription,
+                                final boolean checkRepair,
+                                final boolean checkTire,
+                                final boolean checkChassis,
+                                final boolean checkItp) {
         final ListView listView = new ListView(mCtx);
         ArrayList<String> availableHours = new ArrayList<>();
         //ToDo: for i=start program hour to end program hour if program will be available, probably no
@@ -1109,12 +1132,27 @@ public class ServiceAutoActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String chosenHour = (String) listView.getItemAtPosition(position);
                 //Toast.makeText(getApplicationContext(), chosenHour, Toast.LENGTH_SHORT).show();
+                int type = 0;
+                if (checkRepair) {
+                    type |= 1;
+                }
+                if (checkTire) {
+                    type |= 2;
+                }
+                if (checkChassis) {
+                    type |= 4;
+                }
+                if (checkItp) {
+                    type |= 8;
+                }
                 JsonObject jsonBody = new JsonObject();
                 jsonBody.addProperty("serviceId", mServiceAuto.getServiceId());
                 jsonBody.addProperty("ownerId", mPreferencesManager.getUserId());
                 jsonBody.addProperty("day", new SimpleDateFormat("yyyy-MM-dd").format(date));
                 jsonBody.addProperty("hour", chosenHour);
                 jsonBody.addProperty("shortDescription", shortDescription);
+                jsonBody.addProperty("scheduleType", type);
+
                 Log.i(TAG, "onItemClick: shortDescription: " + shortDescription);
                 try {
                     Response<JsonObject> response = Ion.with(getApplicationContext())

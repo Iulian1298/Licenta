@@ -14,8 +14,8 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:largeHeap="true"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppThemeActionBarNotPresent"
@@ -24,14 +24,10 @@
             android:name=".activities.OfferRequestsActivity"
             android:theme="@style/AppThemeActionBarPresent" />
         <activity
-            android:name=".activities.TodayScheduleActivity"
-            android:theme="@style/AppThemeActionBarPresent" />
-        <activity
             android:name=".activities.CommentsActivity"
             android:theme="@style/AppThemeActionBarPresent" />
-        <activity
-            android:name=".activities.ServiceAutoActivity"
-            />
+        <activity android:name=".activities.TodayScheduleActivity" />
+        <activity android:name=".activities.ServiceAutoActivity" />
         <activity android:name=".activities.HomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

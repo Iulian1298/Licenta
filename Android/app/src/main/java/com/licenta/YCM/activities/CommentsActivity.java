@@ -47,7 +47,6 @@ public class CommentsActivity extends AppCompatActivity {
     private CommentsAdapter mCommentsAdapter;
     private RecyclerView mCommentsRecyclerView;
     private String mUrl;
-    private String mUrlHeroku;
     private String mServiceId;
     private ArrayList<LinearLayout> mRatingBarsForFilterAction;
     private TextView mSeeAllComments;
@@ -58,7 +57,6 @@ public class CommentsActivity extends AppCompatActivity {
     private ProgressBar mGetNewCommentsFromDatabase;
     private Button mLoadMoreComments;
     private boolean mExistMoreComments;
-
     private SharedPreferencesManager mPreferencesManager;
 
     @Override
@@ -79,7 +77,6 @@ public class CommentsActivity extends AppCompatActivity {
         });
 
         init();
-
     }
 
     private void init() {
@@ -99,7 +96,7 @@ public class CommentsActivity extends AppCompatActivity {
         mCommentsLimit = 17;
         mSeeAllComments = findViewById(R.id.seeAllComments);
         mUrl = "http://10.0.2.2:5000";
-        mUrlHeroku = "https://agile-harbor-57300.herokuapp.com";
+        //mUrl = "https://agile-harbor-57300.herokuapp.com";
         Intent intent = getIntent();
         mServiceId = intent.getStringExtra("serviceId");
         getSupportActionBar().setTitle("Pareri si comentarii!");
@@ -108,8 +105,7 @@ public class CommentsActivity extends AppCompatActivity {
         mCommentsAdapter = new CommentsAdapter(this, mCommentsList);
         mCommentsRecyclerView.setAdapter(mCommentsAdapter);
         try {
-            //String url = mUrl + "/comments/forService/" + mServiceId + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
-            String url = mUrlHeroku + "/comments/forService/" + mServiceId + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
+            String url = mUrl + "/comments/forService/" + mServiceId + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
             populateCommentList(url);
         } catch (ExecutionException e) {
             e.printStackTrace();
@@ -126,8 +122,7 @@ public class CommentsActivity extends AppCompatActivity {
                 mGetNewCommentsFromDatabase.setVisibility(View.VISIBLE);
                 mCommentsOffset += 17;
                 try {
-                    //String url = mUrl + "/comments/forService/" + mServiceId + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
-                    String url = mUrlHeroku + "/comments/forService/" + mServiceId + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
+                    String url = mUrl + "/comments/forService/" + mServiceId + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
                     populateCommentList(url);
                 } catch (ExecutionException e) {
                     e.printStackTrace();
@@ -143,19 +138,16 @@ public class CommentsActivity extends AppCompatActivity {
             }
         });
         mCommentsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            private int mPreviousTotal = 0;
-
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 int visibleItemCount = recyclerView.getChildCount();
                 int totalItemCount = recyclerView.getLayoutManager().getItemCount();
                 int firstVisibleItem = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-
                 if (dy < 0) {
                     mLoadMoreComments.setVisibility(View.GONE);
                 }
-                Log.i(TAG, String.format("onScrolled: dy: %d totalItemCount: %d firstVisibleItemCount: %d visibleItemCount: %d previousTotal: %d", dy, totalItemCount, firstVisibleItem, visibleItemCount, mPreviousTotal));
+                Log.i(TAG, String.format("onScrolled: dy: %d totalItemCount: %d firstVisibleItemCount: %d visibleItemCount: %d", dy, totalItemCount, firstVisibleItem, visibleItemCount));
                 if ((totalItemCount - visibleItemCount) <= (firstVisibleItem + 2)) {
                     if (dy > 0 & mExistMoreComments) {
                         mLoadMoreComments.setVisibility(View.VISIBLE);
@@ -168,8 +160,7 @@ public class CommentsActivity extends AppCompatActivity {
             @Override
             public void onDeleteClick(View view, int pos) throws ExecutionException, InterruptedException {
                 Log.i(TAG, "onDeleteClick: delete comment at pos: " + pos);
-                //String url = mUrl + "/comments/deleteById/" + mCommentsList.get(pos).getId() + "/serviceId/" + mCommentsList.get(pos).getServiceId();
-                String url = mUrlHeroku + "/comments/deleteById/" + mCommentsList.get(pos).getId() + "/serviceId/" + mCommentsList.get(pos).getServiceId();
+                String url = mUrl + "/comments/deleteById/" + mCommentsList.get(pos).getId() + "/serviceId/" + mCommentsList.get(pos).getServiceId();
                 Response<JsonObject> response = Ion.with(mCtx)
                         .load("DELETE", url)
                         .setHeader("Authorization", mPreferencesManager.getToken())
@@ -181,7 +172,7 @@ public class CommentsActivity extends AppCompatActivity {
                     mReturnIntent.putExtra("deletionNewRating", response.getResult().get("newRating").getAsFloat());
                     mCommentsList.remove(pos);
                     mCommentsAdapter.notifyDataSetChanged();
-                    Log.i(TAG, "onDeleteClick: Comment wit id: " + mCommentsList.get(pos).getId() + "deleted");
+                    Log.i(TAG, "onDeleteClick: Comment with id: " + mCommentsList.get(pos).getId() + "deleted");
                 }
             }
         });
@@ -198,8 +189,7 @@ public class CommentsActivity extends AppCompatActivity {
                     mCommentsOffset = 0;
                     mCommentsList.clear();
                     mCommentsAdapter.notifyDataSetChanged();
-                    //String url = mUrl + "/comments/forService/" + mServiceId + "/withRatingStars/" + finalI + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
-                    String url = mUrlHeroku + "/comments/forService/" + mServiceId + "/withRatingStars/" + finalI + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
+                    String url = mUrl + "/comments/forService/" + mServiceId + "/withRatingStars/" + finalI + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
                     try {
                         populateCommentList(url);
                     } catch (ExecutionException e) {
@@ -216,8 +206,7 @@ public class CommentsActivity extends AppCompatActivity {
                 mCommentsOffset = 0;
                 mCommentsList.clear();
                 mCommentsAdapter.notifyDataSetChanged();
-                //String url = mUrl + "/comments/forService/" + mServiceId + "/withRatingStars/" + 0 + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
-                String url = mUrlHeroku + "/comments/forService/" + mServiceId + "/withRatingStars/" + 0 + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
+                String url = mUrl + "/comments/forService/" + mServiceId + "/withRatingStars/" + 0 + "/getIdsBetween/offset/" + mCommentsOffset + "/limit/" + mCommentsLimit;
                 try {
                     populateCommentList(url);
                 } catch (ExecutionException e) {
@@ -254,7 +243,7 @@ public class CommentsActivity extends AppCompatActivity {
                         public void onResult(String result) {
                             if (!result.isEmpty()) {
                                 try {
-                                    Log.i(TAG, "Comment received");
+                                    Log.i(TAG, "onResult: Comment received");
                                     JSONObject comment = new JSONObject(result).getJSONObject("comment");
                                     mCommentsList.add(new Comment(
                                             comment.getString("id"),
@@ -275,8 +264,7 @@ public class CommentsActivity extends AppCompatActivity {
                             }
                         }
                     });
-                    //String urlComment = mUrl + "/comments/getById/" + commentId;
-                    String urlComment = mUrlHeroku + "/comments/getById/" + commentId;
+                    String urlComment = mUrl + "/comments/getById/" + commentId;
                     httpGetService.execute("GET", urlComment);
                 }
             } else {

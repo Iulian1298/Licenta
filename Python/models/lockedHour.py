@@ -9,13 +9,14 @@ class LockedHour(db.Model):
     ownerId = db.Column(db.String)
     hour = db.Column(db.String)
     shortDescription = db.Column(db.String)
+    scheduleType = db.Column(db.Integer)
 
     def __repr__(self):
-        return "id: {}, dayId: {}, ownerId: {}, hour: {}, shortDescription: {}" \
-            .format(self.id, self.dayId, self.ownerId, self.hour, self.shortDescription)
+        return "id: {}, dayId: {}, ownerId: {}, hour: {}, shortDescription: {}, scheduleType" \
+            .format(self.id, self.dayId, self.ownerId, self.hour, self.shortDescription, self.scheduleType)
 
     def toDict(self):
-        return dict(zip(["id", "dayId", "ownerId", "hour", "shortDescription"], self.toList()))
+        return dict(zip(["id", "dayId", "ownerId", "hour", "shortDescription", "scheduleType"], self.toList()))
 
     def toList(self):
-        return [self.id, self.dayId, self.ownerId, self.hour, self.shortDescription]
+        return [self.id, self.dayId, self.ownerId, self.hour, self.shortDescription, self.scheduleType]

@@ -86,7 +86,6 @@
                                 android:id="@+id/distanceFromYouFullIcon"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="10dp"
                                 android:src="@drawable/ic_pin_drop_red_20dp" />
 
                             <TextView

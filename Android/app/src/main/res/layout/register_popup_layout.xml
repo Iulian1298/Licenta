@@ -10,72 +10,76 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/registerPopUpImage"
-            android:layout_width="90dp"
-            android:layout_height="90dp"
-            android:layout_margin="15dp"
-            android:src="@drawable/ic_add_a_photo_blue_24dp" />
-
-        <EditText
-            android:id="@+id/registerPopUpEmail"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:background="@drawable/input_text_background_layout"
-            android:hint="@string/email"
-            android:inputType="textEmailAddress"
-            android:maxLength="50"
-            android:textAlignment="center"
-            android:textSize="30sp" />
+            android:layout_height="wrap_content">
 
-        <EditText
-            android:id="@+id/registerPopUpPhone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:background="@drawable/input_text_background_layout"
-            android:hint="@string/phone"
-            android:inputType="phone"
-            android:textAlignment="center"
-            android:textSize="30sp" />
+            <ImageView
+                android:id="@+id/registerPopUpImage"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
+                android:layout_margin="15dp"
+                android:src="@drawable/ic_add_a_photo_blue_24dp" />
 
-        <EditText
-            android:id="@+id/registerPopUpFullName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:background="@drawable/input_text_background_layout"
-            android:hint="@string/fullName"
-            android:inputType="textPersonName"
-            android:maxLength="50"
-            android:textAlignment="center"
-            android:textSize="30sp" />
+            <EditText
+                android:id="@+id/registerPopUpEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:background="@drawable/input_text_background_layout"
+                android:hint="@string/email"
+                android:inputType="textEmailAddress"
+                android:maxLength="50"
+                android:textAlignment="center"
+                android:textSize="30sp" />
 
-        <EditText
-            android:id="@+id/registerPopUpPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:background="@drawable/input_text_background_layout"
-            android:hint="@string/password"
-            android:inputType="textPassword"
-            android:maxLength="50"
-            android:textAlignment="center"
-            android:textSize="30sp" />
+            <EditText
+                android:id="@+id/registerPopUpPhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:background="@drawable/input_text_background_layout"
+                android:hint="@string/phone"
+                android:inputType="phone"
+                android:textAlignment="center"
+                android:textSize="30sp" />
 
-        <EditText
-            android:id="@+id/registerPopUpRePassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:background="@drawable/input_text_background_layout"
-            android:hint="@string/rePassword"
-            android:inputType="textPassword"
-            android:maxLength="50"
-            android:textAlignment="center"
-            android:textSize="30sp" />
+            <EditText
+                android:id="@+id/registerPopUpFullName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:background="@drawable/input_text_background_layout"
+                android:hint="@string/fullName"
+                android:inputType="textPersonName"
+                android:maxLength="50"
+                android:textAlignment="center"
+                android:textSize="30sp" />
 
+            <EditText
+                android:id="@+id/registerPopUpPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:background="@drawable/input_text_background_layout"
+                android:hint="@string/password"
+                android:inputType="textPassword"
+                android:maxLength="50"
+                android:textAlignment="center"
+                android:textSize="30sp" />
 
+            <EditText
+                android:id="@+id/registerPopUpRePassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:background="@drawable/input_text_background_layout"
+                android:hint="@string/rePassword"
+                android:inputType="textPassword"
+                android:maxLength="50"
+                android:textAlignment="center"
+                android:textSize="30sp" />
+
+        </ScrollView>
     </LinearLayout>
 </RelativeLayout>

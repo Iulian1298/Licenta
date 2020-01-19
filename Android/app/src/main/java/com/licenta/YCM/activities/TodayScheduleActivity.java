@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -43,11 +44,10 @@ public class TodayScheduleActivity extends AppCompatActivity {
     private ScheduledHourAdapter mScheduledHourAdapter;
     private RecyclerView mScheduledHourRecyclerView;
     private String mUrl;
-    private String mUrlHeroku;
     private String mServiceId;
     private Context mCtx;
     private SharedPreferencesManager mPreferencesManager;
-    private TextView mCurrentDay;
+    private Toolbar mTodayScheduleToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,15 +69,17 @@ public class TodayScheduleActivity extends AppCompatActivity {
 
     private void init() {
         Log.i(TAG, "init: ");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        Objects.requireNonNull(getSupportActionBar()).setTitle("Programarile pe azi");
         mScheduledHourRecyclerView = findViewById(R.id.scheduledHoursList);
-        mCurrentDay = findViewById(R.id.currentDay);
         Date currentDate = Calendar.getInstance().getTime();
         SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy");
-        mCurrentDay.setText(format.format(currentDate));
+        mTodayScheduleToolbar = findViewById(R.id.todayScheduleToolbar);
+        setSupportActionBar(mTodayScheduleToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        TextView toolbarTitle = findViewById(R.id.todayScheduleToolbarTitle);
+        toolbarTitle.setText("Programarile pe azi - " + format.format(currentDate));
+        Objects.requireNonNull(getSupportActionBar()).setTitle("");
         mScheduledHourRecyclerView.setLayoutManager(new LinearLayoutManager(mCtx));
-        mUrlHeroku = "https://agile-harbor-57300.herokuapp.com";
+        //mUrl = "https://agile-harbor-57300.herokuapp.com";
         mUrl = "http://10.0.2.2:5000";
         mScheduledHourList = new ArrayList<>();
         mScheduledHourAdapter = new ScheduledHourAdapter(mCtx, mScheduledHourList);
@@ -100,8 +102,8 @@ public class TodayScheduleActivity extends AppCompatActivity {
     private void populateScheduledHourList() {
         Log.i(TAG, "populateScheduledHourList: ");
         Ion.with(mCtx)
-                //.load("GET", mUrl + "/getLockedHoursForTodayForService/" + mServiceId)
-                .load("GET", mUrlHeroku + "/getLockedHoursForTodayForService/" + mServiceId)
+                .load("GET", mUrl + "/getLockedHoursForTodayForService/" + mServiceId)
+                .setHeader("Authorization", mPreferencesManager.getToken())
                 .asJsonObject()
                 .withResponse()
                 .setCallback(new FutureCallback<Response<JsonObject>>() {
@@ -121,7 +123,8 @@ public class TodayScheduleActivity extends AppCompatActivity {
                                                     jsonObject.getString("dayId"),
                                                     jsonObject.getString("hour"),
                                                     jsonObject.getString("shortDescription"),
-                                                    jsonObject.getString("phoneNumber")
+                                                    jsonObject.getString("phoneNumber"),
+                                                    jsonObject.getInt("scheduleType")
                                             ));
                                             mScheduledHourAdapter.notifyDataSetChanged();
                                         } catch (JSONException e1) {

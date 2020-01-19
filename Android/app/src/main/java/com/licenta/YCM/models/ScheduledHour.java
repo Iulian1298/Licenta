@@ -6,17 +6,20 @@ public class ScheduledHour {
     private String mHour;
     private String mShortDescription;
     private String mUserPhone;
+    private int mScheduleType;
 
     public ScheduledHour(String ownerUsername,
                          String dayId,
                          String hour,
                          String shortDescription,
-                         String userPhone) {
+                         String userPhone,
+                         int type) {
         this.mOwnerUsername = ownerUsername;
         this.mDayId = dayId;
         this.mHour = hour;
         this.mShortDescription = shortDescription;
         this.mUserPhone = userPhone;
+        this.mScheduleType = type;
     }
 
     public String getOwnerUsername() {
@@ -37,5 +40,9 @@ public class ScheduledHour {
 
     public String getUserPhone() {
         return mUserPhone;
+    }
+
+    public int getScheduleType() {
+        return mScheduleType;
     }
 }

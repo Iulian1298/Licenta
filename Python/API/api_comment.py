@@ -25,7 +25,7 @@ def getCommentById(commentId):
         result["ownerId"] = commentDict["userId"]
         result["profileImage"] = owner.first().toDict()["imagePath"]
         # print(result)
-        response = make_response(jsonify({"status": "Found", "comment": result}))
+        response = make_response(jsonify({"status": "Found", "comment": result}), status.HTTP_200_OK)
         response.headers.set('Content-Length', len({"status": "Found", "comment": result}))
         return make_response(jsonify({"status": "Found", "comment": result}))
     return make_response(jsonify({"status": "NotFound"}), status.HTTP_404_NOT_FOUND)

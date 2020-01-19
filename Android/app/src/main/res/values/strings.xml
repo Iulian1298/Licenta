@@ -85,4 +85,19 @@
     <string name="newRePassword">Reintrodu noua parola</string>
     <string name="newPasword">Noua parola</string>
     <string name="newOldPassword">Introdu vechea parola</string>
+    <string name="scheduleType">Tipul Programarii: </string>
+    <string name="requestText">Lorem Ipsum este pur şi simplu o machetă pentru text a industriei tipografice. Lorem Ipsum a fost macheta</string>
+    <string name="userOrService">User/Service</string>
+    <string name="withUserParts">Cu piesele clientului:</string>
+    <string name="servicePriceResponse">Pret:</string>
+    <string name="serviceFixEndDate">Data iesire</string>
+    <string name="serviceFixStartDate">Data intrare:</string>
+    <string name="serviceAcceptance">Cerere acceptata/respinsa:</string>
+    <string name="userAcceptance">Oferta acceptata/respinsa</string>
+    <string name="carAllDetails">Toate detaliile, masina model an vin</string>
+    <string name="serviceResponse">Raspunsul service-ului, data de intrare, iesire din service si pretul</string>
+    <string name="accept">Ok</string>
+    <string name="decline">Refuza</string>
+    <string name="delete">Sterge</string>
+    <string name="coin">Lei</string>
 </resources>
