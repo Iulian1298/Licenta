@@ -85,9 +85,8 @@ public class RequestOfferAdapter extends RecyclerView.Adapter<RequestOfferAdapte
         viewHolder.mDecline.setVisibility(requestOffer.getServiceAcceptance() == 1
                 && requestOffer.getUserAcceptance() == 0 ? View.VISIBLE : View.GONE);
         viewHolder.mOfferUpdated.setVisibility(requestOffer.getSeen() == 2 ? View.VISIBLE : View.GONE);
-        viewHolder.mUserAccepted.setVisibility(View.GONE);
-        viewHolder.mUserRejected.setVisibility(View.GONE);
-        viewHolder.mUserAcceptedOrRejected.setVisibility(View.GONE);
+        viewHolder.mUserAccepted.setVisibility(requestOffer.getUserAcceptance() == 1 ? View.VISIBLE : View.GONE);
+        viewHolder.mUserRejected.setVisibility(requestOffer.getUserAcceptance() == 2 ? View.VISIBLE : View.GONE);
         viewHolder.mUserAcceptedOrRejected.setVisibility(requestOffer.getUserAcceptance() == 0 ? View.GONE : View.VISIBLE);
         viewHolder.mUserAcceptedOrRejected.setText(requestOffer.getUserAcceptance() == 1 ? "Acceptat" : "Refuzat");
         viewHolder.mUserAcceptedOrRejected.setTextColor(
