@@ -39,6 +39,7 @@ import com.licenta.YCM.activities.AuthenticationActivity;
 import com.licenta.YCM.activities.HomeActivity;
 
 import java.io.ByteArrayOutputStream;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class Register implements Authentication {
@@ -150,7 +151,7 @@ public class Register implements Authentication {
         jsonBody.addProperty("fullName", mFullName.getText().toString().trim());
 
         StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("user_image");
-        final StorageReference imageFilePath = storageReference.child(mUserImageUri.getLastPathSegment());
+        final StorageReference imageFilePath = storageReference.child(UUID.randomUUID() + "_" + mUserImageUri.getLastPathSegment());
         imageFilePath.putFile(mUserImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {

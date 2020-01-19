@@ -70,6 +70,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -381,7 +382,7 @@ public class HomeFragment extends Fragment {
         jsonBody.addProperty("latitude", mPreferencesManager.getUserLatitude());
         jsonBody.addProperty("serviceOwner", mPreferencesManager.getUserId());
         StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("service_image");
-        final StorageReference imageFilePath = storageReference.child(mAddServiceImageUri.getLastPathSegment());
+        final StorageReference imageFilePath = storageReference.child(UUID.randomUUID() + "_" + mAddServiceImageUri.getLastPathSegment());
         imageFilePath.putFile(mAddServiceImageUri).addOnSuccessListener(
                 new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
@@ -390,8 +391,8 @@ public class HomeFragment extends Fragment {
                         imageFilePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
-                                String imageDownlaodLink = uri.toString();
-                                jsonBody.addProperty("imageDownloadLink", imageDownlaodLink);
+                                String imageDownloadLink = uri.toString();
+                                jsonBody.addProperty("imageDownloadLink", imageDownloadLink);
 
                                 Response<JsonObject> response = null;
                                 try {
