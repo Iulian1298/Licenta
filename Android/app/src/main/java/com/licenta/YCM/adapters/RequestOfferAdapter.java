@@ -80,12 +80,19 @@ public class RequestOfferAdapter extends RecyclerView.Adapter<RequestOfferAdapte
         } else {
             viewHolder.mRequestText.setText(requestOffer.getRequestText());
         }
-        viewHolder.mAccept.setVisibility(requestOffer.getServiceAcceptance() == 1 ? View.VISIBLE : View.GONE);
-        viewHolder.mDecline.setVisibility(requestOffer.getServiceAcceptance() == 1 ? View.VISIBLE : View.GONE);
+        viewHolder.mAccept.setVisibility(requestOffer.getServiceAcceptance() == 1
+                && requestOffer.getUserAcceptance() == 0 ? View.VISIBLE : View.GONE);
+        viewHolder.mDecline.setVisibility(requestOffer.getServiceAcceptance() == 1
+                && requestOffer.getUserAcceptance() == 0 ? View.VISIBLE : View.GONE);
         viewHolder.mOfferUpdated.setVisibility(requestOffer.getSeen() == 2 ? View.VISIBLE : View.GONE);
         viewHolder.mUserAccepted.setVisibility(View.GONE);
         viewHolder.mUserRejected.setVisibility(View.GONE);
         viewHolder.mUserAcceptedOrRejected.setVisibility(View.GONE);
+        viewHolder.mUserAcceptedOrRejected.setVisibility(requestOffer.getUserAcceptance() == 0 ? View.GONE : View.VISIBLE);
+        viewHolder.mUserAcceptedOrRejected.setText(requestOffer.getUserAcceptance() == 1 ? "Acceptat" : "Refuzat");
+        viewHolder.mUserAcceptedOrRejected.setTextColor(
+                requestOffer.getUserAcceptance() == 1 ?
+                        Color.parseColor("#03DA00") : Color.parseColor("#DA1800"));
     }
 
     private void bindForService(final ViewHolder viewHolder, final RequestOffer requestOffer) {
