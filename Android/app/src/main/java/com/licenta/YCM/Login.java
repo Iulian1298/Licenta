@@ -41,9 +41,9 @@ public class Login implements Authentication {
     public Login(Context ctx) {
         Log.i(TAG, "Login: Create login worker");
         mCtx = ctx;
-        //mUrl = "https://agile-harbor-57300.herokuapp.com";
-        mUrl = "http://10.0.2.2:5000";
         mPreferencesManager = SharedPreferencesManager.getInstance(mCtx);
+        mUrl = mPreferencesManager.getServerUrl();
+
 
         LayoutInflater inflater = (LayoutInflater) mCtx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mLoginView = inflater.inflate(R.layout.login_popup_layout, null);
@@ -65,8 +65,8 @@ public class Login implements Authentication {
         mLoginPopUp = new AlertDialog.Builder(mCtx)
                 .setCustomTitle(mLoginTitle)
                 .setView(mLoginView)
-                .setPositiveButton("Confirma", null)
-                .setNegativeButton("Anuleaza", null)
+                .setPositiveButton("Confirmă", null)
+                .setNegativeButton("Anulează", null)
                 .create();
         mLoginPopUp.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
@@ -138,16 +138,16 @@ public class Login implements Authentication {
         Log.i(TAG, "verifyInputOnClientSide: Login");
         boolean resultOk = true;
         if (mEmail.getText().toString().trim().isEmpty()) {
-            mEmail.setError("Completeaza campul!");
+            mEmail.setError("Completează campul!");
             resultOk = false;
         } else {
             if (!Patterns.EMAIL_ADDRESS.matcher(mEmail.getText().toString().trim()).matches()) {
-                mEmail.setError("Adresa nevalida!");
+                mEmail.setError("Adresă nevalidă!");
                 resultOk = false;
             }
         }
         if (mPassword.getText().toString().trim().isEmpty()) {
-            mPassword.setError("Completeaza campul!");
+            mPassword.setError("Completează campul!");
             resultOk = false;
         }
         return resultOk;

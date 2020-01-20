@@ -1,8 +1,10 @@
 package com.licenta.YCM.fragments;
 
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,20 +13,23 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.koushikdutta.ion.Ion;
 import com.koushikdutta.ion.Response;
-import com.licenta.YCM.AsyncHttpRequest;
+import com.licenta.YCM.AsyncRequest;
 import com.licenta.YCM.R;
 import com.licenta.YCM.SharedPreferencesManager;
+import com.licenta.YCM.activities.HomeActivity;
 import com.licenta.YCM.adapters.RequestOfferAdapter;
 import com.licenta.YCM.models.RequestOffer;
 
@@ -48,6 +53,7 @@ public class MyRequestFragment extends Fragment {
     private boolean mExistMoreRequest;
     private ProgressBar mGetNewRequestFromDatabase;
     private Button mLoadMoreRequests;
+    private boolean mDisplayNoRequest;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -85,13 +91,25 @@ public class MyRequestFragment extends Fragment {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            if (mDisplayNoRequest) {
+                TextView noRequestPerformed = new TextView(mCtx);
+                noRequestPerformed.setText("Nu ai facut nicio cerere de ofertă. Mergi pe pagina service-ului și accesează butonul de cerere din meniu pentru a face o cerere!");
+                noRequestPerformed.setPadding(20, 20, 20, 20);
+                noRequestPerformed.setGravity(Gravity.CENTER);
+                noRequestPerformed.setTextSize(18);
+                noRequestPerformed.setTextColor(Color.DKGRAY);
+                AlertDialog dialog = new AlertDialog.Builder((HomeActivity) mCtx)
+                        .setView(noRequestPerformed)
+                        .setPositiveButton("Am ințeles!", null)
+                        .create();
+                dialog.show();
+            }
         }
     }
 
     private void init(View v) {
         Log.i(TAG, "init: ");
-        //mUrl = "https://agile-harbor-57300.herokuapp.com";
-        mUrl = "http://10.0.2.2:5000";
+        mUrl = mPreferencesManager.getServerUrl();
         mGetNewRequestFromDatabase = v.findViewById(R.id.getNewMyRequestsFromDatabase);
         mLoadMoreRequests = v.findViewById(R.id.loadMoreMyRequests);
         mExistMoreRequest = true;
@@ -110,6 +128,19 @@ public class MyRequestFragment extends Fragment {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+        if (mDisplayNoRequest) {
+            TextView noRequestPerformed = new TextView(mCtx);
+            noRequestPerformed.setText("Nu ai facut nicio cerere de ofertă. Mergi pe pagina service-ului și accesează butonul de cerere din meniu pentru a face o cerere!");
+            noRequestPerformed.setPadding(20, 20, 20, 20);
+            noRequestPerformed.setGravity(Gravity.CENTER);
+            noRequestPerformed.setTextSize(18);
+            noRequestPerformed.setTextColor(Color.DKGRAY);
+            AlertDialog dialog = new AlertDialog.Builder((HomeActivity) mCtx)
+                    .setView(noRequestPerformed)
+                    .setPositiveButton("Am ințeles!", null)
+                    .create();
+            dialog.show();
         }
         mLoadMoreRequests.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -216,10 +247,10 @@ public class MyRequestFragment extends Fragment {
             if (response.getHeaders().code() == 200) {
                 if (userAcceptance == 1) {
                     Log.i(TAG, "acceptDeclineOfferRequestServiceResponse: client confirm offer");
-                    Toast.makeText(mCtx, "Oferta acceptata!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mCtx, "Ofertă acceptată!", Toast.LENGTH_SHORT).show();
                 } else {
                     Log.i(TAG, "acceptDeclineOfferRequestServiceResponse: client decline offer");
-                    Toast.makeText(mCtx, "Oferta refuzata!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mCtx, "Ofertă refuzată!", Toast.LENGTH_SHORT).show();
 
                 }
                 RequestOffer requestOffer = mRequestOfferList.get(pos);
@@ -268,15 +299,12 @@ public class MyRequestFragment extends Fragment {
             Log.i(TAG, "populateRequestList: requests Ids received");
             if (response.getResult() != null) {
                 final JsonArray requestsId = response.getResult().get("Ids").getAsJsonArray();
-                if (requestsId.size() != 11) {
-                    mExistMoreRequest = false;
-                } else {
-                    mExistMoreRequest = true;
-                }
+                mDisplayNoRequest = requestsId.size() == 0;
+                mExistMoreRequest = requestsId.size() == 11;
                 for (int i = 0; i < requestsId.size(); i++) {
                     final String requestId = requestsId.get(i).getAsString();
                     Log.i(TAG, "populateRequestList: add request with Id: " + requestId);
-                    final AsyncHttpRequest httpGetRequest = new AsyncHttpRequest(new AsyncHttpRequest.Listener() {
+                    final AsyncRequest httpGetRequest = new AsyncRequest(mPreferencesManager, new AsyncRequest.Listener() {
                         @Override
                         public void onResult(String result) {
                             if (!result.isEmpty()) {

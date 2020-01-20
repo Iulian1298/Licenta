@@ -25,7 +25,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.koushikdutta.ion.Ion;
 import com.koushikdutta.ion.Response;
-import com.licenta.YCM.AsyncHttpRequest;
+import com.licenta.YCM.AsyncRequest;
 import com.licenta.YCM.R;
 import com.licenta.YCM.SharedPreferencesManager;
 import com.licenta.YCM.adapters.RequestOfferAdapter;
@@ -53,6 +53,7 @@ public class OfferRequestsActivity extends AppCompatActivity {
     private String mServiceId;
     private ProgressBar mGetNewRequestFromDatabase;
     private Button mLoadMoreRequests;
+    private boolean mDisplayNoRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,9 +76,8 @@ public class OfferRequestsActivity extends AppCompatActivity {
     private void init() {
         Log.i(TAG, "init: ");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        Objects.requireNonNull(getSupportActionBar()).setTitle("Cereri de oferta");
-        //mUrl = "https://agile-harbor-57300.herokuapp.com";
-        mUrl = "http://10.0.2.2:5000";
+        Objects.requireNonNull(getSupportActionBar()).setTitle("Cereri de ofertă");
+        mUrl = mPreferencesManager.getServerUrl();
         mGetNewRequestFromDatabase = findViewById(R.id.getNewRequestsFromDatabase);
         mLoadMoreRequests = findViewById(R.id.loadMoreRequests);
         mExistMoreRequest = true;
@@ -98,6 +98,19 @@ public class OfferRequestsActivity extends AppCompatActivity {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+        if (mDisplayNoRequest) {
+            TextView noRequestPerformed = new TextView(mCtx);
+            noRequestPerformed.setText("Nu ai primit nicio cerere de ofertă!");
+            noRequestPerformed.setPadding(20, 20, 20, 0);
+            noRequestPerformed.setGravity(Gravity.CENTER);
+            noRequestPerformed.setTextSize(18);
+            noRequestPerformed.setTextColor(Color.DKGRAY);
+            android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(OfferRequestsActivity.this)
+                    .setView(noRequestPerformed)
+                    .setPositiveButton("Am ințeles!", null)
+                    .create();
+            dialog.show();
         }
         mLoadMoreRequests.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -206,8 +219,8 @@ public class OfferRequestsActivity extends AppCompatActivity {
         final AlertDialog acceptOfferRequest = new AlertDialog.Builder(OfferRequestsActivity.this)
                 .setCustomTitle(acceptOfferRequestTitle)
                 .setView(acceptOfferRequestContent)
-                .setPositiveButton("Confirma", null)
-                .setNegativeButton("Anuleaza", null)
+                .setPositiveButton("Confirmă", null)
+                .setNegativeButton("Anulează", null)
                 .create();
         acceptOfferRequest.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
@@ -220,15 +233,15 @@ public class OfferRequestsActivity extends AppCompatActivity {
                                 + " endDate: " + endDate.getText().toString() + " price: " + price.getText());
                         boolean resultOk = true;
                         if (endDate.getText().toString().trim().isEmpty()) {
-                            endDate.setError("Completeaza campul");
+                            endDate.setError("Completează campul");
                             resultOk = false;
                         }
                         if (startDate.getText().toString().trim().isEmpty()) {
-                            startDate.setError("Completeaza campul");
+                            startDate.setError("Completează campul");
                             resultOk = false;
                         }
                         if (price.getText().toString().trim().isEmpty()) {
-                            price.setError("Completeaza campul");
+                            price.setError("Completează campul");
                             resultOk = false;
                         }
                         if (resultOk) {
@@ -248,7 +261,7 @@ public class OfferRequestsActivity extends AppCompatActivity {
                                         .get();
                                 if (response.getHeaders().code() == 200) {
                                     Log.i(TAG, "onClick: service added offer response");
-                                    Toast.makeText(mCtx, "Oferta adaugata cu succes!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(mCtx, "Ofertă adaugată cu succes!", Toast.LENGTH_SHORT).show();
                                     RequestOffer requestOffer = mRequestOfferList.get(pos);
                                     requestOffer.setServiceAcceptance(1);
                                     requestOffer.setSeen(2);
@@ -261,7 +274,7 @@ public class OfferRequestsActivity extends AppCompatActivity {
                                 } else {
                                     if (response.getHeaders().code() == 404) {
                                         Log.i(TAG, "onClick: offer deleted by user since server last refresh");
-                                        Toast.makeText(mCtx, "Oferta a fost stearsa de user intre timp!", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(mCtx, "Oferta a fost ștearsa de user intre timp!", Toast.LENGTH_SHORT).show();
                                         mRequestOfferList.remove(pos);
                                         mRequestOfferAdapter.notifyDataSetChanged();
                                         acceptOfferRequest.dismiss();
@@ -294,8 +307,8 @@ public class OfferRequestsActivity extends AppCompatActivity {
         final AlertDialog declineOfferRequest = new AlertDialog.Builder(OfferRequestsActivity.this)
                 .setCustomTitle(declineOfferRequestTitle)
                 .setView(declineResponse)
-                .setPositiveButton("Confirma", null)
-                .setNegativeButton("Anuleaza", null)
+                .setPositiveButton("Confirmă", null)
+                .setNegativeButton("Anulează", null)
                 .create();
         declineOfferRequest.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
@@ -307,7 +320,7 @@ public class OfferRequestsActivity extends AppCompatActivity {
                         Log.i(TAG, "onClick: ");
                         boolean resultOk = true;
                         if (declineResponse.getText().toString().trim().isEmpty()) {
-                            declineResponse.setError("Completeaza campul");
+                            declineResponse.setError("Completează campul");
                             resultOk = false;
                         }
                         if (resultOk) {
@@ -336,7 +349,7 @@ public class OfferRequestsActivity extends AppCompatActivity {
                                 } else {
                                     if (response.getHeaders().code() == 404) {
                                         Log.i(TAG, "onClick: offer deleted by user since server last refresh");
-                                        Toast.makeText(mCtx, "Oferta a fost stearsa de user intre timp!", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(mCtx, "Oferta a fost ștearsa de user intre timp!", Toast.LENGTH_SHORT).show();
                                         mRequestOfferList.remove(pos);
                                         mRequestOfferAdapter.notifyDataSetChanged();
                                         declineOfferRequest.dismiss();
@@ -390,15 +403,12 @@ public class OfferRequestsActivity extends AppCompatActivity {
             Log.i(TAG, "populateRequestList: requests Ids received");
             if (response.getResult() != null) {
                 final JsonArray requestsId = response.getResult().get("Ids").getAsJsonArray();
-                if (requestsId.size() != 11) {
-                    mExistMoreRequest = false;
-                } else {
-                    mExistMoreRequest = true;
-                }
+                mDisplayNoRequest = requestsId.size() == 0;
+                mExistMoreRequest = requestsId.size() == 11;
                 for (int i = 0; i < requestsId.size(); i++) {
                     final String requestId = requestsId.get(i).getAsString();
                     Log.i(TAG, "populateRequestList: add request with Id: " + requestId);
-                    final AsyncHttpRequest httpGetRequest = new AsyncHttpRequest(new AsyncHttpRequest.Listener() {
+                    final AsyncRequest httpGetRequest = new AsyncRequest(mPreferencesManager, new AsyncRequest.Listener() {
                         @Override
                         public void onResult(String result) {
                             if (!result.isEmpty()) {

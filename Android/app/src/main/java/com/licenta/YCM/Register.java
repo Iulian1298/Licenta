@@ -65,9 +65,9 @@ public class Register implements Authentication {
     public Register(Context ctx) {
         Log.i(TAG, "Register: Create register worker");
         mCtx = ctx;
-        //mUrl = "https://agile-harbor-57300.herokuapp.com";
-        mUrl = "http://10.0.2.2:5000";
         mPreferencesManager = SharedPreferencesManager.getInstance(mCtx);
+        mUrl = mPreferencesManager.getServerUrl();
+
 
         LayoutInflater inflater = (LayoutInflater) mCtx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mRegisterView = inflater.inflate(R.layout.register_popup_layout, null);
@@ -86,7 +86,7 @@ public class Register implements Authentication {
                     galleryIntent.setType("image/*");
                     ((AuthenticationActivity) mCtx).startActivityForResult(galleryIntent, 2);
                 } else {
-                    Toast.makeText((AuthenticationActivity) mCtx, "Mai intai permite aplicatiei de a accesa galeria!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText((AuthenticationActivity) mCtx, "Mai întai permite aplicației să acceseze galeria!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -106,8 +106,8 @@ public class Register implements Authentication {
         mRegisterPopUp = new AlertDialog.Builder(mCtx)
                 .setCustomTitle(mRegisterTitle)
                 .setView(mRegisterView)
-                .setPositiveButton("Confirma", null)
-                .setNegativeButton("Anuleaza", null)
+                .setPositiveButton("Confirmă", null)
+                .setNegativeButton("Anulează", null)
                 .create();
         mRegisterPopUp.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
@@ -184,11 +184,11 @@ public class Register implements Authentication {
                                 if (response.getHeaders().code() == 409) {
                                     confirm.setEnabled(true);
                                     cancel.setEnabled(true);
-                                    Toast.makeText(mCtx, "Acest email a fost deja inregistrat!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(mCtx, "Acest email a fost deja înregistrat!", Toast.LENGTH_SHORT).show();
                                     resultOk[0] = false;
                                 } else {
                                     setEnableFields(true);
-                                    Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(mCtx, "Ceva nu a mers! Verifică conexiunea la internet!", Toast.LENGTH_SHORT).show();
                                     resultOk[0] = false;
                                 }
                             }
@@ -203,7 +203,7 @@ public class Register implements Authentication {
                     public void onFailure(@NonNull Exception e) {
                         setEnableFields(true);
                         Log.e(TAG, "onFailure: Something goes wrong to get image link");
-                        Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mCtx, "Ceva nu a mers! Verifică conexiunea la internet!", Toast.LENGTH_SHORT).show();
                         resultOk[0] = false;
                     }
                 });
@@ -213,7 +213,7 @@ public class Register implements Authentication {
             public void onFailure(@NonNull Exception e) {
                 setEnableFields(true);
                 Log.e(TAG, "onFailure: Something goes wrong to put image on firebase");
-                Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiuneă la internet!", Toast.LENGTH_SHORT).show();
                 resultOk[0] = false;
             }
         });
@@ -237,20 +237,20 @@ public class Register implements Authentication {
         Log.i(TAG, "verifyInputOnClientSide: Register");
         boolean resultOk = true;
         if (mFullName.getText().toString().trim().isEmpty()) {
-            mFullName.setError("Completeaza campul!");
+            mFullName.setError("Completează campul!");
             resultOk = false;
         }
         if (mEmail.getText().toString().trim().isEmpty()) {
-            mEmail.setError("Completeaza campul!");
+            mEmail.setError("Completează campul!");
             resultOk = false;
         } else {
             if (!Patterns.EMAIL_ADDRESS.matcher(mEmail.getText().toString().trim()).matches()) {
-                mEmail.setError("Adresa nevalida!");
+                mEmail.setError("Adresă nevalidă!");
                 resultOk = false;
             }
         }
         if (mPhoneNumber.getText().toString().trim().isEmpty()) {
-            mPhoneNumber.setError("Completeaza campul!");
+            mPhoneNumber.setError("Completează campul!");
             resultOk = false;
         } else {
             if (!Patterns.PHONE.matcher(mPhoneNumber.getText().toString().trim()).matches()) {
@@ -259,14 +259,14 @@ public class Register implements Authentication {
             }
         }
         if (mPassword.getText().toString().trim().isEmpty()) {
-            mPassword.setError("Completeaza campul!");
+            mPassword.setError("Completează campul!");
             resultOk = false;
         } else if (mPassword.getText().toString().trim().length() < 6) {
             mPassword.setError("Introdu minim 6 caractere!");
             resultOk = false;
         }
         if (mRePassword.getText().toString().trim().isEmpty()) {
-            mRePassword.setError("Completeaza campul!");
+            mRePassword.setError("Completează campul!");
             resultOk = false;
         }
         if (!mPassword.getText().toString().trim().equals(mRePassword.getText().toString().trim())) {

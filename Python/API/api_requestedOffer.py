@@ -55,7 +55,7 @@ def getMyRequestsIds(userId, limit, offset):
 
 
 @app.route("/requestedOffers/getById/<requestId>/userOrService/<isUserOrService>", methods=['GET'])
-# @check_token
+@check_token
 def getByIdForUserOrService(requestId, isUserOrService):
     request = RequestedOffer.query.filter_by(id=requestId)
     if request.first():
@@ -88,7 +88,7 @@ def getServiceRequestsIds(serviceId, limit, offset):
 
 
 @app.route("/requestedOffers/addServiceResponse", methods=['POST'])
-# @check_token
+@check_token
 def addServiceResponse():
     serviceAcceptance = request.json['serviceAcceptance']
     if int(serviceAcceptance) == 1:

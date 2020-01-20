@@ -22,7 +22,6 @@ public class SharedPreferencesManager {
     //private static final String mUrl = "https://agile-harbor-57300.herokuapp.com";
 
 
-
     private static final String SHARED_PREF_NAME = "YCM";
     private static final String KEY_IS_LOGGED = "isLogged";
     private static final String KEY_TOKEN = "token";
@@ -50,6 +49,10 @@ public class SharedPreferencesManager {
             mInstance = new SharedPreferencesManager(ctx);
         }
         return mInstance;
+    }
+
+    public String getServerUrl() {
+        return mUrl;
     }
 
     public boolean getOnlyMyServices() {

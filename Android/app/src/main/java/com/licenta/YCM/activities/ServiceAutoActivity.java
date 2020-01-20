@@ -147,8 +147,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
 
     private void init() {
         Log.i(TAG, "init: ");
-        //mUrl = "https://agile-harbor-57300.herokuapp.com";
-        mUrl = "http://10.0.2.2:5000";
+        mUrl = mPreferencesManager.getServerUrl();
         mFabMenuExpanded = false;
         mServiceAutoFloatingButtons = findViewById(R.id.serviceAutoFloatingButtons);
         mLogoImage = findViewById(R.id.logoImageFull);
@@ -344,13 +343,13 @@ public class ServiceAutoActivity extends AppCompatActivity {
             } else {
                 if ((mServiceAuto.getType() & 1) == 1) {
                     TextView requestTypeTitle = new TextView(mCtx);
-                    requestTypeTitle.setText("Tipul de problema!");
+                    requestTypeTitle.setText("Tipul de problemă!");
                     requestTypeTitle.setGravity(Gravity.CENTER);
                     requestTypeTitle.setPadding(10, 10, 10, 10);
                     requestTypeTitle.setTextSize(18);
                     requestTypeTitle.setTextColor(Color.DKGRAY);
                     TextView requestTypeContent = new TextView(mCtx);
-                    requestTypeContent.setText("Apasa \"DA\" daca vrei o oferta pentru rezolvarea unei probleme mecanice sau \"NU\" altfel!");
+                    requestTypeContent.setText("Apasă \"DA\" daca vrei o ofertă pentru rezolvarea unei probleme mecanice sau \"NU\" altfel!");
                     requestTypeContent.setGravity(Gravity.CENTER);
                     requestTypeContent.setPadding(10, 10, 10, 10);
                     AlertDialog requestType = new AlertDialog.Builder(ServiceAutoActivity.this)
@@ -415,7 +414,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                                             !scheduleServiceTireCheck.isChecked() &&
                                             !scheduleServiceChassisCheck.isChecked() &&
                                             !scheduleServiceItpCheck.isChecked())) {
-                                Toast.makeText(mCtx, "Trebuie completat campul din pop-up si cel putin o casuta bifata!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(mCtx, "Trebuie completat câmpul din pop-up și cel puțin o casută bifată!", Toast.LENGTH_SHORT).show();
                             } else {
                                 showDatePicker(scheduleDescriptionText.getText().toString().trim(),
                                         scheduleRepairServiceCheck.isChecked(),
@@ -426,7 +425,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                             }
                         }
                     })
-                    .setNegativeButton("Anuleaza", null)
+                    .setNegativeButton("Anulează", null)
                     .create();
             schedulePopUp.show();
         }
@@ -449,7 +448,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
             final EditText givenComment = leaveCommentView.findViewById(R.id.givenComment);
             final RatingBar givenRating = leaveCommentView.findViewById(R.id.givenRating);
             TextView addCommentTitle = new TextView(getApplicationContext());
-            addCommentTitle.setText("Lasa un comentariu!");
+            addCommentTitle.setText("Lasă un comentariu!");
             addCommentTitle.setGravity(Gravity.CENTER);
             addCommentTitle.setPadding(10, 10, 10, 10);
             addCommentTitle.setTextSize(18);
@@ -458,13 +457,13 @@ public class ServiceAutoActivity extends AppCompatActivity {
             AlertDialog addCommentPopUp = new AlertDialog.Builder(ServiceAutoActivity.this)
                     .setCustomTitle(addCommentTitle)
                     .setView(leaveCommentView)
-                    .setPositiveButton("Adauga", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("Adaugă", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             Log.i(TAG, "onCick() -> onClick() -> Comentariu: " + givenComment.getText());
                             Log.i(TAG, "onCick() -> onClick() -> Rating: " + givenRating.getRating());
                             if (givenComment.getText().toString().trim().isEmpty() || givenRating.getRating() == 0) {
-                                Toast.makeText(getApplicationContext(), "Completeaza toate campurile", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), "Completează toate campurile", Toast.LENGTH_SHORT).show();
                             } else {
                                 JsonObject jsonBody = new JsonObject();
                                 jsonBody.addProperty("userId", mPreferencesManager.getUserId());
@@ -501,7 +500,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                             }
                         }
                     })
-                    .setNegativeButton("Anuleaza", null)
+                    .setNegativeButton("Anulează", null)
                     .create();
             addCommentPopUp.show();
         }
@@ -569,7 +568,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private void editService() {
         Log.i(TAG, "editService: ");
         TextView editServiceTitle = new TextView(mCtx);
-        editServiceTitle.setText("Editeaza service-ul!");
+        editServiceTitle.setText("Editează service-ul!");
         editServiceTitle.setGravity(Gravity.CENTER);
         editServiceTitle.setPadding(10, 10, 10, 10);
         editServiceTitle.setTextSize(18);
@@ -623,15 +622,15 @@ public class ServiceAutoActivity extends AppCompatActivity {
                     galleryIntent.setType("image/*");
                     startActivityForResult(galleryIntent, 2);
                 } else {
-                    Toast.makeText(mCtx, "Mai intai permite aplicatiei de a accesa galeria!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mCtx, "Mai întai permite aplicației sa acceseze galeria!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
         mEditServicePopUp = new AlertDialog.Builder(ServiceAutoActivity.this)
                 .setCustomTitle(editServiceTitle)
                 .setView(editServiceView)
-                .setPositiveButton("Confirma", null)
-                .setNegativeButton("Anuleaza", null)
+                .setPositiveButton("Confirmă", null)
+                .setNegativeButton("Anulează", null)
                 .create();
         mEditServicePopUp.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
@@ -726,19 +725,19 @@ public class ServiceAutoActivity extends AppCompatActivity {
         Log.i(TAG, "verifyInputOnClientSide:  verify edit service");
         boolean resultOk = true;
         if (mEditServiceName.getText().toString().trim().isEmpty()) {
-            mEditServiceName.setError("Completeaza campul!");
+            mEditServiceName.setError("Completează campul!");
             resultOk = false;
         }
         if (mEditServiceAddress.getText().toString().trim().isEmpty()) {
-            mEditServiceAddress.setError("Completeaza campul!");
+            mEditServiceAddress.setError("Completează campul!");
             resultOk = false;
         }
         if (mEditServiceCity.getText().toString().trim().isEmpty()) {
-            mEditServiceCity.setError("Completeaza campul!");
+            mEditServiceCity.setError("Completează campul!");
             resultOk = false;
         }
         if (mEditServicePhone.getText().toString().trim().isEmpty()) {
-            mEditServicePhone.setError("Completeaza campul!");
+            mEditServicePhone.setError("Completează campul!");
             resultOk = false;
         } else {
             if (!Patterns.PHONE.matcher(mEditServicePhone.getText().toString().trim()).matches()) {
@@ -747,20 +746,20 @@ public class ServiceAutoActivity extends AppCompatActivity {
             }
         }
         if (mEditServiceEmail.getText().toString().trim().isEmpty()) {
-            mEditServiceEmail.setError("Completeaza campul!");
+            mEditServiceEmail.setError("Completează campul!");
             resultOk = false;
         } else {
             if (!Patterns.EMAIL_ADDRESS.matcher(mEditServiceEmail.getText().toString().trim()).matches()) {
-                mEditServiceEmail.setError("Adresa nevalida!");
+                mEditServiceEmail.setError("Adresa nevalidă!");
                 resultOk = false;
             }
         }
         if (mEditServiceDescription.getText().toString().trim().isEmpty()) {
-            mEditServiceDescription.setError("Completeaza campul!");
+            mEditServiceDescription.setError("Completează campul!");
             resultOk = false;
         }
         if (mEditServiceAcceptedBrand.getText().toString().trim().isEmpty()) {
-            mEditServiceAcceptedBrand.setError("Completeaza campul!");
+            mEditServiceAcceptedBrand.setError("Completează campul!");
             resultOk = false;
         }
         if (!mEditRepairServiceCheck.isChecked() && !mEditServiceTireCheck.isChecked() && !mEditServiceChassisCheck.isChecked() && !mEditServiceItpCheck.isChecked()) {
@@ -844,7 +843,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                                     } else {
                                         setEnableFields(true);
                                         Log.i(TAG, "verifyInputOnServerSide: Service not edited! err code: " + response.getHeaders().code());
-                                        Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet!", Toast.LENGTH_SHORT).show();
                                     }
                                 } catch (ExecutionException e) {
                                     e.printStackTrace();
@@ -857,7 +856,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                             public void onFailure(@NonNull Exception e) {
                                 Log.i(TAG, "onFailure: fail to get download link");
                                 setEnableFields(true);
-                                Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet!", Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -866,7 +865,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Log.e(TAG, "onFailure: Fail to add image to firebase");
-                Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet!", Toast.LENGTH_SHORT).show();
                 setEnableFields(true);
             }
         });
@@ -937,7 +936,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
             withMyPartsCheck.setVisibility(View.GONE);
         }
         TextView requestOfferTitle = new TextView(mCtx);
-        requestOfferTitle.setText("Cere oferta!");
+        requestOfferTitle.setText("Cere ofertă!");
         requestOfferTitle.setGravity(Gravity.CENTER);
         requestOfferTitle.setPadding(10, 10, 10, 10);
         requestOfferTitle.setTextSize(18);
@@ -945,7 +944,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         AlertDialog requestOfferPopUp = new AlertDialog.Builder(ServiceAutoActivity.this)
                 .setCustomTitle(requestOfferTitle)
                 .setView(requestOffer)
-                .setPositiveButton("Confirma", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Confirmă", new DialogInterface.OnClickListener() {
                     //ToDo: ca in login sa nu se inchida dialogul daca ceva nu e valid
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -954,7 +953,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                                 carModel.getText().toString().trim().isEmpty() ||
                                 carYear.getText().toString().trim().isEmpty() ||
                                 carVin.getText().toString().trim().isEmpty()) {
-                            Toast.makeText(mCtx, "Trebuie completate toate campurile cererii!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mCtx, "Trebuie completate toate câmpurile cererii!", Toast.LENGTH_SHORT).show();
                         } else {
                             if (carVin.getText().toString().trim().length() != 17) {
                                 Toast.makeText(mCtx, "VIN-ul completat nu este valid!", Toast.LENGTH_SHORT).show();
@@ -984,7 +983,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                                             .get();
                                     if (response.getHeaders().code() == 201) {
                                         Log.i(TAG, "onClick: requestAdded");
-                                        Toast.makeText(getApplicationContext(), "Cerere realizata cu succes!", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getApplicationContext(), "Cerere realizată cu succes!", Toast.LENGTH_SHORT).show();
                                     } else {
                                         if (response.getHeaders().code() == 409) {
                                             Toast.makeText(getApplicationContext(), "Conflict in baza de date!", Toast.LENGTH_SHORT).show();
@@ -1001,7 +1000,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                         }
                     }
                 })
-                .setNegativeButton("Anuleaza", null)
+                .setNegativeButton("Anulează", null)
                 .create();
         requestOfferPopUp.show();
     }
@@ -1164,7 +1163,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                             .get();
                     if (response.getHeaders().code() == 201) {
                         Log.i(TAG, "onItemClick: scheduled!");
-                        Toast.makeText(getApplicationContext(), "Programare realizata cu succes!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Programare realizată cu succes!", Toast.LENGTH_SHORT).show();
                     } else {
                         if (response.getHeaders().code() == 403) {
                             TextView oncePerDayTitle = new TextView(mCtx);
@@ -1174,13 +1173,13 @@ public class ServiceAutoActivity extends AppCompatActivity {
                             oncePerDayTitle.setTextSize(18);
                             oncePerDayTitle.setTextColor(Color.DKGRAY);
                             TextView oncePerDayContent = new TextView(mCtx);
-                            oncePerDayContent.setText("Ai voie sa te programezi o data pe zi la un service!");
+                            oncePerDayContent.setText("Ai voie sa te programezi o singură data pe zi la un service!");
                             oncePerDayContent.setGravity(Gravity.CENTER);
                             oncePerDayContent.setPadding(10, 10, 10, 10);
                             AlertDialog requestType = new AlertDialog.Builder(ServiceAutoActivity.this)
                                     .setCustomTitle(oncePerDayTitle)
                                     .setView(oncePerDayContent)
-                                    .setPositiveButton("Am inteles!", null)
+                                    .setPositiveButton("Am ințeles!", null)
                                     .create();
                             requestType.show();
                         } else {
@@ -1225,11 +1224,11 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private void showPopUpNotLogged() {
         Log.i(TAG, "showPopUpNotLogged: ");
         TextView notLoggedContent = new TextView(mCtx);
-        notLoggedContent.setText("Pentru a executa aceasta actiune trebuie sa fii logat. Vrei sa te autentifici?");
+        notLoggedContent.setText("Pentru a executa aceasta acțiune trebuie să fii logat. Vrei să te autentifici?");
         notLoggedContent.setGravity(Gravity.CENTER);
         notLoggedContent.setPadding(10, 10, 10, 10);
         TextView notLoggedTitle = new TextView(mCtx);
-        notLoggedTitle.setText("Actiune interzisa!");
+        notLoggedTitle.setText("Acțiune interzisă!");
         notLoggedTitle.setGravity(Gravity.CENTER);
         notLoggedTitle.setPadding(10, 10, 10, 10);
         notLoggedTitle.setTextSize(18);
@@ -1237,7 +1236,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         AlertDialog notLoggedPopUp = new AlertDialog.Builder(ServiceAutoActivity.this)
                 .setCustomTitle(notLoggedTitle)
                 .setView(notLoggedContent)
-                .setPositiveButton("Autentifica-te", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Autentifică-te", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Log.i(TAG, "onClick: go to auth page");
@@ -1245,7 +1244,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                         startActivityForResult(intent, 3);
                     }
                 })
-                .setNegativeButton("Anuleaza", null)
+                .setNegativeButton("Anulează", null)
                 .create();
         notLoggedPopUp.show();
     }
@@ -1304,7 +1303,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         spannable.setSpan(color, 17, spannable.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         spannable.setSpan(style, 17, spannable.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         mServiceType.setText(spannable);
-        spannable = new SpannableStringBuilder(String.format("Branduri acceptate: %s", mServiceAuto.getAcceptedBrands()));
+        spannable = new SpannableStringBuilder(String.format("Brand-uri acceptate: %s", mServiceAuto.getAcceptedBrands()));
         spannable.setSpan(color, 19, spannable.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         spannable.setSpan(style, 19, spannable.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         mServiceAcceptedBrands.setText(spannable);

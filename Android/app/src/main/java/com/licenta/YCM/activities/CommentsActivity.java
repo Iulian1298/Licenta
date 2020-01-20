@@ -1,9 +1,11 @@
 package com.licenta.YCM.activities;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -14,6 +16,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -27,7 +30,7 @@ import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 import com.koushikdutta.ion.Response;
-import com.licenta.YCM.AsyncHttpRequest;
+import com.licenta.YCM.AsyncRequest;
 import com.licenta.YCM.adapters.CommentsAdapter;
 import com.licenta.YCM.R;
 import com.licenta.YCM.SharedPreferencesManager;
@@ -58,6 +61,7 @@ public class CommentsActivity extends AppCompatActivity {
     private Button mLoadMoreComments;
     private boolean mExistMoreComments;
     private SharedPreferencesManager mPreferencesManager;
+    private boolean mDisplayNoComment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,11 +99,10 @@ public class CommentsActivity extends AppCompatActivity {
         mCommentsOffset = 0;
         mCommentsLimit = 17;
         mSeeAllComments = findViewById(R.id.seeAllComments);
-        mUrl = "http://10.0.2.2:5000";
-        //mUrl = "https://agile-harbor-57300.herokuapp.com";
+        mUrl = mPreferencesManager.getServerUrl();
         Intent intent = getIntent();
         mServiceId = intent.getStringExtra("serviceId");
-        getSupportActionBar().setTitle("Pareri si comentarii!");
+        getSupportActionBar().setTitle("Păreri și comentarii!");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mCommentsList = new ArrayList<>();
         mCommentsAdapter = new CommentsAdapter(this, mCommentsList);
@@ -111,6 +114,19 @@ public class CommentsActivity extends AppCompatActivity {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+        if (mDisplayNoComment) {
+            TextView noCommentAdded = new TextView(mCtx);
+            noCommentAdded.setText("Acest service nu are niciun comentariu!");
+            noCommentAdded.setPadding(20, 20, 20, 20);
+            noCommentAdded.setGravity(Gravity.CENTER);
+            noCommentAdded.setTextSize(18);
+            noCommentAdded.setTextColor(Color.DKGRAY);
+            AlertDialog dialog = new AlertDialog.Builder(CommentsActivity.this)
+                    .setView(noCommentAdded)
+                    .setPositiveButton("Am inteles!", null)
+                    .create();
+            dialog.show();
         }
         mReturnIntent = new Intent();
         setResult(RESULT_CANCELED, mReturnIntent);
@@ -230,15 +246,12 @@ public class CommentsActivity extends AppCompatActivity {
             Log.i(TAG, "populateCommentList: comments Ids received");
             if (response.getResult() != null) {
                 final JsonArray commentsId = response.getResult().get("Ids").getAsJsonArray();
-                if (commentsId.size() != 17) {
-                    mExistMoreComments = false;
-                } else {
-                    mExistMoreComments = true;
-                }
+                mDisplayNoComment = commentsId.size() == 0;
+                mExistMoreComments = commentsId.size() == 17;
                 for (int i = 0; i < commentsId.size(); i++) {
                     final String commentId = commentsId.get(i).getAsString();
                     Log.i(TAG, "populateCommentList: add comment with Id: " + commentId);
-                    final AsyncHttpRequest httpGetService = new AsyncHttpRequest(new AsyncHttpRequest.Listener() {
+                    final AsyncRequest httpGetService = new AsyncRequest(mPreferencesManager, new AsyncRequest.Listener() {
                         @Override
                         public void onResult(String result) {
                             if (!result.isEmpty()) {

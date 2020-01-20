@@ -2,6 +2,7 @@ package com.licenta.YCM.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -12,6 +13,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +38,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Timer;
+import java.util.concurrent.ExecutionException;
 
 public class TodayScheduleActivity extends AppCompatActivity {
 
@@ -48,6 +51,7 @@ public class TodayScheduleActivity extends AppCompatActivity {
     private Context mCtx;
     private SharedPreferencesManager mPreferencesManager;
     private Toolbar mTodayScheduleToolbar;
+    private boolean mDisplayNoScheduleToday;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,11 +80,10 @@ public class TodayScheduleActivity extends AppCompatActivity {
         setSupportActionBar(mTodayScheduleToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         TextView toolbarTitle = findViewById(R.id.todayScheduleToolbarTitle);
-        toolbarTitle.setText("Programarile pe azi - " + format.format(currentDate));
+        toolbarTitle.setText("Programările pe azi - " + format.format(currentDate));
         Objects.requireNonNull(getSupportActionBar()).setTitle("");
         mScheduledHourRecyclerView.setLayoutManager(new LinearLayoutManager(mCtx));
-        //mUrl = "https://agile-harbor-57300.herokuapp.com";
-        mUrl = "http://10.0.2.2:5000";
+        mUrl = mPreferencesManager.getServerUrl();
         mScheduledHourList = new ArrayList<>();
         mScheduledHourAdapter = new ScheduledHourAdapter(mCtx, mScheduledHourList);
         mScheduledHourRecyclerView.addItemDecoration(new DividerItemDecoration(mCtx, DividerItemDecoration.VERTICAL));
@@ -88,6 +91,19 @@ public class TodayScheduleActivity extends AppCompatActivity {
         Intent intent = getIntent();
         mServiceId = intent.getStringExtra("serviceId");
         populateScheduledHourList();
+        if (mDisplayNoScheduleToday) {
+            TextView noRequestPerformed = new TextView(mCtx);
+            noRequestPerformed.setText("Nu ai nicio programare pe astăzi!");
+            noRequestPerformed.setPadding(20, 20, 20, 0);
+            noRequestPerformed.setGravity(Gravity.CENTER);
+            noRequestPerformed.setTextSize(18);
+            noRequestPerformed.setTextColor(Color.DKGRAY);
+            android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(TodayScheduleActivity.this)
+                    .setView(noRequestPerformed)
+                    .setPositiveButton("Am ințeles!", null)
+                    .create();
+            dialog.show();
+        }
         mScheduledHourAdapter.setPhoneClickListener(new ScheduledHourAdapter.OnPhoneClickListener() {
             @Override
             public void onPhoneClick(View view, int pos) {
@@ -101,47 +117,52 @@ public class TodayScheduleActivity extends AppCompatActivity {
 
     private void populateScheduledHourList() {
         Log.i(TAG, "populateScheduledHourList: ");
-        Ion.with(mCtx)
-                .load("GET", mUrl + "/getLockedHoursForTodayForService/" + mServiceId)
-                .setHeader("Authorization", mPreferencesManager.getToken())
-                .asJsonObject()
-                .withResponse()
-                .setCallback(new FutureCallback<Response<JsonObject>>() {
-                    @Override
-                    public void onCompleted(Exception e, Response<JsonObject> result) {
-                        if (result != null) {
-                            if (result.getHeaders().code() == 200) {
-                                if (result.getResult() != null) {
-                                    JsonArray scheduledHours = result.getResult().get("lockedHours").getAsJsonArray();
-                                    System.out.println(scheduledHours.toString());
-                                    for (JsonElement element : scheduledHours) {
-                                        try {
-                                            System.out.println(element.toString());
-                                            JSONObject jsonObject = new JSONObject(element.toString());
-                                            mScheduledHourList.add(new ScheduledHour(
-                                                    jsonObject.getString("username"),
-                                                    jsonObject.getString("dayId"),
-                                                    jsonObject.getString("hour"),
-                                                    jsonObject.getString("shortDescription"),
-                                                    jsonObject.getString("phoneNumber"),
-                                                    jsonObject.getInt("scheduleType")
-                                            ));
-                                            mScheduledHourAdapter.notifyDataSetChanged();
-                                        } catch (JSONException e1) {
-                                            e1.printStackTrace();
-                                        }
-                                    }
-                                } else {
-                                    Log.e(TAG, "onCompleted: result.getResult() is null");
-                                }
-                            } else {
-                                Toast.makeText(mCtx, "Error code: " + result.getHeaders().code(), Toast.LENGTH_SHORT).show();
-                            }
-                        } else {
-                            Log.e(TAG, "onCompleted: result is null");
+        Response<JsonObject> result = null;
+        try {
+            result = Ion.with(mCtx)
+                    .load("GET", mUrl + "/getLockedHoursForTodayForService/" + mServiceId)
+                    .setHeader("Authorization", mPreferencesManager.getToken())
+                    .asJsonObject()
+                    .withResponse()
+                    .get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (result != null) {
+            if (result.getHeaders().code() == 200) {
+                if (result.getResult() != null) {
+                    JsonArray scheduledHours = result.getResult().get("lockedHours").getAsJsonArray();
+                    System.out.println(scheduledHours.toString());
+                    mDisplayNoScheduleToday = scheduledHours.size() == 0;
+                    for (JsonElement element : scheduledHours) {
+                        try {
+                            System.out.println(element.toString());
+                            JSONObject jsonObject = new JSONObject(element.toString());
+                            mScheduledHourList.add(new ScheduledHour(
+                                    jsonObject.getString("username"),
+                                    jsonObject.getString("dayId"),
+                                    jsonObject.getString("hour"),
+                                    jsonObject.getString("shortDescription"),
+                                    jsonObject.getString("phoneNumber"),
+                                    jsonObject.getInt("scheduleType")
+                            ));
+                            mScheduledHourAdapter.notifyDataSetChanged();
+                        } catch (JSONException e1) {
+                            e1.printStackTrace();
                         }
                     }
-                });
+                } else {
+                    Log.e(TAG, "onCompleted: result.getResult() is null");
+                }
+            } else {
+                Toast.makeText(mCtx, "Error code: " + result.getHeaders().code(), Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Log.e(TAG, "onCompleted: result is null");
+        }
+
     }
 
     @Override

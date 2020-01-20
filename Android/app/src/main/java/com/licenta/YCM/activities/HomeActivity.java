@@ -98,17 +98,16 @@ public class HomeActivity extends AppCompatActivity {
         init();
         //set startup fragment
 
-        getSupportActionBar().setTitle("Acasa");
+        getSupportActionBar().setTitle("Acasă");
         mPreferencesManager.setOnlyMyServices(false);
-        getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment(), "Acasa").commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment(), "Acasă").commit();
 
         requestLocationPermission();
     }
 
     private void init() {
         Log.i(TAG, "init: ");
-        //mUrl = "https://agile-harbor-57300.herokuapp.com";
-        mUrl = "http://10.0.2.2:5000";
+        mUrl = mPreferencesManager.getServerUrl();
         mPreferencesManager.setPermissionLocation(false);
         mCtx = getApplicationContext();
         mToolbar = findViewById(R.id.homeToolbar);
@@ -128,7 +127,7 @@ public class HomeActivity extends AppCompatActivity {
                 mPreferencesManager.setUserLongitude((float) location.getLongitude());
                 //TextView test = mNavigationView.getHeaderView(0).findViewById(R.id.test);
                 //test.setText("Location: lat: " + location.getLatitude() + " long: " + location.getLongitude());
-                HomeFragment fragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag("Acasa");
+                HomeFragment fragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag("Acasă");
                 if (fragment != null) {
                     fragment.refreshLocation();
                 }
@@ -227,7 +226,7 @@ public class HomeActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.menuHome:
-                        getSupportActionBar().setTitle("Acasa");
+                        getSupportActionBar().setTitle("Acasă");
                         mPreferencesManager.setOnlyMyServices(false);
                         getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment(), "Acasa").commit();
                         mDrawerLayout.closeDrawer(GravityCompat.START);
@@ -294,9 +293,9 @@ public class HomeActivity extends AppCompatActivity {
         Log.i(TAG, "logout: ");
         mPreferencesManager.logout();
         setNavigationView();
-        getSupportActionBar().setTitle("Acasa");
+        getSupportActionBar().setTitle("Acasă");
         mPreferencesManager.setOnlyMyServices(false);
-        getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment(), "Acasa").commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment(), "Acasă").commit();
         //ToDo: same as onActivityResult() or not(need investigation)
     }
 
@@ -317,9 +316,9 @@ public class HomeActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         String message = "";
         if (requestCode == 11) {
-            message = "Permite aplicatiei sa foloseasca locatia pentru a vede distanta fata de service-uri!";
+            message = "Permite aplicației să folosească locația pentru a vede distanța față de service-uri!";
         } else {
-            message = "Permite aplicatiei sa foloseasca locatia pentru a seta locatia noului service!";
+            message = "Permite aplicației să folosească locația pentru a seta locația noului service!";
         }
         if (requestCode == 11 || requestCode == 12) {
             if (grantResults.length > 0) {
@@ -400,7 +399,7 @@ public class HomeActivity extends AppCompatActivity {
     private void editProfile() {
         Log.i(TAG, "editProfile: ");
         TextView editMyProfileTitle = new TextView(mCtx);
-        editMyProfileTitle.setText("Editeaza profilul!");
+        editMyProfileTitle.setText("Editează profilul!");
         editMyProfileTitle.setGravity(Gravity.CENTER);
         editMyProfileTitle.setPadding(10, 10, 10, 10);
         editMyProfileTitle.setTextSize(18);
@@ -433,15 +432,15 @@ public class HomeActivity extends AppCompatActivity {
                     galleryIntent.setType("image/*");
                     startActivityForResult(galleryIntent, 2);
                 } else {
-                    Toast.makeText(mCtx, "Mai intai permite aplicatiei de a accesa galeria!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mCtx, "Mai intai permite aplicației să acceseze galeria!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
         mEditMyProfilePopUp = new AlertDialog.Builder(HomeActivity.this)
                 .setCustomTitle(editMyProfileTitle)
                 .setView(editMyProfileView)
-                .setPositiveButton("Confirma", null)
-                .setNegativeButton("Anuleaza", null)
+                .setPositiveButton("Confirmă", null)
+                .setNegativeButton("Anulează", null)
                 .create();
         mEditMyProfilePopUp.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
@@ -471,20 +470,20 @@ public class HomeActivity extends AppCompatActivity {
         Log.i(TAG, "verifyInputOnClientSide: ");
         boolean resultOk = true;
         if (mEditFullName.getText().toString().trim().isEmpty()) {
-            mEditFullName.setError("Completeaza campul!");
+            mEditFullName.setError("Completează campul!");
             resultOk = false;
         }
         if (mEditEmail.getText().toString().trim().isEmpty()) {
-            mEditEmail.setError("Completeaza campul!");
+            mEditEmail.setError("Completează campul!");
             resultOk = false;
         } else {
             if (!Patterns.EMAIL_ADDRESS.matcher(mEditEmail.getText().toString().trim()).matches()) {
-                mEditEmail.setError("Adresa nevalida!");
+                mEditEmail.setError("Adresă nevalidă!");
                 resultOk = false;
             }
         }
         if (mEditPhone.getText().toString().trim().isEmpty()) {
-            mEditPhone.setError("Completeaza campul!");
+            mEditPhone.setError("Completează campul!");
             resultOk = false;
         } else {
             if (!Patterns.PHONE.matcher(mEditPhone.getText().toString().trim()).matches()) {
@@ -493,7 +492,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         }
         if (mEditOldPassword.getText().toString().trim().isEmpty()) {
-            mEditOldPassword.setError("Completeaza campul!");
+            mEditOldPassword.setError("Completează campul!");
             resultOk = false;
         } else if (mEditOldPassword.getText().toString().trim().length() < 6) {
             mEditOldPassword.setError("Introdu minim 6 caractere!");
@@ -564,7 +563,7 @@ public class HomeActivity extends AppCompatActivity {
                             } else {
                                 setEnableFields(true);
                                 Log.i(TAG, "verifyInputOnServerSide: Profile not edited! err code: " + response.getHeaders().code());
-                                Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(mCtx, "Ceva nu a mers! Verifică conexiunea la internet!", Toast.LENGTH_SHORT).show();
                             }
                         } catch (ExecutionException e) {
                             e.printStackTrace();
@@ -576,7 +575,7 @@ public class HomeActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.i(TAG, "onFailure: fail to get download link");
-                        Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mCtx, "Ceva nu a mers! Verifică conexiunea la internet!", Toast.LENGTH_SHORT).show();
                         setEnableFields(true);
                     }
                 });
@@ -585,7 +584,7 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Log.i(TAG, "onFailure: fail to get download link");
-                Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mCtx, "Ceva nu a mers! Verifică conexiunea la internet!", Toast.LENGTH_SHORT).show();
                 setEnableFields(true);
             }
         });

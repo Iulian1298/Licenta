@@ -114,17 +114,6 @@ def updateService():
                          status.HTTP_200_OK)
 
 
-@app.route("/services/getIdsFilterBy/", methods=["GET"])
-def getServiceIdsFilterBy():
-    minRating = request.json['minRating']
-    maxRating = request.json['maxRating']
-    givenNameFilter = request.json['givenNameFilter']
-    latitude = request.json['latitude']
-    longitude = request.json['longitude']
-    distanceInput = request.json['distanceInput']
-    cityInput = request.json['cityInput']
-
-
 def calculateDistance(lat1, long1, latitude, longitude, math=math):
     if (lat1 == latitude) and (long1 == longitude):
         return 0
@@ -148,11 +137,31 @@ def updateDistance(latitude, longitude):
         db.session.commit()
 
 
-@app.route("/service/getIdsBetween/offset/<offset>/limit/<limit>", methods=['GET'])
-def getIdsBetween(offset, limit):
+@app.route("/service/getIdsBetween/offset/<offset>/limit/<limit>/latitude/<latitude>/longitude/<longitude>",
+           methods=['GET'])
+def getIdsBetween(offset, limit, latitude, longitude):
     # updateDistance(latitude, longitude)
     # serviceIds = db.session.query(Service.id).order_by(asc(Service.distanceFromUser)).offset(offset).limit(limit).all()
-    serviceIds = db.session.query(Service.id).offset(offset).limit(limit).all()
+
+    serviceAll = db.session.query(Service).all()
+
+    serviceIds = [x.toDict()['id'] for x in sorted(serviceAll,
+                                                   key=lambda x: calculateDistance(x.toDict()['latitude'],
+                                                                                   x.toDict()['longitude'],
+                                                                                   float(latitude),
+                                                                                   float(longitude)))[
+                                            int(offset):int(offset) + int(limit)]]
+    '''for x in sorted(serviceAll,
+                    key=lambda x: calculateDistance(x.toDict()['latitude'],
+                                                    x.toDict()['longitude'],
+                                                    float(latitude),
+                                                    float(longitude)))[
+             int(offset):int(offset) + int(limit)]:
+        print(calculateDistance(x.toDict()['latitude'],
+                                x.toDict()['longitude'],
+                                float(latitude),
+                                float(longitude)),"        ",x.toDict()['id'])
+        # serviceIds = db.session.query(Service.id).offset(offset).limit(limit).all()'''
     print(serviceIds)
     return make_response(jsonify({"ids": serviceIds}), status.HTTP_200_OK)
 

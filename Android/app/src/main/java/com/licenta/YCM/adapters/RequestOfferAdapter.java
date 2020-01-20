@@ -55,12 +55,12 @@ public class RequestOfferAdapter extends RecyclerView.Adapter<RequestOfferAdapte
                         requestOffer.getCarVin(),
                         requestOffer.isWithUserParts() ? "Da" : "Nu"));
         viewHolder.serviceResponseFull.setText(requestOffer.getServiceAcceptance() == 1 ?
-                String.format("Perioada reparatie: %s - %s, pret estimativ: %s Lei",
+                String.format("Perioadă reparație: %s - %s, preț estimativ: %s Lei",
                         requestOffer.getFixStartDate(),
                         requestOffer.getFixEndDate(),
                         requestOffer.getServicePriceResponse()) :
                 requestOffer.getServiceAcceptance() == 2 ?
-                        String.format("Cerere refuzata deoarece: %s ",
+                        String.format("Cerere refuzată deoarece: %s ",
                                 requestOffer.getServiceResponse()) : "");
         viewHolder.serviceResponseFull.setVisibility((requestOffer.getServiceAcceptance() == 1) || (requestOffer.getServiceAcceptance() == 2) ? View.VISIBLE : View.GONE);
         viewHolder.mUserOrServicePhone.setText(requestOffer.getUserOrServicePhone());
@@ -104,12 +104,12 @@ public class RequestOfferAdapter extends RecyclerView.Adapter<RequestOfferAdapte
                         requestOffer.getCarVin(),
                         requestOffer.isWithUserParts() ? "Da" : "Nu"));
         viewHolder.serviceResponseFull.setText(requestOffer.getServiceAcceptance() == 1 ?
-                String.format("Perioada reparatie: %s - %s, pret estimativ: %s Lei",
+                String.format("Perioadă reparație: %s - %s, preț estimativ: %s Lei",
                         requestOffer.getFixStartDate(),
                         requestOffer.getFixEndDate(),
                         requestOffer.getServicePriceResponse()) :
                 requestOffer.getServiceAcceptance() == 2 ?
-                        String.format("Cerere refuzata deoarece: %s ",
+                        String.format("Cerere refuzată deoarece: %s ",
                                 requestOffer.getServiceResponse()) : "");
         viewHolder.serviceResponseFull.setVisibility((requestOffer.getServiceAcceptance() == 1) ||
                 (requestOffer.getServiceAcceptance() == 2) ? View.VISIBLE : View.GONE);
