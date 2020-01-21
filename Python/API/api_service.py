@@ -143,14 +143,17 @@ def getIdsBetween(offset, limit, latitude, longitude):
     # updateDistance(latitude, longitude)
     # serviceIds = db.session.query(Service.id).order_by(asc(Service.distanceFromUser)).offset(offset).limit(limit).all()
 
-    serviceAll = db.session.query(Service).all()
+    if float(latitude) > -1 and float(longitude) > -1:
+        serviceAll = db.session.query(Service).all()
 
-    serviceIds = [x.toDict()['id'] for x in sorted(serviceAll,
-                                                   key=lambda x: calculateDistance(x.toDict()['latitude'],
-                                                                                   x.toDict()['longitude'],
-                                                                                   float(latitude),
-                                                                                   float(longitude)))[
-                                            int(offset):int(offset) + int(limit)]]
+        serviceIds = [x.toDict()['id'] for x in sorted(serviceAll,
+                                                       key=lambda x: calculateDistance(x.toDict()['latitude'],
+                                                                                       x.toDict()['longitude'],
+                                                                                       float(latitude),
+                                                                                       float(longitude)))[
+                                                int(offset):int(offset) + int(limit)]]
+    else:
+        serviceIds = db.session.query(Service.id).offset(offset).limit(limit).all()
     '''for x in sorted(serviceAll,
                     key=lambda x: calculateDistance(x.toDict()['latitude'],
                                                     x.toDict()['longitude'],
@@ -174,14 +177,18 @@ def getIdsBetweenForUser(userId, offset, limit):
 
 
 @app.route("/services/getIdsBetweenWithFilter/offset/<offset>/limit/<limit>/minRating/<minRating>/maxRating/<maxRating>"
-           "/name/<name>/address/<address>/city/<city>/type/<serviceType>", methods=['GET'])
-def getIdsBetweenWithFilter(offset, limit, minRating, maxRating, name, address, city, serviceType):
+           "/name/<name>/address/<address>/city/<city>/type/<serviceType>/maxDistance/<maxDistance>/latitude/<latitude>"
+           "/longitude/<longitude>", methods=['GET'])
+def getIdsBetweenWithFilter(offset, limit, minRating, maxRating, name, address, city, serviceType, maxDistance,
+                            latitude, longitude):
     if name == "empty":
         name = ''
     if address == "empty":
         address = ''
     if city == "empty":
         city = ''
+    if maxDistance == "empty":
+        maxDistance = 100000
     if int(serviceType) & 1:
         S = "s"
     else:
@@ -198,18 +205,42 @@ def getIdsBetweenWithFilter(offset, limit, minRating, maxRating, name, address, 
         I = "i"
     else:
         I = "none"
-    serviceIds = Service.query.with_entities(Service.id).filter(Service.rating >= minRating,
-                                                                Service.rating <= maxRating,
-                                                                Service.name.contains(name),
-                                                                Service.address.contains(address),
-                                                                Service.city.contains(city),
-                                                                or_(Service.serviceType.contains(S),
-                                                                    Service.serviceType.contains(T),
-                                                                    Service.serviceType.contains(C),
-                                                                    Service.serviceType.contains(I))
-                                                                ).offset(
-        offset).limit(
-        limit).all()
+    if float(latitude) > -1 and float(longitude) > -1:
+        services = Service.query.with_entities(Service).filter(Service.rating >= minRating,
+                                                               Service.rating <= maxRating,
+                                                               Service.name.contains(name),
+                                                               Service.address.contains(address),
+                                                               Service.city.contains(city),
+                                                               or_(Service.serviceType.contains(S),
+                                                                   Service.serviceType.contains(T),
+                                                                   Service.serviceType.contains(C),
+                                                                   Service.serviceType.contains(I))
+                                                               ).all()
+        serviceIds = [x.toDict()['id'] for x in [x for x in sorted(services,
+                                                                   key=lambda x: calculateDistance(
+                                                                       x.toDict()['latitude'],
+                                                                       x.toDict()['longitude'],
+                                                                       float(latitude),
+                                                                       float(longitude))) if
+                                                 (calculateDistance(x.toDict()['latitude'],
+                                                                    x.toDict()['longitude'],
+                                                                    float(latitude),
+                                                                    float(longitude)) < float(maxDistance))]
+        [int(offset): int(offset) + int(limit)]]
+    else:
+        serviceIds = Service.query.with_entities(Service).filter(Service.rating >= minRating,
+                                                                 Service.rating <= maxRating,
+                                                                 Service.name.contains(name),
+                                                                 Service.address.contains(address),
+                                                                 Service.city.contains(city),
+                                                                 or_(Service.serviceType.contains(S),
+                                                                     Service.serviceType.contains(T),
+                                                                     Service.serviceType.contains(C),
+                                                                     Service.serviceType.contains(I))
+                                                                 ).offset(
+            offset).limit(
+            limit).all()
+
     return make_response(jsonify({"ids": serviceIds}), status.HTTP_200_OK)
 
 

@@ -11,12 +11,12 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:layout_margin="5dp"
+            android:gravity="center"
             android:orientation="vertical">
 
             <RelativeLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
                 <TextView
@@ -27,7 +27,8 @@
                     android:layout_alignParentTop="true"
                     android:layout_centerVertical="true"
                     android:layout_margin="5dp"
-                    android:text="@string/ratingMin" />
+                    android:text="@string/ratingMin"
+                    android:textColor="@color/colorBlack" />
 
                 <RatingBar
                     android:id="@+id/ratingBarMinFilter"
@@ -45,7 +46,7 @@
             </RelativeLayout>
 
             <RelativeLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
                 <TextView
@@ -55,7 +56,8 @@
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:layout_margin="5dp"
-                    android:text="@string/ratingMax" />
+                    android:text="@string/ratingMax"
+                    android:textColor="@color/colorBlack" />
 
                 <RatingBar
                     android:id="@+id/ratingBarMaxFilter"
@@ -82,7 +84,8 @@
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:layout_margin="5dp"
-                    android:text="@string/nameFilter" />
+                    android:text="@string/nameFilter"
+                    android:textColor="@color/colorBlack" />
 
                 <EditText
                     android:id="@+id/givenNameFilter"
@@ -105,7 +108,8 @@
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:layout_margin="5dp"
-                    android:text="@string/addressFilter" />
+                    android:text="@string/addressFilter"
+                    android:textColor="@color/colorBlack" />
 
                 <EditText
                     android:id="@+id/addressInputFilter"
@@ -113,7 +117,6 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:layout_toEndOf="@id/addressFilter"
-                    android:inputType="number"
                     android:maxLength="50" />
             </RelativeLayout>
 
@@ -128,7 +131,8 @@
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:layout_margin="5dp"
-                    android:text="@string/cityFilter" />
+                    android:text="@string/cityFilter"
+                    android:textColor="@color/colorBlack" />
 
                 <EditText
                     android:id="@+id/cityInputFilter"
@@ -138,6 +142,40 @@
                     android:layout_toEndOf="@id/cityFilter"
                     android:maxLength="50" />
             </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/distanceFilter"
+                    android:layout_width="125dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_margin="5dp"
+                    android:text="@string/distanceFilter"
+                    android:textColor="@color/colorBlack" />
+
+                <EditText
+                    android:id="@+id/distanceInputFilter"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:layout_toEndOf="@id/distanceFilter"
+                    android:inputType="numberDecimal"
+                    android:maxLength="50" />
+
+                <TextView
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_margin="5dp"
+                    android:layout_toEndOf="@id/distanceInputFilter"
+                    android:text="@string/distanceUnit"
+                    android:textColor="@color/colorBlack" />
+            </RelativeLayout>
+
 
             <HorizontalScrollView
                 android:layout_width="wrap_content"
@@ -152,8 +190,8 @@
                         android:id="@+id/repairServiceCheckFilter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:checked="true"
                         android:layout_marginEnd="10dp"
+                        android:checked="true"
                         android:text="@string/repairService" />
 
                     <CheckBox
@@ -183,27 +221,12 @@
             </HorizontalScrollView>
 
 
-            <RelativeLayout
+            <CheckBox
+                android:id="@+id/resetFilterCheck"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center">
-
-                <TextView
-                    android:id="@+id/resetFilter"
-                    android:layout_width="125dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_margin="5dp"
-                    android:text="@string/resetFilter" />
-
-                <CheckBox
-                    android:id="@+id/resetFilterCheck"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:layout_toEndOf="@id/resetFilter" />
-            </RelativeLayout>
+                android:layout_margin="5dp"
+                android:text="@string/resetFilter" />
         </LinearLayout>
     </RelativeLayout>
 

@@ -100,4 +100,6 @@
     <string name="decline">Refuză</string>
     <string name="delete">Șterge</string>
     <string name="coin">Lei</string>
+    <string name="distanceFilter">Distanța maximă:</string>
+    <string name="distanceUnit">Km</string>
 </resources>

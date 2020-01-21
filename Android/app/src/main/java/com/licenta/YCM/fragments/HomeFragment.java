@@ -122,6 +122,7 @@ public class HomeFragment extends Fragment {
     private String mFilterName;
     private String mFilterAddress;
     private String mFilterCity;
+    private String mFilterDistance;
     private int mFilterType;
 
     @Override
@@ -190,7 +191,10 @@ public class HomeFragment extends Fragment {
                             + "/name/" + mFilterName
                             + "/address/" + mFilterAddress
                             + "/city/" + mFilterCity
-                            + "/type/" + mFilterType;
+                            + "/type/" + mFilterType
+                            + "/maxDistance/" + mFilterDistance
+                            + "/latitude/" + mPreferencesManager.getUserLatitude()
+                            + "/longitude/" + mPreferencesManager.getUserLongitude();
                 }
             }
             populateServiceAutoList();
@@ -221,7 +225,6 @@ public class HomeFragment extends Fragment {
         mUrl = mPreferencesManager.getServerUrl();
         mServiceAutoList = new ArrayList<>();
         mServiceAutoAdapter = new ServiceAutoAdapter(mCtx, mServiceAutoList);
-        //mServiceAutoRecyclerView.addItemDecoration(new DividerItemDecoration(mCtx, DividerItemDecoration.VERTICAL));
         mServiceAutoRecyclerView.setAdapter(mServiceAutoAdapter);
         mLoadMoreServices = v.findViewById(R.id.loadMoreServices);
         mFilterUlrSet = false;
@@ -265,11 +268,25 @@ public class HomeFragment extends Fragment {
                     mCompleteUrl = mUrl + "/services/getIdsBetweenForMyServices/" + mPreferencesManager.getUserId() + "/offset/" + mServiceAutoOffset + "/limit/"
                             + mServiceAutoLimit;
                 } else {
-                    //added lat and long warning!!!
-                    mCompleteUrl = mUrl + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
-                            + mServiceAutoLimit + "/latitude/" + mPreferencesManager.getUserLatitude()
-                            + "/longitude/" + mPreferencesManager.getUserLongitude();
-
+                    if (!mFilterUlrSet) {
+                        //added lat and long warning!!!
+                        mCompleteUrl = mUrl + "/service/getIdsBetween/offset/" + mServiceAutoOffset + "/limit/"
+                                + mServiceAutoLimit + "/latitude/" + mPreferencesManager.getUserLatitude()
+                                + "/longitude/" + mPreferencesManager.getUserLongitude();
+                    } else {
+                        mCompleteUrl = mUrl
+                                + "/services/getIdsBetweenWithFilter/offset/" + mServiceAutoOffset
+                                + "/limit/" + mServiceAutoLimit
+                                + "/minRating/" + (int) mFilterRatingMinBar.getRating()
+                                + "/maxRating/" + (int) mFilterRatingMaxBar.getRating()
+                                + "/name/" + mFilterName
+                                + "/address/" + mFilterAddress
+                                + "/city/" + mFilterCity
+                                + "/type/" + mFilterType
+                                + "/maxDistance/" + mFilterDistance
+                                + "/latitude/" + mPreferencesManager.getUserLatitude()
+                                + "/longitude/" + mPreferencesManager.getUserLongitude();
+                    }
                 }
                 populateServiceAutoList();
                 new Handler().postDelayed(new Runnable() {
@@ -844,6 +861,7 @@ public class HomeFragment extends Fragment {
                 final EditText givenNameFilter = advancedFilterView.findViewById(R.id.givenNameFilter);
                 final EditText addressInput = advancedFilterView.findViewById(R.id.addressInputFilter);
                 final EditText cityInput = advancedFilterView.findViewById(R.id.cityInputFilter);
+                final EditText distanceInput = advancedFilterView.findViewById(R.id.distanceInputFilter);
                 final CheckBox repairServiceCheckFilter = advancedFilterView.findViewById(R.id.repairServiceCheckFilter);
                 final CheckBox serviceChassisCheckFilter = advancedFilterView.findViewById(R.id.serviceChassisCheckFilter);
                 final CheckBox serviceTireCheckFilter = advancedFilterView.findViewById(R.id.serviceTireCheckFilter);
@@ -885,9 +903,11 @@ public class HomeFragment extends Fragment {
                                     } else {
                                         if (!(mFilterRatingMinBar.getRating() == 0
                                                 && mFilterRatingMaxBar.getRating() == 0)
-                                                && givenNameFilter.getText().toString().isEmpty()
-                                                && addressInput.getText().toString().isEmpty()
-                                                && cityInput.getText().toString().isEmpty()) {
+                                                || givenNameFilter.getText().toString().isEmpty()
+                                                || addressInput.getText().toString().isEmpty()
+                                                || cityInput.getText().toString().isEmpty()
+                                                || distanceInput.getText().toString().isEmpty()
+                                        ) {
                                             mFilterType = 0;
                                             if (repairServiceCheckFilter.isChecked()) {
                                                 mFilterType |= 1;
@@ -922,6 +942,11 @@ public class HomeFragment extends Fragment {
                                             } else {
                                                 mFilterCity = cityInput.getText().toString();
                                             }
+                                            if (distanceInput.getText().toString().isEmpty()) {
+                                                mFilterDistance = "empty";
+                                            } else {
+                                                mFilterDistance = distanceInput.getText().toString();
+                                            }
                                             mCompleteUrl = mUrl
                                                     + "/services/getIdsBetweenWithFilter/offset/" + mServiceAutoOffset
                                                     + "/limit/" + mServiceAutoLimit
@@ -930,7 +955,10 @@ public class HomeFragment extends Fragment {
                                                     + "/name/" + mFilterName
                                                     + "/address/" + mFilterAddress
                                                     + "/city/" + mFilterCity
-                                                    + "/type/" + mFilterType;
+                                                    + "/type/" + mFilterType
+                                                    + "/maxDistance/" + mFilterDistance
+                                                    + "/latitude/" + mPreferencesManager.getUserLatitude()
+                                                    + "/longitude/" + mPreferencesManager.getUserLongitude();
                                             mFilterUlrSet = true;
                                             mServiceAutoOffset = 0;
                                             mServiceAutoList.clear();

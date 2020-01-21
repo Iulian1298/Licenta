@@ -77,7 +77,7 @@ public class SharedPreferencesManager {
 
     public float getUserLongitude() {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getFloat(KEY_LONGITUDE, 0);
+        return sharedPreferences.getFloat(KEY_LONGITUDE, -1);
     }
 
     public void setUserLongitude(float longitude) {
@@ -89,7 +89,7 @@ public class SharedPreferencesManager {
 
     public float getUserLatitude() {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getFloat(KEY_LATITUDE, 0);
+        return sharedPreferences.getFloat(KEY_LATITUDE, -1);
     }
 
     public void setUserLatitude(float latitude) {
