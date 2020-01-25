@@ -9,8 +9,9 @@ from models.users import User
 def check():
     return make_response(jsonify({"response": "Token OK"}), status.HTTP_200_OK)
 
+
 def getJWT(user):
-    token = jwt.encode({'user': user, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=180)},
+    token = jwt.encode({'user': user},
                        app.config["SECRET_KEY"]).decode("UTF-8")
     return token
 

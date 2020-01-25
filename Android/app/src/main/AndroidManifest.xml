@@ -20,13 +20,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppThemeActionBarNotPresent"
         tools:ignore="GoogleAppIndexingWarning">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCEGaMfRLYBNzHLk-hXuZogTTHG7c6NTLg"/>
         <activity
             android:name=".activities.OfferRequestsActivity"
             android:theme="@style/AppThemeActionBarPresent" />
         <activity
             android:name=".activities.CommentsActivity"
             android:theme="@style/AppThemeActionBarPresent" />
-        <activity android:name=".activities.TodayScheduleActivity" />
+        <activity android:name=".activities.TodayAppointmentsActivity" />
         <activity android:name=".activities.ServiceAutoActivity" />
         <activity android:name=".activities.HomeActivity">
             <intent-filter>

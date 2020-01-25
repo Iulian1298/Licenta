@@ -48,6 +48,14 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.libraries.maps.CameraUpdate;
+import com.google.android.libraries.maps.CameraUpdateFactory;
+import com.google.android.libraries.maps.GoogleMap;
+import com.google.android.libraries.maps.MapView;
+import com.google.android.libraries.maps.OnMapReadyCallback;
+import com.google.android.libraries.maps.SupportMapFragment;
+import com.google.android.libraries.maps.model.LatLng;
+import com.google.android.libraries.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
@@ -124,10 +132,14 @@ public class HomeFragment extends Fragment {
     private String mFilterCity;
     private String mFilterDistance;
     private int mFilterType;
+    private MapView mMapAddService;
+    private LatLng mSelectedServiceLocation;
+    private Bundle mSavedInstanceState;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        mSavedInstanceState = savedInstanceState;
         final View fragmentView = inflater.inflate(R.layout.fragment_home, container, false);
         mFragmentView = fragmentView;
         mCtx = getContext();
@@ -348,6 +360,48 @@ public class HomeFragment extends Fragment {
                 startActivityForResult(intent, 1);
             }
         });
+        mServiceAutoAdapter.setDeleteClickListener(new ServiceAutoAdapter.OnDeleteClickListener() {
+            @Override
+            public void onDeleteClick(View view, final int pos) {
+                Log.i(TAG, "onDeleteClick: delete Service");
+                final StorageReference storageReference = FirebaseStorage.getInstance()
+                        .getReferenceFromUrl(mServiceAutoList.get(pos).getImage().toString());
+                storageReference.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.i(TAG, "onSuccess: Image for service deleted");
+                        String url = mUrl + "/service/deleteById/" + mServiceAutoList.get(pos).getServiceId();
+                        try {
+                            Response<JsonObject> response = Ion.with(mCtx)
+                                    .load("DELETE", url)
+                                    .setHeader("Authorization", mPreferencesManager.getToken())
+                                    .asJsonObject()
+                                    .withResponse()
+                                    .get();
+                            if (response.getHeaders().code() == 200) {
+                                Log.i(TAG, "onDeleteClick: Service with id: " + mServiceAutoList.get(pos).getServiceId() + "deleted");
+                                mServiceAutoList.remove(pos);
+                                mServiceAutoAdapter.notifyDataSetChanged();
+
+                                Toast.makeText(mCtx, "Service-ul a fost șters!", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(mCtx, "Err code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "onFailure: Something goes wrong to get dowload link");
+                        Toast.makeText(mCtx, "Ceva nu a mers! Verifică conexiunea la internet!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
         mAddServiceFloatingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -363,12 +417,7 @@ public class HomeFragment extends Fragment {
                 if (!isLoggedIn) {
                     showPopUpNotLogged();
                 } else {
-                    if (ContextCompat.checkSelfPermission(mCtx, Manifest.permission.ACCESS_FINE_LOCATION)
-                            == PackageManager.PERMISSION_GRANTED) {
-                        mAddService.show();
-                    } else {
-                        ActivityCompat.requestPermissions((HomeActivity) mCtx, new String[]{ACCESS_FINE_LOCATION}, 12);
-                    }
+                    mAddService.show();
                 }
             }
         });
@@ -395,6 +444,27 @@ public class HomeFragment extends Fragment {
         mServiceTireCheck = mAddService.findViewById(R.id.serviceTireCheck);
         mRepairServiceCheck = mAddService.findViewById(R.id.repairServiceCheck);
         mAddServiceProgressBar = mAddService.findViewById(R.id.addServiceProgressBar);
+        mMapAddService = mAddService.findViewById(R.id.mapAddService);
+        mMapAddService.onCreate(mSavedInstanceState);
+        mMapAddService.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(final GoogleMap googleMap) {
+                LatLng currentUserPosition = new LatLng(mPreferencesManager.getUserLatitude(), mPreferencesManager.getUserLongitude());
+                mSelectedServiceLocation = currentUserPosition;
+                Log.i(TAG, "onMapReady: Set user current location: " + currentUserPosition.toString());
+                googleMap.addMarker(new MarkerOptions().position(currentUserPosition).title("Locația service-ului"));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentUserPosition, 12.0f));
+                googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                    @Override
+                    public void onMapClick(LatLng latLng) {
+                        googleMap.clear();
+                        mSelectedServiceLocation = latLng;
+                        Log.i(TAG, "onMapClick: User selected: " + latLng.toString());
+                        googleMap.addMarker(new MarkerOptions().position(latLng).title("Locația service-ului"));
+                    }
+                });
+            }
+        });
         mAddServiceImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -457,8 +527,8 @@ public class HomeFragment extends Fragment {
         jsonBody.addProperty("serviceAcceptedBrand", mAddServiceAcceptedBrand.getText().toString().trim());
         jsonBody.addProperty("serviceDescription", mAddServiceDescription.getText().toString().trim());
         jsonBody.addProperty("serviceType", type);
-        jsonBody.addProperty("longitude", mPreferencesManager.getUserLongitude());
-        jsonBody.addProperty("latitude", mPreferencesManager.getUserLatitude());
+        jsonBody.addProperty("longitude", mSelectedServiceLocation.longitude);
+        jsonBody.addProperty("latitude", mSelectedServiceLocation.latitude);
         jsonBody.addProperty("serviceOwner", mPreferencesManager.getUserId());
         StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("service_image");
         final StorageReference imageFilePath = storageReference.child(UUID.randomUUID() + "_" + mAddServiceImageUri.getLastPathSegment());
@@ -559,6 +629,7 @@ public class HomeFragment extends Fragment {
         mServiceItpCheck.setEnabled(value);
         mServiceTireCheck.setEnabled(value);
         mRepairServiceCheck.setEnabled(value);
+        mMapAddService.setEnabled(value);
     }
 
     private boolean verifyInputOnClientSide() {
@@ -867,6 +938,13 @@ public class HomeFragment extends Fragment {
                 final CheckBox serviceTireCheckFilter = advancedFilterView.findViewById(R.id.serviceTireCheckFilter);
                 final CheckBox serviceItpCheckFilter = advancedFilterView.findViewById(R.id.serviceItpCheckFilter);
                 final CheckBox resetFilterCheck = advancedFilterView.findViewById(R.id.resetFilterCheck);
+                if (ContextCompat.checkSelfPermission(mCtx, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED) {
+                    TextView distanceFilter = advancedFilterView.findViewById(R.id.distanceFilter);
+                    TextView distanceFilterUnit = advancedFilterView.findViewById(R.id.distanceInputFilterUnit);
+                    distanceFilter.setTextColor(Color.parseColor("#808080"));
+                    distanceFilterUnit.setTextColor(Color.parseColor("#808080"));
+                    distanceInput.setEnabled(false);
+                }
                 TextView filterTitle = new TextView(getContext());
                 filterTitle.setText("Filtrare avansată!");
                 filterTitle.setGravity(Gravity.CENTER);
@@ -978,6 +1056,12 @@ public class HomeFragment extends Fragment {
                 return true;
         }
         return super.onOptionsItemSelected(menuItem);
+    }
+
+    @Override
+    public void onDestroyView() {
+        Log.i(TAG, "onDestroyView: ");
+        super.onDestroyView();
     }
 
     public HomeFragment() {

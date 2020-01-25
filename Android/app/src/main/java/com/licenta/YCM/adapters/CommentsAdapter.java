@@ -34,6 +34,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ViewHo
     public CommentsAdapter(Context context, ArrayList<Comment> commentsList) {
         this.mCommentsList = commentsList;
         this.mContext = context;
+        this.mDeleteClickListener = null;
     }
 
     @NonNull

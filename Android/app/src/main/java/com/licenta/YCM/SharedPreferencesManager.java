@@ -74,6 +74,10 @@ public class SharedPreferencesManager {
         editor.putBoolean(KEY_PERMISSION_LOCATION, permission);
         editor.apply();
     }
+    public boolean getPermissionLocation() {
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean(KEY_PERMISSION_LOCATION, false);
+    }
 
     public float getUserLongitude() {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);

@@ -184,11 +184,14 @@ public class CommentsActivity extends AppCompatActivity {
                         .withResponse()
                         .get();
                 if (response.getHeaders().code() == 200) {
+                    Log.i(TAG, "onDeleteClick: Comment with id: " + mCommentsList.get(pos).getId() + "deleted");
                     setResult(RESULT_OK, mReturnIntent);
                     mReturnIntent.putExtra("deletionNewRating", response.getResult().get("newRating").getAsFloat());
                     mCommentsList.remove(pos);
                     mCommentsAdapter.notifyDataSetChanged();
-                    Log.i(TAG, "onDeleteClick: Comment with id: " + mCommentsList.get(pos).getId() + "deleted");
+                    Toast.makeText(mCtx, "Comentariul a fost șters!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(mCtx, "Err code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
                 }
             }
         });

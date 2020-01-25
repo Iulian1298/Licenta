@@ -56,11 +56,13 @@
     <string name="carVin">VIN:</string>
     <string name="menuAuthButton">Autentificare</string>
     <string name="menuMyServices">Service-urile mele</string>
-    <string name="menuMyRequestOffer">Cererile mele</string>
-    <string name="scheduledHour">08:00</string>
-    <string name="scheduleOwner">Schedule Owner</string>
-    <string name="scheduleUserPhone">0712345678</string>
-    <string name="scheduleShortDescription">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed dolore magna aliqua. Ut enim ad minim veniam, quis nostrud</string>
+    <string name="menuMyRequestsAndMyAppointments">Cererile și programările mele</string>
+    <string name="tabMyRequestsOffer">Cererile mele</string>
+    <string name="tabMyAppointments">Programările mele</string>
+    <string name="appointmentHour">08:00</string>
+    <string name="appointmentOwnerOrService">Schedule Owner</string>
+    <string name="appointmentOwnerOrServicePhone">0712345678</string>
+    <string name="appointmentShortDescription">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed dolore magna aliqua. Ut enim ad minim veniam, quis nostrud</string>
     <string name="phone">Nr. tău de telefon..</string>
     <string name="todaySchedule">Programarile pe azi</string>
     <string name="offerRequest">Cereri de oferta</string>
@@ -85,7 +87,7 @@
     <string name="newRePassword">Reintrodu noua parolă</string>
     <string name="newPasword">Noua parolă</string>
     <string name="newOldPassword">Introdu vechea parolă</string>
-    <string name="scheduleType">Tipul Programarii: </string>
+    <string name="appointmentType">Tipul Programarii: </string>
     <string name="requestText">Lorem Ipsum este pur şi simplu o machetă pentru text a industriei tipografice. Lorem Ipsum a fost macheta</string>
     <string name="userOrService">User/Service</string>
     <string name="withUserParts">Cu piesele clientului:</string>

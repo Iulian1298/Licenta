@@ -34,6 +34,7 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
     private Context mContext;
     private OnItemServiceAutoClickListener mItemServiceAutoClickListener;
     private SharedPreferencesManager mPreferencesManager;
+    private OnDeleteClickListener mDeleteClickListener;
 
 
     public ServiceAutoAdapter(Context context, ArrayList<ServiceAuto> serviceAutoList) {
@@ -42,6 +43,7 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
         this.mServiceAutoList = serviceAutoList;
         this.mServiceAutoListFiltered = serviceAutoList;
         this.mItemServiceAutoClickListener = null;
+        this.mDeleteClickListener = null;
     }
 
     @NonNull
@@ -92,6 +94,9 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
             viewHolder.mDistance.setVisibility(View.GONE);
             viewHolder.mDistanceIcon.setVisibility(View.GONE);
         }
+        if (mPreferencesManager.getOnlyMyServices()) {
+            viewHolder.mDeleteService.setVisibility(View.VISIBLE);
+        }
         viewHolder.mAddress.setText(serviceAuto.getCity() + ", " + serviceAuto.getAddress());
         viewHolder.mRatingBar.setRating(serviceAuto.getRating());
     }
@@ -109,6 +114,7 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
         private TextView mAddress;
         private RatingBar mRatingBar;
         private ImageView mDistanceIcon;
+        private ImageView mDeleteService;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -119,11 +125,20 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
             mDistanceIcon = itemView.findViewById(R.id.distanceFromYouIcon);
             mAddress = itemView.findViewById(R.id.address);
             mRatingBar = itemView.findViewById(R.id.rating);
+            mDeleteService = itemView.findViewById(R.id.deleteService);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if (mItemServiceAutoClickListener != null) {
                         mItemServiceAutoClickListener.onItemServiceAutoClick(view, getAdapterPosition());
+                    }
+                }
+            });
+            mDeleteService.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mDeleteClickListener != null) {
+                        mDeleteClickListener.onDeleteClick(v, getAdapterPosition());
                     }
                 }
             });
@@ -136,6 +151,14 @@ public class ServiceAutoAdapter extends RecyclerView.Adapter<ServiceAutoAdapter.
 
     public interface OnItemServiceAutoClickListener {
         void onItemServiceAutoClick(View view, int pos);
+    }
+
+    public interface OnDeleteClickListener {
+        void onDeleteClick(View view, int pos);
+    }
+
+    public void setDeleteClickListener(OnDeleteClickListener clickListener) {
+        this.mDeleteClickListener = clickListener;
     }
 
     private class ServicesHomeListFilter extends Filter {

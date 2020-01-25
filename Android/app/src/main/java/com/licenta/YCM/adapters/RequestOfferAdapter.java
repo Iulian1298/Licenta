@@ -35,6 +35,11 @@ public class RequestOfferAdapter extends RecyclerView.Adapter<RequestOfferAdapte
         this.mRequestOfferList = requestOfferList;
         this.mContext = context;
         this.mIsUserOrService = isUserOrService;
+        this.mPhoneCLickListener = null;
+        this.mAcceptClickListener = null;
+        this.mDeclineCLickListener = null;
+        this.mDeleteCLickListener = null;
+        this.mOfferUpdatedClickListener = null;
     }
 
     @NonNull

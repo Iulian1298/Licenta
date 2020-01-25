@@ -62,7 +62,7 @@ def addComment():
 def getCommentsIdsBetweenForService(serviceId, offset, limit):
     serviceAllCommentsId = [i[0] for i in
                             Comment.query.with_entities(Comment.id).filter_by(serviceId=serviceId).order_by(
-                                desc(Comment.creationTime)).offset(offset).limit(limit).all()]
+                                Comment.creationTime.desc()).offset(offset).limit(limit).all()]
     # print(serviceAllCommentsId)
     return make_response(jsonify({"Ids": serviceAllCommentsId}), status.HTTP_200_OK)
 

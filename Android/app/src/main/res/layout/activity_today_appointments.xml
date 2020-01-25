@@ -6,20 +6,20 @@
     android:orientation="vertical">
 
     <android.support.design.widget.AppBarLayout
-        android:id="@+id/todayScheduleAppbar"
+        android:id="@+id/todayAppointmentsAppbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppThemeActionBarPresent">
 
         <android.support.v7.widget.Toolbar
-            android:id="@+id/todayScheduleToolbar"
+            android:id="@+id/todayAppointmentsToolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_scrollFlags="scroll|enterAlways|snap"
             app:popupTheme="@style/AppThemeActionBarPresent">
 
             <TextView
-                android:id="@+id/todayScheduleToolbarTitle"
+                android:id="@+id/todayAppointmentsToolbarTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="marquee"
@@ -35,13 +35,13 @@
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/refreshScheduledHours"
+        android:id="@+id/refreshAppointments"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/scheduledHoursList"
+            android:id="@+id/appointmentsList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scrollbars="vertical" />

@@ -22,12 +22,10 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.text.InputFilter;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
@@ -48,7 +46,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,6 +53,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.libraries.maps.CameraUpdateFactory;
+import com.google.android.libraries.maps.GoogleMap;
+import com.google.android.libraries.maps.MapView;
+import com.google.android.libraries.maps.OnMapReadyCallback;
+import com.google.android.libraries.maps.model.LatLng;
+import com.google.android.libraries.maps.model.MarkerOptions;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -71,9 +74,7 @@ import com.roomorama.caldroid.CaldroidFragment;
 import com.roomorama.caldroid.CaldroidListener;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -110,6 +111,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private FloatingActionButton mScheduleToServiceFab;
     private FloatingActionButton mCallServiceFab;
     private FloatingActionButton mSendMailToServiceFab;
+    private FloatingActionButton mCreateRouteToService;
     private CoordinatorLayout mServiceAutoFloatingButtons;
     private Toolbar mServiceToolbar;
     private TextView mServiceType;
@@ -132,12 +134,16 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private LinearLayout mEditLinearLayout;
     private Button mConfirm;
     private Button mCancel;
+    private MapView mMapEditService;
+    private Bundle mSavedInstanceState;
+    private LatLng mSelectedServiceLocation;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "onCreate: ");
         super.onCreate(savedInstanceState);
+        mSavedInstanceState = savedInstanceState;
         setContentView(R.layout.activity_service_auto);
         mCtx = getApplicationContext();
         mPreferencesManager = SharedPreferencesManager.getInstance(mCtx);
@@ -254,6 +260,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
             mScheduleToServiceFab = floatingButtons.findViewById(R.id.scheduleToServiceFab);
             mCallServiceFab = floatingButtons.findViewById(R.id.callServiceFab);
             mSendMailToServiceFab = floatingButtons.findViewById(R.id.sendMailToServiceFab);
+            mCreateRouteToService = floatingButtons.findViewById(R.id.createRouteToService);
             mLeaveCommentFab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -289,6 +296,13 @@ public class ServiceAutoActivity extends AppCompatActivity {
                     closeFloatingMenu();
                 }
             });
+            mCreateRouteToService.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    createRouteToService();
+                    closeFloatingMenu();
+                }
+            });
         }
         mMenuServiceFloatingButton = floatingButtons.findViewById(R.id.menuServiceFloatingButton);
         closeFloatingMenu();
@@ -309,6 +323,15 @@ public class ServiceAutoActivity extends AppCompatActivity {
                 closeFloatingMenu();
             }
         });
+    }
+
+    private void createRouteToService() {
+        String uri = "http://maps.google.com/maps?saddr="
+                + mPreferencesManager.getUserLatitude() + "," + mPreferencesManager.getUserLongitude()
+                + "&daddr=" + mServiceAuto.getLatitude() + "," + mServiceAuto.getLongitude();
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+        intent.setPackage("com.google.android.apps.maps");
+        startActivity(intent);
     }
 
     private void callService() {
@@ -588,6 +611,27 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mEditServiceImage = editServiceView.findViewById(R.id.editServiceImage);
         mEditServiceProgressBar = editServiceView.findViewById(R.id.editServiceProgressBar);
         mEditLinearLayout = editServiceView.findViewById(R.id.editLinearLayout);
+        mMapEditService = editServiceView.findViewById(R.id.mapEditService);
+        mMapEditService.onCreate(mSavedInstanceState);
+        mMapEditService.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(final GoogleMap googleMap) {
+                LatLng curentServicePosition = new LatLng(mServiceAuto.getLatitude(), mServiceAuto.getLongitude());
+                mSelectedServiceLocation = curentServicePosition;
+                Log.i(TAG, "onMapReady: Set service current location: " + curentServicePosition.toString());
+                googleMap.addMarker(new MarkerOptions().position(curentServicePosition).title("Locația service-ului"));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(curentServicePosition, 12.0f));
+                googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                    @Override
+                    public void onMapClick(LatLng latLng) {
+                        googleMap.clear();
+                        mSelectedServiceLocation = latLng;
+                        Log.i(TAG, "onMapClick: User selected: " + latLng.toString());
+                        googleMap.addMarker(new MarkerOptions().position(latLng).title("Noua locația"));
+                    }
+                });
+            }
+        });
         mEditServiceName.setText(mServiceAuto.getName());
         mEditServiceAddress.setText(mServiceAuto.getAddress());
         mEditServiceCity.setText(mServiceAuto.getCity());
@@ -671,6 +715,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mEditServiceChassisCheck.setEnabled(value);
         mEditServiceItpCheck.setEnabled(value);
         mEditServiceImage.setEnabled(value);
+        mMapEditService.setEnabled(value);
     }
 
     private void updateUi() {
@@ -695,13 +740,8 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mServiceAuto.setDescription(mEditServiceDescription.getText().toString().trim());
         mServiceAuto.setAcceptedBrands(mEditServiceAcceptedBrand.getText().toString().trim());
         mServiceAuto.setType(type);
-        if (ContextCompat.checkSelfPermission(mCtx, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mServiceAuto.setLongitude(mPreferencesManager.getUserLongitude());
-            mServiceAuto.setLatitude(mPreferencesManager.getUserLatitude());
-        } else {
-            mServiceAuto.setLongitude(mServiceAuto.getLongitude());
-            mServiceAuto.setLatitude(mServiceAuto.getLatitude());
-        }
+        mServiceAuto.setLongitude(mSelectedServiceLocation.longitude);
+        mServiceAuto.setLatitude(mSelectedServiceLocation.latitude);
 
         setResult(3, mReturnIntent);
         mReturnIntent.putExtra("newServiceName", mEditServiceName.getText().toString().trim());
@@ -712,13 +752,8 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mReturnIntent.putExtra("newServiceDescription", mEditServiceDescription.getText().toString().trim());
         mReturnIntent.putExtra("newServiceAcceptedBrand", mEditServiceAcceptedBrand.getText().toString().trim());
         mReturnIntent.putExtra("newServiceType", type);
-        if (ContextCompat.checkSelfPermission(mCtx, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mReturnIntent.putExtra("newLongitude", (double) mPreferencesManager.getUserLongitude());
-            mReturnIntent.putExtra("newLatitude", (double) mPreferencesManager.getUserLatitude());
-        } else {
-            mReturnIntent.putExtra("newLongitude", mServiceAuto.getLongitude());
-            mReturnIntent.putExtra("newLatitude", mServiceAuto.getLatitude());
-        }
+        mReturnIntent.putExtra("newLongitude", mSelectedServiceLocation.longitude);
+        mReturnIntent.putExtra("newLatitude", mSelectedServiceLocation.latitude);
     }
 
     private boolean verifyInputOnClientSide() {
@@ -794,13 +829,8 @@ public class ServiceAutoActivity extends AppCompatActivity {
         jsonBody.addProperty("serviceAcceptedBrand", mEditServiceAcceptedBrand.getText().toString().trim());
         jsonBody.addProperty("serviceDescription", mEditServiceDescription.getText().toString().trim());
         jsonBody.addProperty("serviceType", type);
-        if (ContextCompat.checkSelfPermission(mCtx, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            jsonBody.addProperty("longitude", mPreferencesManager.getUserLongitude());
-            jsonBody.addProperty("latitude", mPreferencesManager.getUserLatitude());
-        } else {
-            jsonBody.addProperty("longitude", mServiceAuto.getLongitude());
-            jsonBody.addProperty("latitude", mServiceAuto.getLatitude());
-        }
+        jsonBody.addProperty("longitude", mSelectedServiceLocation.longitude);
+        jsonBody.addProperty("latitude", mSelectedServiceLocation.latitude);
         jsonBody.addProperty("serviceOwner", mServiceAuto.getOwnerId());
         jsonBody.addProperty("serviceId", mServiceAuto.getServiceId());
 
@@ -883,7 +913,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
 
     private void seeTodaySchedule() {
         Log.i(TAG, "seeTodaySchedule: ");
-        Intent startTodaySchedule = new Intent(mCtx, TodayScheduleActivity.class);
+        Intent startTodaySchedule = new Intent(mCtx, TodayAppointmentsActivity.class);
         startTodaySchedule.putExtra("serviceId", mServiceAuto.getServiceId());
         startActivity(startTodaySchedule);
     }
@@ -899,6 +929,9 @@ public class ServiceAutoActivity extends AppCompatActivity {
             mScheduleToServiceFab.show();
             mCallServiceFab.show();
             mSendMailToServiceFab.show();
+            if (ContextCompat.checkSelfPermission(mCtx, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                mCreateRouteToService.show();
+            }
         }
         mViewCommentsFab.show();
         mFabMenuExpanded = true;
@@ -916,6 +949,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
             mScheduleToServiceFab.hide();
             mCallServiceFab.hide();
             mSendMailToServiceFab.hide();
+            mCreateRouteToService.hide();
         }
         mViewCommentsFab.hide();
         mFabMenuExpanded = false;
@@ -1019,7 +1053,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         //get locked days from server
         try {
             Response<JsonObject> response = Ion.with(mCtx)
-                    .load("GET", mUrl+"/getLockedDays/" + mServiceAuto.getServiceId())
+                    .load("GET", mUrl + "/getLockedDays/" + mServiceAuto.getServiceId())
                     .setHeader("Authorization", mPreferencesManager.getToken())
                     .asJsonObject()
                     .withResponse()
@@ -1046,7 +1080,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                 ArrayList<String> lockedHours = new ArrayList<>();
                 try {
                     Response<JsonObject> response = Ion.with(mCtx)
-                            .load("GET", mUrl+"/getLockedHoursForDay/" + format.format(date) + "/serviceId/" + mServiceAuto.getServiceId())
+                            .load("GET", mUrl + "/getLockedHoursForDay/" + format.format(date) + "/serviceId/" + mServiceAuto.getServiceId())
                             .setHeader("Authorization", mPreferencesManager.getToken())
                             .asJsonObject()
                             .withResponse()
@@ -1155,7 +1189,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                 Log.i(TAG, "onItemClick: shortDescription: " + shortDescription);
                 try {
                     Response<JsonObject> response = Ion.with(getApplicationContext())
-                            .load("POST", mUrl+"/addLockedPeriod")
+                            .load("POST", mUrl + "/addLockedPeriod")
                             .setHeader("Authorization", mPreferencesManager.getToken())
                             .setJsonObjectBody(jsonBody)
                             .asJsonObject()
@@ -1314,10 +1348,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
 
         if (requestCode == 3) {
             Log.i(TAG, "onActivityResult: out from login intent");
-            if (ContextCompat.checkSelfPermission(mCtx, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                mDistanceFromYou.setVisibility(View.VISIBLE);
-                mDistanceFromYouIcon.setVisibility(View.VISIBLE);
-            }
+
         }
         if (requestCode == 1) {
             Log.i(TAG, "onActivityResult: out from comments intent");

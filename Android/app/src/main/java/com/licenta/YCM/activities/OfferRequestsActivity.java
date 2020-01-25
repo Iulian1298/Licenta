@@ -29,7 +29,6 @@ import com.licenta.YCM.AsyncRequest;
 import com.licenta.YCM.R;
 import com.licenta.YCM.SharedPreferencesManager;
 import com.licenta.YCM.adapters.RequestOfferAdapter;
-import com.licenta.YCM.adapters.ScheduledHourAdapter;
 import com.licenta.YCM.models.RequestOffer;
 
 import org.json.JSONException;

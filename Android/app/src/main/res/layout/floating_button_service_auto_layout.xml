@@ -69,6 +69,16 @@
         android:src="@drawable/ic_email_black_24dp"
         app:backgroundTint="@color/colorDarkGreen"
         app:fabSize="mini" />
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/createRouteToService"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="22dp"
+        android:layout_marginBottom="185dp"
+        android:src="@drawable/ic_drive_black_24dp"
+        app:backgroundTint="@color/colorDarkGreen"
+        app:fabSize="mini" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/menuServiceFloatingButton"

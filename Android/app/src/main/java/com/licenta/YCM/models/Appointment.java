@@ -1,33 +1,33 @@
 package com.licenta.YCM.models;
 
-public class ScheduledHour {
-    private String mOwnerUsername;
-    private String mDayId;
+public class Appointment {
+    private String mOwnerOrServiceName;
+    private String mAppointmentId;
     private String mHour;
     private String mShortDescription;
     private String mUserPhone;
-    private int mScheduleType;
+    private int mAppointmentType;
 
-    public ScheduledHour(String ownerUsername,
+    public Appointment(String ownerOrServiceName,
                          String dayId,
                          String hour,
                          String shortDescription,
                          String userPhone,
                          int type) {
-        this.mOwnerUsername = ownerUsername;
-        this.mDayId = dayId;
+        this.mOwnerOrServiceName = ownerOrServiceName;
+        this.mAppointmentId = dayId;
         this.mHour = hour;
         this.mShortDescription = shortDescription;
         this.mUserPhone = userPhone;
-        this.mScheduleType = type;
+        this.mAppointmentType = type;
     }
 
-    public String getOwnerUsername() {
-        return mOwnerUsername;
+    public String getOwnerOrServiceUsername() {
+        return mOwnerOrServiceName;
     }
 
-    public String getDayId() {
-        return mDayId;
+    public String getAppointmentId() {
+        return mAppointmentId;
     }
 
     public String getHour() {
@@ -42,7 +42,7 @@ public class ScheduledHour {
         return mUserPhone;
     }
 
-    public int getScheduleType() {
-        return mScheduleType;
+    public int getAppointmentType() {
+        return mAppointmentType;
     }
 }

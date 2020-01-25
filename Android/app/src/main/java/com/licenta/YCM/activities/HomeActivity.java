@@ -42,6 +42,7 @@ import com.licenta.YCM.R;
 import com.licenta.YCM.SharedPreferencesManager;
 import com.licenta.YCM.fragments.HomeFragment;
 import com.licenta.YCM.fragments.MyRequestFragment;
+import com.licenta.YCM.fragments.MyRequestsAndMyAppointmentsFragment;
 
 import android.support.design.widget.NavigationView;
 import android.util.Patterns;
@@ -87,6 +88,8 @@ public class HomeActivity extends AppCompatActivity {
     private ProgressBar mEditMyProfileProgressBar;
     private LinearLayout mEditMyProfileLinearLayout;
     private String mUrl;
+    private boolean mMenuItemSelected;
+    private int mSelectedItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,8 +110,12 @@ public class HomeActivity extends AppCompatActivity {
 
     private void init() {
         Log.i(TAG, "init: ");
+        mSelectedItem = 0;
+        mMenuItemSelected = false;
         mUrl = mPreferencesManager.getServerUrl();
         mPreferencesManager.setPermissionLocation(false);
+        mPreferencesManager.setUserLatitude(-1);
+        mPreferencesManager.setUserLongitude(-1);
         mCtx = getApplicationContext();
         mToolbar = findViewById(R.id.homeToolbar);
         mDrawerLayout = findViewById(R.id.drawerLayout);
@@ -117,6 +124,51 @@ public class HomeActivity extends AppCompatActivity {
                 this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.addDrawerListener(toggle);
         toggle.syncState();
+        mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(@NonNull View view, float v) {
+            }
+
+            @Override
+            public void onDrawerOpened(@NonNull View view) {
+            }
+
+            @Override
+            public void onDrawerClosed(@NonNull View view) {
+                if (mMenuItemSelected) {
+                    mMenuItemSelected = false;
+                    switch (mSelectedItem) {
+                        case 0:
+                            getSupportActionBar().setTitle("Acasă");
+                            mPreferencesManager.setOnlyMyServices(false);
+                            getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment(), "Acasa").commit();
+                            break;
+                        case 1:
+                            getSupportActionBar().setTitle("Service-urile mele");
+                            mPreferencesManager.setOnlyMyServices(true);
+                            getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment()).commit();
+                            break;
+                        case 2:
+                            getSupportActionBar().setTitle("Cererile și programările mele");
+                            getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new MyRequestsAndMyAppointmentsFragment()).commit();
+                            break;
+                        case 3:
+                            logout();
+                            break;
+                        case 4:
+                            Intent intent = new Intent(mCtx, AuthenticationActivity.class);
+                            startActivityForResult(intent, 3);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            @Override
+            public void onDrawerStateChanged(int i) {
+            }
+        });
         mNavigationView = findViewById(R.id.navigationView);
         mLocationManager = (LocationManager) mCtx.getSystemService(Context.LOCATION_SERVICE);
         mLocationListener = new LocationListener() {
@@ -224,33 +276,25 @@ public class HomeActivity extends AppCompatActivity {
         mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                mMenuItemSelected = true;
                 switch (menuItem.getItemId()) {
                     case R.id.menuHome:
-                        getSupportActionBar().setTitle("Acasă");
-                        mPreferencesManager.setOnlyMyServices(false);
-                        getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment(), "Acasa").commit();
-                        mDrawerLayout.closeDrawer(GravityCompat.START);
-                        return true;
+                        mSelectedItem = 0;
+                        break;
                     case R.id.menuMyServices:
-                        getSupportActionBar().setTitle("Service-urile mele");
-                        mPreferencesManager.setOnlyMyServices(true);
-                        getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new HomeFragment()).commit();
-                        mDrawerLayout.closeDrawer(GravityCompat.START);
-                        return true;
+                        mSelectedItem = 1;
+                        break;
                     case R.id.menuMyRequestOffer:
-                        getSupportActionBar().setTitle("Cererile mele");
-                        getSupportFragmentManager().beginTransaction().replace(R.id.homeContainer, new MyRequestFragment()).commit();
-                        mDrawerLayout.closeDrawer(GravityCompat.START);
-                        return true;
+                        mSelectedItem = 2;
+                        break;
                     case R.id.menuLogout:
-                        mDrawerLayout.closeDrawer(GravityCompat.START);
-                        logout();
-                        return true;
+                        mSelectedItem = 3;
+                        break;
                     case R.id.menuAuth:
-                        Intent intent = new Intent(mCtx, AuthenticationActivity.class);
-                        startActivityForResult(intent, 3);
-                        mDrawerLayout.closeDrawer(GravityCompat.START);
-                        return true;
+                        mSelectedItem = 4;
+                        break;
+                    default:
+                        break;
                 }
                 mDrawerLayout.closeDrawer(GravityCompat.START);
                 return true;
@@ -307,7 +351,7 @@ public class HomeActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION}, 11);
         } else {
             Log.i(TAG, "requestLocationPermission: permission already granted");
-            //mPreferencesManager.setPermissionLocation(true);
+            mPreferencesManager.setPermissionLocation(true);
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 50, mLocationListener);
         }
     }
@@ -316,15 +360,13 @@ public class HomeActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         String message = "";
         if (requestCode == 11) {
-            message = "Permite aplicației să folosească locația pentru a vede distanța față de service-uri!";
-        } else {
-            message = "Permite aplicației să folosească locația pentru a seta locația noului service!";
+            message = "Permite aplicației să folosească locația pentru a vedea distanța față de service-uri!";
         }
-        if (requestCode == 11 || requestCode == 12) {
+        if (requestCode == 11) {
             if (grantResults.length > 0) {
                 boolean locationAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 if (!locationAccepted) {
-                    Log.i(TAG, "onRequestPermissionsResult: permision not accepted");
+                    Log.i(TAG, "onRequestPermissionsResult: permission not accepted");
                     if (shouldShowRequestPermissionRationale(ACCESS_FINE_LOCATION)) {
                         new AlertDialog.Builder(HomeActivity.this)
                                 .setMessage(message)
@@ -338,11 +380,11 @@ public class HomeActivity extends AppCompatActivity {
                                 .setNegativeButton("Cancel", null)
                                 .create()
                                 .show();
-                        //mPreferencesManager.setPermissionLocation(false);
+                        mPreferencesManager.setPermissionLocation(false);
                     }
                 } else {
                     Log.i(TAG, "onRequestPermissionsResult: apply changes");
-                    //mPreferencesManager.setPermissionLocation(true);
+                    mPreferencesManager.setPermissionLocation(true);
                     if (ContextCompat.checkSelfPermission(getApplicationContext(), ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 5, mLocationListener);
                     }
@@ -612,7 +654,7 @@ public class HomeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "Resuming");
-        requestLocationPermission();
+        //requestLocationPermission();
     }
 
     @Override

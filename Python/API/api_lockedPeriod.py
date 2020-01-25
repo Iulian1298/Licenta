@@ -1,10 +1,11 @@
-from sqlalchemy import asc
+from sqlalchemy import asc, desc
 
 from API import *
 from API.api_check import check_token
 from database import db
 from models.lockedDay import LockedDay
 from models.lockedHour import LockedHour
+from models.services import Service
 from models.users import User
 
 
@@ -98,8 +99,53 @@ def getLockedHoursForToday(serviceId):
                 User.query.with_entities(User.phoneNumber).filter_by(id=i.toDict()['ownerId']).first()[0]
             content['hour'] = i.toDict()['hour']
             content['shortDescription'] = i.toDict()['shortDescription']
-            content["dayId"] = i.toDict()['dayId']
-            content["scheduleType"] = i.toDict()['scheduleType']
+            content["appointmentId"] = i.toDict()['id']
+            content["appointmentType"] = i.toDict()['scheduleType']
             result.append(content)
         print((result))
-    return make_response(jsonify({"lockedHours": result}), status.HTTP_200_OK)
+    return make_response(jsonify({"appointment": result}), status.HTTP_200_OK)
+
+
+@app.route("/lockedPeriod/getMyAppointmentsIds/<userId>/limit/<limit>/offset/<offset>", methods=['GET'])
+@check_token
+def getMyAppointmentsIds(userId, limit, offset):
+    appointmentsIds = [i[0] for i in
+                       LockedHour.query.with_entities(LockedHour.id).filter_by(ownerId=userId).all()]
+    appointmentsIds.reverse()
+    appointmentsIds = appointmentsIds[int(offset): int(offset) + int(limit)]
+    return make_response(jsonify({"Ids": appointmentsIds}), status.HTTP_200_OK)
+
+
+@app.route("/lockedPeriod/getById/<appointmentId>", methods=['GET'])
+@check_token
+def getAppointmentById(appointmentId):
+    lockedHours = LockedHour.query.filter_by(id=appointmentId).first()
+    lockedDay = LockedDay.query.filter_by(id=lockedHours.toDict()["dayId"]).first()
+    content = {}
+    content['serviceName'] = Service.query.filter_by(id=lockedDay.toDict()["serviceId"]).first().toDict()["name"]
+    content['dayId'] = lockedHours.toDict()["dayId"]
+    content['hour'] = lockedHours.toDict()["hour"]
+    content['shortDescription'] = lockedHours.toDict()["shortDescription"]
+    content['appointmentType'] = lockedHours.toDict()["scheduleType"]
+    content['phoneNumber'] = Service.query.filter_by(id=lockedDay.toDict()["serviceId"]).first().toDict()[
+        "phoneNumber"]
+    print(content)
+    return make_response(jsonify({"appointment": content}), status.HTTP_200_OK)
+
+
+@app.route("/lockedPeriod/deleteById/<appointmentId>", methods=['DELETE'])
+#@check_token
+def deleteAppointmentById(appointmentId):
+    try:
+        appointment = LockedHour.query.filter_by(id=appointmentId)
+        lockedDay = LockedDay.query.filter_by(id=appointment.first().toDict()['dayId'])
+        if lockedDay.first().toDict()['lockedHours'] == 1:
+            lockedDay.delete()
+        else:
+            lockedDay.update({LockedDay.lockedHours: LockedDay.lockedHours - 1}, synchronize_session=False)
+        appointment.delete()
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        return make_response(jsonify({"status": "Could not delete"}), status.HTTP_409_CONFLICT)
+    return make_response(jsonify({"status": "Deleted"}), status.HTTP_200_OK)
