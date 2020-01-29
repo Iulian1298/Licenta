@@ -36,6 +36,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -98,7 +99,7 @@ public class HomeFragment extends Fragment {
     private boolean mIsLoggedIn;
     private boolean mShowOnlyMyServices;
     private FloatingActionButton mAddServiceFloatingButton;
-    private Dialog mAddService;
+    private AlertDialog mAddService;
     private EditText mAddServiceName;
     private EditText mAddServiceAddress;
     private EditText mAddServiceCity;
@@ -110,13 +111,16 @@ public class HomeFragment extends Fragment {
     private CheckBox mServiceTireCheck;
     private CheckBox mServiceChassisCheck;
     private CheckBox mServiceItpCheck;
+    private EditText mPriceService;
+    private EditText mPriceTire;
+    private EditText mPriceChassis;
+    private EditText mPriceItp;
     private ImageView mAddServiceImage;
     private boolean mUseDefaultServiceImage;
     private int mLastElementClickedPosition;
     private View mFragmentView;
     private Uri mAddServiceImageUri;
     private ProgressBar mAddServiceProgressBar;
-    private FloatingActionButton mAddServiceButton;
     private int mServiceAutoOffset;
     private int mServiceAutoLimit;
     private ProgressBar mGetNewServicesFromDatabase;
@@ -135,6 +139,9 @@ public class HomeFragment extends Fragment {
     private MapView mMapAddService;
     private LatLng mSelectedServiceLocation;
     private Bundle mSavedInstanceState;
+    private Button mConfirm;
+    private Button mCancel;
+    private LinearLayout mAddServiceLinearLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -333,7 +340,6 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
-        initAddServicePopUp();
         mServiceAutoAdapter.setClickListener(new ServiceAutoAdapter.OnItemServiceAutoClickListener() {
             @Override
             public void onItemServiceAutoClick(View view, int pos) {
@@ -356,6 +362,10 @@ public class HomeFragment extends Fragment {
                 intent.putExtra("ownerId", serviceAuto.getOwnerId());
                 intent.putExtra("serviceType", serviceAuto.getType());
                 intent.putExtra("acceptedBrands", serviceAuto.getAcceptedBrands());
+                intent.putExtra("priceService", serviceAuto.getPriceService());
+                intent.putExtra("priceTire", serviceAuto.getPriceTire());
+                intent.putExtra("priceChassis", serviceAuto.getPriceChassis());
+                intent.putExtra("priceItp", serviceAuto.getPriceItp());
                 mLastElementClickedPosition = pos;
                 startActivityForResult(intent, 1);
             }
@@ -417,34 +427,41 @@ public class HomeFragment extends Fragment {
                 if (!isLoggedIn) {
                     showPopUpNotLogged();
                 } else {
-                    mAddService.show();
+                    addService();
                 }
             }
         });
     }
 
-    private void initAddServicePopUp() {
+    private void addService() {
         Log.i(TAG, "initAddServicePopUp: ");
         mUseDefaultServiceImage = true;
-        mAddService = new Dialog(mCtx);
-        mAddService.setContentView(R.layout.add_service_popup_layout);
-        mAddService.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        mAddService.getWindow().setLayout(Toolbar.LayoutParams.MATCH_PARENT, Toolbar.LayoutParams.WRAP_CONTENT);
-        mAddService.getWindow().getAttributes().gravity = Gravity.TOP;
-        mAddServiceName = mAddService.findViewById(R.id.addServiceName);
-        mAddServiceAddress = mAddService.findViewById(R.id.addServiceAddress);
-        mAddServiceCity = mAddService.findViewById(R.id.addServiceCity);
-        mAddServicePhone = mAddService.findViewById(R.id.addServicePhone);
-        mAddServiceEmail = mAddService.findViewById(R.id.addServiceEmail);
-        mAddServiceDescription = mAddService.findViewById(R.id.addServiceDescription);
-        mAddServiceImage = mAddService.findViewById(R.id.addServiceImage);
-        mAddServiceAcceptedBrand = mAddService.findViewById(R.id.addServiceAcceptedBrand);
-        mServiceChassisCheck = mAddService.findViewById(R.id.serviceChassisCheck);
-        mServiceItpCheck = mAddService.findViewById(R.id.serviceItpCheck);
-        mServiceTireCheck = mAddService.findViewById(R.id.serviceTireCheck);
-        mRepairServiceCheck = mAddService.findViewById(R.id.repairServiceCheck);
-        mAddServiceProgressBar = mAddService.findViewById(R.id.addServiceProgressBar);
-        mMapAddService = mAddService.findViewById(R.id.mapAddService);
+        TextView addServiceTitle = new TextView(mCtx);
+        addServiceTitle.setText("Adaugă service");
+        addServiceTitle.setGravity(Gravity.CENTER);
+        addServiceTitle.setPadding(10, 10, 10, 10);
+        addServiceTitle.setTextSize(18);
+        addServiceTitle.setTextColor(Color.DKGRAY);
+        View addServiceView = getLayoutInflater().inflate(R.layout.add_service_popup_layout, null);
+        mAddServiceLinearLayout = addServiceView.findViewById(R.id.addServiceLinearLayout);
+        mAddServiceName = addServiceView.findViewById(R.id.addServiceName);
+        mAddServiceAddress = addServiceView.findViewById(R.id.addServiceAddress);
+        mAddServiceCity = addServiceView.findViewById(R.id.addServiceCity);
+        mAddServicePhone = addServiceView.findViewById(R.id.addServicePhone);
+        mAddServiceEmail = addServiceView.findViewById(R.id.addServiceEmail);
+        mAddServiceDescription = addServiceView.findViewById(R.id.addServiceDescription);
+        mAddServiceImage = addServiceView.findViewById(R.id.addServiceImage);
+        mAddServiceAcceptedBrand = addServiceView.findViewById(R.id.addServiceAcceptedBrand);
+        mServiceChassisCheck = addServiceView.findViewById(R.id.serviceChassisCheck);
+        mServiceItpCheck = addServiceView.findViewById(R.id.serviceItpCheck);
+        mServiceTireCheck = addServiceView.findViewById(R.id.serviceTireCheck);
+        mRepairServiceCheck = addServiceView.findViewById(R.id.repairServiceCheck);
+        mPriceService = addServiceView.findViewById(R.id.priceRepairService);
+        mPriceTire = addServiceView.findViewById(R.id.priceTire);
+        mPriceChassis = addServiceView.findViewById(R.id.priceChassis);
+        mPriceItp = addServiceView.findViewById(R.id.priceItp);
+        mAddServiceProgressBar = addServiceView.findViewById(R.id.addServiceProgressBar);
+        mMapAddService = addServiceView.findViewById(R.id.mapAddService);
         mMapAddService.onCreate(mSavedInstanceState);
         mMapAddService.getMapAsync(new OnMapReadyCallback() {
             @Override
@@ -465,6 +482,47 @@ public class HomeFragment extends Fragment {
                 });
             }
         });
+        mRepairServiceCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mPriceService.setEnabled(true);
+                } else {
+                    mPriceService.setEnabled(false);
+                }
+            }
+        });
+        mServiceTireCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mPriceTire.setEnabled(true);
+                } else {
+                    mPriceTire.setEnabled(false);
+                }
+            }
+        });
+        mServiceItpCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mPriceItp.setEnabled(true);
+                } else {
+                    mPriceItp.setEnabled(false);
+                }
+            }
+        });
+        mServiceChassisCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mPriceChassis.setEnabled(true);
+                } else {
+                    mPriceChassis.setEnabled(false);
+                }
+            }
+        });
+
         mAddServiceImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -478,23 +536,35 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
-        mAddServiceButton = mAddService.findViewById(R.id.addService);
-        mAddServiceButton.setOnClickListener(new View.OnClickListener() {
+        mAddService = new AlertDialog.Builder((HomeActivity) mCtx)
+                .setCustomTitle(addServiceTitle)
+                .setView(addServiceView)
+                .setPositiveButton("Confirmă", null)
+                .setNegativeButton("Anulează", null)
+                .create();
+
+        mAddService.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
-            public void onClick(View v) {
-                mAddServiceProgressBar.setVisibility(View.VISIBLE);
-                mAddServiceButton.hide();
-                Log.i(TAG, "onClick: add button pressed");
-                if (verifyInputOnClientSide()) {
-                    if (verifyInputOnServerSide()) {
-                    } else {
+            public void onShow(DialogInterface dialog) {
+                mConfirm = mAddService.getButton(DialogInterface.BUTTON_POSITIVE);
+                mCancel = mAddService.getButton(DialogInterface.BUTTON_NEGATIVE);
+                mConfirm.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.i(TAG, "onClick: add button pressed");
+                        if (verifyInputOnClientSide()) {
+                            mAddServiceProgressBar.setVisibility(View.VISIBLE);
+                            mAddServiceLinearLayout.setBackground(new ColorDrawable(Color.parseColor("#75676767")));
+                            if (verifyInputOnServerSide()) {
+                            } else {
+                                mConfirm.setError("Eroare");
+                            }
+                        }
                     }
-                } else {
-                    mAddServiceProgressBar.setVisibility(View.GONE);
-                    mAddServiceButton.show();
-                }
+                });
             }
         });
+        mAddService.show();
     }
 
     private boolean verifyInputOnServerSide() {
@@ -530,6 +600,10 @@ public class HomeFragment extends Fragment {
         jsonBody.addProperty("longitude", mSelectedServiceLocation.longitude);
         jsonBody.addProperty("latitude", mSelectedServiceLocation.latitude);
         jsonBody.addProperty("serviceOwner", mPreferencesManager.getUserId());
+        jsonBody.addProperty("priceService", mPriceService.getText().toString());
+        jsonBody.addProperty("priceTire", mPriceTire.getText().toString());
+        jsonBody.addProperty("priceChassis", mPriceChassis.getText().toString());
+        jsonBody.addProperty("priceItp", mPriceItp.getText().toString());
         StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("service_image");
         final StorageReference imageFilePath = storageReference.child(UUID.randomUUID() + "_" + mAddServiceImageUri.getLastPathSegment());
         imageFilePath.putFile(mAddServiceImageUri).addOnSuccessListener(
@@ -569,14 +643,13 @@ public class HomeFragment extends Fragment {
                                         }
                                         populateServiceAutoList();
 
-                                        mAddServiceProgressBar.setVisibility(View.INVISIBLE);
+                                        mAddServiceProgressBar.setVisibility(View.GONE);
                                         mAddService.dismiss();
                                     } else {
                                         Log.i(TAG, "verifyInputOnServerSide: Service not added to database! err code: " + response.getHeaders().code());
                                         Toast.makeText(mCtx, "Ceva nu a mers! Verifică conexiunea la internet!", Toast.LENGTH_SHORT).show();
                                         setEnableFields(true);
-                                        mAddServiceProgressBar.setVisibility(View.INVISIBLE);
-                                        mAddServiceButton.show();
+                                        mAddServiceProgressBar.setVisibility(View.GONE);
                                         resultOk[0] = false;
                                     }
                                 } catch (ExecutionException e) {
@@ -593,8 +666,6 @@ public class HomeFragment extends Fragment {
                                 Log.e(TAG, "onFailure: Something goes wrong to get dowload link");
                                 Toast.makeText(mCtx, "Ceva nu a mers! Verifică conexiunea la internet!", Toast.LENGTH_SHORT).show();
                                 setEnableFields(true);
-                                mAddServiceProgressBar.setVisibility(View.INVISIBLE);
-                                mAddServiceButton.show();
                                 resultOk[0] = false;
                             }
                         });
@@ -606,8 +677,6 @@ public class HomeFragment extends Fragment {
                 Log.e(TAG, "onFailure: Something goes wrong to get dowload link");
                 Toast.makeText(mCtx, "Ceva nu a mers! Verifică conexiunea la internet!", Toast.LENGTH_SHORT).show();
                 setEnableFields(true);
-                mAddServiceProgressBar.setVisibility(View.INVISIBLE);
-                mAddServiceButton.show();
                 resultOk[0] = false;
             }
         });
@@ -630,6 +699,12 @@ public class HomeFragment extends Fragment {
         mServiceTireCheck.setEnabled(value);
         mRepairServiceCheck.setEnabled(value);
         mMapAddService.setEnabled(value);
+        mPriceService.setEnabled(value);
+        mPriceTire.setEnabled(value);
+        mPriceChassis.setEnabled(value);
+        mPriceItp.setEnabled(value);
+        mConfirm.setEnabled(value);
+        mCancel.setEnabled(value);
     }
 
     private boolean verifyInputOnClientSide() {
@@ -674,8 +749,29 @@ public class HomeFragment extends Fragment {
             resultOk = false;
         }
         if (!mRepairServiceCheck.isChecked() && !mServiceTireCheck.isChecked() && !mServiceChassisCheck.isChecked() && !mServiceItpCheck.isChecked()) {
-            mRepairServiceCheck.setChecked(true);
+            mPriceService.setError("Bifează o opțiune și adaugă prețul!");
+            mPriceTire.setError("Bifează o opțiune și adaugă prețul!");
+            mPriceChassis.setError("Bifează o opțiune și adaugă prețul!");
+            mPriceItp.setError("Bifează o opțiune și adaugă prețul!");
+            resultOk = false;
         }
+        if (mPriceService.getText().toString().trim().isEmpty() && mRepairServiceCheck.isChecked()) {
+            mPriceService.setError("Bifează o opțiune și adaugă prețul!");
+            resultOk = false;
+        }
+        if (mPriceTire.getText().toString().trim().isEmpty() && mServiceTireCheck.isChecked()) {
+            mPriceTire.setError("Bifează o opțiune și adaugă prețul!");
+            resultOk = false;
+        }
+        if (mPriceChassis.getText().toString().trim().isEmpty() && mServiceChassisCheck.isChecked()) {
+            mPriceChassis.setError("Bifează o opțiune și adaugă prețul!");
+            resultOk = false;
+        }
+        if (mPriceItp.getText().toString().trim().isEmpty() && mServiceItpCheck.isChecked()) {
+            mPriceItp.setError("Bifează o opțiune și adaugă prețul!");
+            resultOk = false;
+        }
+
         return resultOk;
     }
 
@@ -760,7 +856,11 @@ public class HomeFragment extends Fragment {
                                                     Double.valueOf(service.getString("longitude")),
                                                     service.getString("owner"),
                                                     service.getInt("serviceType"),
-                                                    service.getString("acceptedBrand")));
+                                                    service.getString("acceptedBrand"),
+                                                    service.getInt("priceService"),
+                                                    service.getInt("priceTire"),
+                                                    service.getInt("priceChassis"),
+                                                    service.getInt("priceItp")));
                                             mServiceAutoAdapter.notifyDataSetChanged();
                                         } catch (JSONException e1) {
                                             e1.printStackTrace();
@@ -828,7 +928,11 @@ public class HomeFragment extends Fragment {
                                             Double.valueOf(service.getString("longitude")),
                                             service.getString("owner"),
                                             service.getInt("serviceType"),
-                                            service.getString("acceptedBrand")));
+                                            service.getString("acceptedBrand"),
+                                            service.getInt("priceService"),
+                                            service.getInt("priceTire"),
+                                            service.getInt("priceChassis"),
+                                            service.getInt("priceItp")));
                                     mServiceAutoAdapter.notifyDataSetChanged();
                                 } catch (JSONException e1) {
                                     e1.printStackTrace();
@@ -877,6 +981,10 @@ public class HomeFragment extends Fragment {
                 serviceAuto.setType(data.getIntExtra("newServiceType", 1));
                 serviceAuto.setLatitude(data.getDoubleExtra("newLatitude", 0));
                 serviceAuto.setLongitude(data.getDoubleExtra("newLongitude", 0));
+                serviceAuto.setPriceService(data.getIntExtra("priceService",-1));
+                serviceAuto.setPriceTire(data.getIntExtra("priceTire",-1));
+                serviceAuto.setPriceChassis(data.getIntExtra("priceChassis",-1));
+                serviceAuto.setPriceItp(data.getIntExtra("priceItp",-1));
                 serviceAuto.setImage(Uri.parse(data.getStringExtra("newLogoImage")));
                 mServiceAutoList.set(mLastElementClickedPosition, serviceAuto);
                 mServiceAutoAdapter.notifyDataSetChanged();

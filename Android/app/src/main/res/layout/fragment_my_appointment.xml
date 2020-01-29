@@ -7,7 +7,16 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
-
+        <TextView
+            android:id="@+id/noAppointment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="@string/noAppointment"
+            android:textColor="@color/colorBlack"
+            android:visibility="gone"
+            android:textSize="16sp" />
         <android.support.v7.widget.RecyclerView
             android:id="@+id/myAppointmentList"
             android:layout_width="match_parent"

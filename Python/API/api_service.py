@@ -60,7 +60,18 @@ def createService():
         strServiceType += "c"
     if int(request.json['serviceType']) & 8:
         strServiceType += "i"
-
+    priceService = request.json['priceService']
+    if priceService == "":
+        priceService = -1
+    priceTire = request.json['priceTire']
+    if priceTire == "":
+        priceTire = -1
+    priceChassis = request.json['priceChassis']
+    if priceChassis == "":
+        priceChassis = -1
+    priceItp = request.json['priceItp']
+    if priceItp == "":
+        priceItp = -1
     try:
         service = Service(id=serviceId,
                           logoPath=request.json['imageDownloadLink'],
@@ -75,7 +86,11 @@ def createService():
                           email=request.json['serviceEmail'],
                           owner=request.json['serviceOwner'],
                           serviceType=strServiceType,
-                          acceptedBrand=request.json['serviceAcceptedBrand'])
+                          acceptedBrand=request.json['serviceAcceptedBrand'],
+                          priceService=priceService,
+                          priceTire=priceTire,
+                          priceChassis=priceChassis,
+                          priceItp=priceItp)
         print(service)
         db.session.add(service)
         db.session.commit()
@@ -120,6 +135,18 @@ def updateService():
         strServiceType += "c"
     if int(request.json['serviceType']) & 8:
         strServiceType += "i"
+    priceService = request.json['priceService']
+    if priceService == "":
+        priceService = -1
+    priceTire = request.json['priceTire']
+    if priceTire == "":
+        priceTire = -1
+    priceChassis = request.json['priceChassis']
+    if priceChassis == "":
+        priceChassis = -1
+    priceItp = request.json['priceItp']
+    if priceItp == "":
+        priceItp = -1
     try:
         db.session.query(Service).filter(Service.id == request.json['serviceId']).update(
             {Service.name: request.json['serviceName'],
@@ -132,7 +159,11 @@ def updateService():
              Service.serviceType: strServiceType,
              Service.longitude: request.json['longitude'],
              Service.latitude: request.json['latitude'],
-             Service.logoPath: request.json['imagePath']
+             Service.logoPath: request.json['imagePath'],
+             Service.priceService: priceService,
+             Service.priceTire: priceTire,
+             Service.priceChassis: priceChassis,
+             Service.priceItp: priceItp
              }, synchronize_session=False)
         db.session.commit()
 

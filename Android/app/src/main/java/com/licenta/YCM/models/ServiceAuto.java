@@ -20,6 +20,10 @@ public class ServiceAuto {
     private double mLongitude;
     private String mOwnerId;
     private int mType;
+    private int mPriceService;
+    private int mPriceChassis;
+    private int mPriceTire;
+    private int mPriceItp;
     private String mAcceptedBrands;
 
     public ServiceAuto(String serviceId,
@@ -35,7 +39,11 @@ public class ServiceAuto {
                        double longitude,
                        String ownerId,
                        int type,
-                       String acceptedBrands) {
+                       String acceptedBrands,
+                       int priceService,
+                       int priceTire,
+                       int priceChassis,
+                       int priceItp) {
         this.mServiceId = serviceId;
         this.mImageUri = imageUri;
         this.mName = name;
@@ -49,6 +57,10 @@ public class ServiceAuto {
         this.mLongitude = longitude;
         this.mOwnerId = ownerId;
         this.mType = type;
+        this.mPriceService = priceService;
+        this.mPriceChassis = priceChassis;
+        this.mPriceTire = priceTire;
+        this.mPriceItp = priceItp;
         this.mAcceptedBrands = acceptedBrands;
     }
 
@@ -177,5 +189,36 @@ public class ServiceAuto {
         }
     }
 
+    public int getPriceService() {
+        return mPriceService;
+    }
+
+    public void setPriceService(int mPriceService) {
+        this.mPriceService = mPriceService;
+    }
+
+    public int getPriceChassis() {
+        return mPriceChassis;
+    }
+
+    public void setPriceChassis(int mPriceChassis) {
+        this.mPriceChassis = mPriceChassis;
+    }
+
+    public int getPriceTire() {
+        return mPriceTire;
+    }
+
+    public void setPriceTire(int mPriceTire) {
+        this.mPriceTire = mPriceTire;
+    }
+
+    public int getPriceItp() {
+        return mPriceItp;
+    }
+
+    public void setPriceItp(int mPriceItp) {
+        this.mPriceItp = mPriceItp;
+    }
 }
 

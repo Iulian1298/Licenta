@@ -34,12 +34,16 @@ import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -108,7 +112,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private FloatingActionButton mTodayScheduleFab;
     private FloatingActionButton mLeaveCommentFab;
     private FloatingActionButton mRequestOfferFab;
-    private FloatingActionButton mScheduleToServiceFab;
+    private FloatingActionButton maddAppointmentFab;
     private FloatingActionButton mCallServiceFab;
     private FloatingActionButton mSendMailToServiceFab;
     private FloatingActionButton mCreateRouteToService;
@@ -116,6 +120,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private Toolbar mServiceToolbar;
     private TextView mServiceType;
     private TextView mServiceAcceptedBrands;
+    private TextView mServicePrices;
     private AlertDialog mEditServicePopUp;
     private EditText mEditServiceName;
     private EditText mEditServiceAddress;
@@ -128,6 +133,10 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private CheckBox mEditServiceTireCheck;
     private CheckBox mEditServiceChassisCheck;
     private CheckBox mEditServiceItpCheck;
+    private EditText mEditPriceService;
+    private EditText mEditPriceTire;
+    private EditText mEditPriceChassis;
+    private EditText mEditPriceITP;
     private ImageView mEditServiceImage;
     private String mUrl;
     private ProgressBar mEditServiceProgressBar;
@@ -165,6 +174,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mDistanceFromYouIcon = findViewById(R.id.distanceFromYouFullIcon);
         mServiceType = findViewById(R.id.offeredServices);
         mServiceAcceptedBrands = findViewById(R.id.acceptedBrands);
+        mServicePrices = findViewById(R.id.prices);
         mServiceToolbar = findViewById(R.id.serviceToolbar);
         setSupportActionBar(mServiceToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -188,7 +198,11 @@ public class ServiceAutoActivity extends AppCompatActivity {
                 intent.getDoubleExtra("longitude", 0),
                 intent.getStringExtra("ownerId"),
                 intent.getIntExtra("serviceType", 0),
-                intent.getStringExtra("acceptedBrands")
+                intent.getStringExtra("acceptedBrands"),
+                intent.getIntExtra("priceService", -1),
+                intent.getIntExtra("priceTire", -1),
+                intent.getIntExtra("priceChassis", -1),
+                intent.getIntExtra("priceItp", -1)
         );
 
         //Objects.requireNonNull(getSupportActionBar()).setTitle(mServiceAuto.getName() + " - " + mServiceAuto.getAddress());
@@ -222,66 +236,13 @@ public class ServiceAutoActivity extends AppCompatActivity {
     }
 
     private void setFloatingButtonsMenu() {
-        CoordinatorLayout floatingButtons;
-        if (isMyService) {
-            floatingButtons = (CoordinatorLayout) View.inflate(ServiceAutoActivity.this, R.layout.floating_buttons_my_services_layout, null);
-            mServiceAutoFloatingButtons.addView(floatingButtons);
-            mViewCommentsFab = floatingButtons.findViewById(R.id.viewCommentsFab);
-            mEditServiceFab = floatingButtons.findViewById(R.id.editServiceFab);
-            mOfferRequestsFab = floatingButtons.findViewById(R.id.offerRequestsFab);
-            mTodayScheduleFab = floatingButtons.findViewById(R.id.todayScheduleFab);
-            mEditServiceFab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    editService();
-                    closeFloatingMenu();
-                }
-            });
-            mOfferRequestsFab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    seeOfferRequests();
-                    closeFloatingMenu();
-                }
-            });
-            mTodayScheduleFab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    seeTodaySchedule();
-                    closeFloatingMenu();
-                }
-            });
-        } else {
+        if (!isMyService) {
+            CoordinatorLayout floatingButtons;
             floatingButtons = (CoordinatorLayout) View.inflate(ServiceAutoActivity.this, R.layout.floating_button_service_auto_layout, null);
             mServiceAutoFloatingButtons.addView(floatingButtons);
-            mViewCommentsFab = floatingButtons.findViewById(R.id.viewCommentsFab);
-            mLeaveCommentFab = floatingButtons.findViewById(R.id.leaveCommentFab);
-            mRequestOfferFab = floatingButtons.findViewById(R.id.requestOfferFab);
-            mScheduleToServiceFab = floatingButtons.findViewById(R.id.scheduleToServiceFab);
             mCallServiceFab = floatingButtons.findViewById(R.id.callServiceFab);
             mSendMailToServiceFab = floatingButtons.findViewById(R.id.sendMailToServiceFab);
             mCreateRouteToService = floatingButtons.findViewById(R.id.createRouteToService);
-            mLeaveCommentFab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    leaveComment();
-                    closeFloatingMenu();
-                }
-            });
-            mRequestOfferFab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    requestOffer();
-                    closeFloatingMenu();
-                }
-            });
-            mScheduleToServiceFab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    scheduleToService();
-                    closeFloatingMenu();
-                }
-            });
             mCallServiceFab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -303,26 +264,19 @@ public class ServiceAutoActivity extends AppCompatActivity {
                     closeFloatingMenu();
                 }
             });
-        }
-        mMenuServiceFloatingButton = floatingButtons.findViewById(R.id.menuServiceFloatingButton);
-        closeFloatingMenu();
-        mMenuServiceFloatingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mFabMenuExpanded) {
-                    closeFloatingMenu();
-                } else {
-                    expandFloatingMenu();
+            mMenuServiceFloatingButton = floatingButtons.findViewById(R.id.menuServiceFloatingButton);
+            closeFloatingMenu();
+            mMenuServiceFloatingButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mFabMenuExpanded) {
+                        closeFloatingMenu();
+                    } else {
+                        expandFloatingMenu();
+                    }
                 }
-            }
-        });
-        mViewCommentsFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                seeComments();
-                closeFloatingMenu();
-            }
-        });
+            });
+        }
     }
 
     private void createRouteToService() {
@@ -366,7 +320,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
             } else {
                 if ((mServiceAuto.getType() & 1) == 1) {
                     TextView requestTypeTitle = new TextView(mCtx);
-                    requestTypeTitle.setText("Tipul de problemă!");
+                    requestTypeTitle.setText("Tipul de problemă");
                     requestTypeTitle.setGravity(Gravity.CENTER);
                     requestTypeTitle.setPadding(10, 10, 10, 10);
                     requestTypeTitle.setTextSize(18);
@@ -401,7 +355,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         }
     }
 
-    private void scheduleToService() {
+    private void addAppointment() {
         Log.i(TAG, "onClick: schedule clicked");
         boolean isLoggedIn = false;
         try {
@@ -415,7 +369,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
             showPopUpNotLogged();
         } else {
             TextView scheduleDescriptionTitle = new TextView(mCtx);
-            scheduleDescriptionTitle.setText("Descrie problema pentru care faci rezervare!");
+            scheduleDescriptionTitle.setText("Descrie problema pentru care faci rezervare");
             scheduleDescriptionTitle.setGravity(Gravity.CENTER);
             scheduleDescriptionTitle.setPadding(10, 10, 10, 10);
             scheduleDescriptionTitle.setTextSize(18);
@@ -471,7 +425,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
             final EditText givenComment = leaveCommentView.findViewById(R.id.givenComment);
             final RatingBar givenRating = leaveCommentView.findViewById(R.id.givenRating);
             TextView addCommentTitle = new TextView(getApplicationContext());
-            addCommentTitle.setText("Lasă un comentariu!");
+            addCommentTitle.setText("Lasă un comentariu");
             addCommentTitle.setGravity(Gravity.CENTER);
             addCommentTitle.setPadding(10, 10, 10, 10);
             addCommentTitle.setTextSize(18);
@@ -508,6 +462,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                                         mRatingBar.setRating(response.getResult().get("newRating").getAsFloat());
                                         setResult(RESULT_OK, mReturnIntent);
                                         mReturnIntent.putExtra("creationDeletionNewRating", mRatingBar.getRating());
+                                        seeComments();
                                     } else {
                                         if (response.getHeaders().code() == 409) {
                                             Toast.makeText(getApplicationContext(), "Conflict in baza de date!", Toast.LENGTH_SHORT).show();
@@ -591,7 +546,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
     private void editService() {
         Log.i(TAG, "editService: ");
         TextView editServiceTitle = new TextView(mCtx);
-        editServiceTitle.setText("Editează service-ul!");
+        editServiceTitle.setText("Editează service-ul");
         editServiceTitle.setGravity(Gravity.CENTER);
         editServiceTitle.setPadding(10, 10, 10, 10);
         editServiceTitle.setTextSize(18);
@@ -608,6 +563,10 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mEditServiceTireCheck = editServiceView.findViewById(R.id.editServiceTireCheck);
         mEditServiceChassisCheck = editServiceView.findViewById(R.id.editServiceChassisCheck);
         mEditServiceItpCheck = editServiceView.findViewById(R.id.editServiceItpCheck);
+        mEditPriceService = editServiceView.findViewById(R.id.editPriceRepairService);
+        mEditPriceTire = editServiceView.findViewById(R.id.editPriceTire);
+        mEditPriceChassis = editServiceView.findViewById(R.id.editPriceChassis);
+        mEditPriceITP = editServiceView.findViewById(R.id.editPriceItp);
         mEditServiceImage = editServiceView.findViewById(R.id.editServiceImage);
         mEditServiceProgressBar = editServiceView.findViewById(R.id.editServiceProgressBar);
         mEditLinearLayout = editServiceView.findViewById(R.id.editLinearLayout);
@@ -632,6 +591,50 @@ public class ServiceAutoActivity extends AppCompatActivity {
                 });
             }
         });
+        mEditRepairServiceCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mEditPriceService.setEnabled(true);
+                } else {
+                    mEditPriceService.setEnabled(false);
+                    mEditPriceService.setText("");
+                }
+            }
+        });
+        mEditServiceTireCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mEditPriceTire.setEnabled(true);
+                } else {
+                    mEditPriceTire.setEnabled(false);
+                    mEditPriceTire.setText("");
+                }
+            }
+        });
+        mEditServiceChassisCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mEditPriceChassis.setEnabled(true);
+                } else {
+                    mEditPriceChassis.setEnabled(false);
+                    mEditPriceChassis.setText("");
+                }
+            }
+        });
+        mEditServiceItpCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mEditPriceITP.setEnabled(true);
+                } else {
+                    mEditPriceITP.setEnabled(false);
+                    mEditPriceITP.setText("");
+                }
+            }
+        });
         mEditServiceName.setText(mServiceAuto.getName());
         mEditServiceAddress.setText(mServiceAuto.getAddress());
         mEditServiceCity.setText(mServiceAuto.getCity());
@@ -641,15 +644,19 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mEditServiceAcceptedBrand.setText(mServiceAuto.getAcceptedBrands());
         if ((mServiceAuto.getType() & 1) == 1) {
             mEditRepairServiceCheck.setChecked(true);
+            mEditPriceService.setText(Integer.toString(mServiceAuto.getPriceService()));
         }
         if ((mServiceAuto.getType() & 2) == 2) {
             mEditServiceTireCheck.setChecked(true);
+            mEditPriceTire.setText(Integer.toString(mServiceAuto.getPriceTire()));
         }
         if ((mServiceAuto.getType() & 4) == 4) {
             mEditServiceChassisCheck.setChecked(true);
+            mEditPriceChassis.setText(Integer.toString(mServiceAuto.getPriceChassis()));
         }
         if ((mServiceAuto.getType() & 8) == 8) {
             mEditServiceItpCheck.setChecked(true);
+            mEditPriceITP.setText(Integer.toString(mServiceAuto.getPriceItp()));
         }
         setOnClearTextListeners(editServiceView);
         Glide.with(mCtx)
@@ -690,7 +697,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                             mEditLinearLayout.setBackground(new ColorDrawable(Color.parseColor("#75676767")));
                             if (verifyInputOnServerSide()) {
                             } else {
-                                mConfirm.setError("Eroare!");
+                                mConfirm.setError("Eroare");
                             }
                         }
                     }
@@ -716,6 +723,10 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mEditServiceItpCheck.setEnabled(value);
         mEditServiceImage.setEnabled(value);
         mMapEditService.setEnabled(value);
+        mEditPriceService.setEnabled(value);
+        mEditPriceTire.setEnabled(value);
+        mEditPriceChassis.setEnabled(value);
+        mEditPriceITP.setEnabled(value);
     }
 
     private void updateUi() {
@@ -740,6 +751,11 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mServiceAuto.setDescription(mEditServiceDescription.getText().toString().trim());
         mServiceAuto.setAcceptedBrands(mEditServiceAcceptedBrand.getText().toString().trim());
         mServiceAuto.setType(type);
+
+        mServiceAuto.setPriceService(mEditPriceService.getText().toString().trim().isEmpty() ? -1 : Integer.valueOf(mEditPriceService.getText().toString().trim()));
+        mServiceAuto.setPriceTire(mEditPriceTire.getText().toString().trim().isEmpty() ? -1 : Integer.valueOf(mEditPriceTire.getText().toString().trim()));
+        mServiceAuto.setPriceChassis(mEditPriceChassis.getText().toString().trim().isEmpty() ? -1 : Integer.valueOf(mEditPriceChassis.getText().toString().trim()));
+        mServiceAuto.setPriceItp(mEditPriceITP.getText().toString().trim().isEmpty() ? -1 : Integer.valueOf(mEditPriceITP.getText().toString().trim()));
         mServiceAuto.setLongitude(mSelectedServiceLocation.longitude);
         mServiceAuto.setLatitude(mSelectedServiceLocation.latitude);
 
@@ -752,6 +768,12 @@ public class ServiceAutoActivity extends AppCompatActivity {
         mReturnIntent.putExtra("newServiceDescription", mEditServiceDescription.getText().toString().trim());
         mReturnIntent.putExtra("newServiceAcceptedBrand", mEditServiceAcceptedBrand.getText().toString().trim());
         mReturnIntent.putExtra("newServiceType", type);
+
+        mReturnIntent.putExtra("priceService", mEditPriceService.getText().toString().trim().isEmpty() ? -1 : Integer.valueOf(mEditPriceService.getText().toString().trim()));
+        mReturnIntent.putExtra("priceTire", mEditPriceTire.getText().toString().trim().isEmpty() ? -1 : Integer.valueOf(mEditPriceTire.getText().toString().trim()));
+        mReturnIntent.putExtra("priceChassis", mEditPriceChassis.getText().toString().trim().isEmpty() ? -1 : Integer.valueOf(mEditPriceChassis.getText().toString().trim()));
+        mReturnIntent.putExtra("priceItp", mEditPriceITP.getText().toString().trim().isEmpty() ? -1 : Integer.valueOf(mEditPriceITP.getText().toString().trim()));
+
         mReturnIntent.putExtra("newLongitude", mSelectedServiceLocation.longitude);
         mReturnIntent.putExtra("newLatitude", mSelectedServiceLocation.latitude);
     }
@@ -798,7 +820,27 @@ public class ServiceAutoActivity extends AppCompatActivity {
             resultOk = false;
         }
         if (!mEditRepairServiceCheck.isChecked() && !mEditServiceTireCheck.isChecked() && !mEditServiceChassisCheck.isChecked() && !mEditServiceItpCheck.isChecked()) {
-            mEditRepairServiceCheck.setChecked(true);
+            mEditPriceService.setError("Bifează o opțiune și adaugă prețul!");
+            mEditPriceTire.setError("Bifează o opțiune și adaugă prețul!");
+            mEditPriceChassis.setError("Bifează o opțiune și adaugă prețul!");
+            mEditPriceITP.setError("Bifează o opțiune și adaugă prețul!");
+            resultOk = false;
+        }
+        if (mEditPriceService.getText().toString().trim().isEmpty() && mEditRepairServiceCheck.isChecked()) {
+            mEditPriceService.setError("Bifează o opțiune și adaugă prețul!");
+            resultOk = false;
+        }
+        if (mEditPriceTire.getText().toString().trim().isEmpty() && mEditServiceTireCheck.isChecked()) {
+            mEditPriceTire.setError("Bifează o opțiune și adaugă prețul!");
+            resultOk = false;
+        }
+        if (mEditPriceChassis.getText().toString().trim().isEmpty() && mEditServiceChassisCheck.isChecked()) {
+            mEditPriceChassis.setError("Bifează o opțiune și adaugă prețul!");
+            resultOk = false;
+        }
+        if (mEditPriceITP.getText().toString().trim().isEmpty() && mEditServiceItpCheck.isChecked()) {
+            mEditPriceITP.setError("Bifează o opțiune și adaugă prețul!");
+            resultOk = false;
         }
         return resultOk;
     }
@@ -833,6 +875,10 @@ public class ServiceAutoActivity extends AppCompatActivity {
         jsonBody.addProperty("latitude", mSelectedServiceLocation.latitude);
         jsonBody.addProperty("serviceOwner", mServiceAuto.getOwnerId());
         jsonBody.addProperty("serviceId", mServiceAuto.getServiceId());
+        jsonBody.addProperty("priceService", mEditPriceService.getText().toString());
+        jsonBody.addProperty("priceTire", mEditPriceTire.getText().toString());
+        jsonBody.addProperty("priceChassis", mEditPriceChassis.getText().toString());
+        jsonBody.addProperty("priceItp", mEditPriceITP.getText().toString());
 
         Bitmap bitmap = ((BitmapDrawable) mEditServiceImage.getDrawable()).getBitmap();
         //need something more efficient, possibility of crash!! same on edit profile
@@ -872,6 +918,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                                         mEditServicePopUp.dismiss();
                                     } else {
                                         setEnableFields(true);
+                                        mEditServiceProgressBar.setVisibility(View.GONE);
                                         Log.i(TAG, "verifyInputOnServerSide: Service not edited! err code: " + response.getHeaders().code());
                                         Toast.makeText(mCtx, "Ceva nu a mers! Verifica conexiunea la internet!", Toast.LENGTH_SHORT).show();
                                     }
@@ -919,39 +966,19 @@ public class ServiceAutoActivity extends AppCompatActivity {
     }
 
     private void expandFloatingMenu() {
-        if (isMyService) {
-            mEditServiceFab.show();
-            mOfferRequestsFab.show();
-            mTodayScheduleFab.show();
-        } else {
-            mLeaveCommentFab.show();
-            mRequestOfferFab.show();
-            mScheduleToServiceFab.show();
-            mCallServiceFab.show();
-            mSendMailToServiceFab.show();
-            if (ContextCompat.checkSelfPermission(mCtx, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                mCreateRouteToService.show();
-            }
+        mCallServiceFab.show();
+        mSendMailToServiceFab.show();
+        if (ContextCompat.checkSelfPermission(mCtx, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mCreateRouteToService.show();
         }
-        mViewCommentsFab.show();
         mFabMenuExpanded = true;
         mMenuServiceFloatingButton.setImageResource(R.drawable.ic_close_black_24dp);
     }
 
     private void closeFloatingMenu() {
-        if (isMyService) {
-            mEditServiceFab.hide();
-            mOfferRequestsFab.hide();
-            mTodayScheduleFab.hide();
-        } else {
-            mLeaveCommentFab.hide();
-            mRequestOfferFab.hide();
-            mScheduleToServiceFab.hide();
-            mCallServiceFab.hide();
-            mSendMailToServiceFab.hide();
-            mCreateRouteToService.hide();
-        }
-        mViewCommentsFab.hide();
+        mCallServiceFab.hide();
+        mSendMailToServiceFab.hide();
+        mCreateRouteToService.hide();
         mFabMenuExpanded = false;
         mMenuServiceFloatingButton.setImageResource(R.drawable.ic_menu_black_24dp);
     }
@@ -970,7 +997,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
             withMyPartsCheck.setVisibility(View.GONE);
         }
         TextView requestOfferTitle = new TextView(mCtx);
-        requestOfferTitle.setText("Cere ofertă!");
+        requestOfferTitle.setText("Cere ofertă");
         requestOfferTitle.setGravity(Gravity.CENTER);
         requestOfferTitle.setPadding(10, 10, 10, 10);
         requestOfferTitle.setTextSize(18);
@@ -1149,9 +1176,9 @@ public class ServiceAutoActivity extends AppCompatActivity {
             availableHours.remove(elem);
         }
         TextView choseHourTitle = new TextView(mCtx);
-        choseHourTitle.setText("Alege ora!");
+        choseHourTitle.setText("Alege ora");
         choseHourTitle.setGravity(Gravity.CENTER);
-        choseHourTitle.setPadding(10, 10, 10, 10);
+        choseHourTitle.setPadding(10, 0, 10, 0);
         choseHourTitle.setTextSize(18);
         choseHourTitle.setTextColor(Color.DKGRAY);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(mCtx, R.layout.time_list_element_layout, availableHours);
@@ -1159,7 +1186,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         final AlertDialog timePickerDialog = new AlertDialog.Builder(ServiceAutoActivity.this)
                 .setCustomTitle(choseHourTitle)
                 .create();
-        timePickerDialog.setView(listView, 50, 50, 50, 50);
+        timePickerDialog.setView(listView, 5, 5, 5, 5);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -1233,7 +1260,9 @@ public class ServiceAutoActivity extends AppCompatActivity {
             }
         });
         timePickerDialog.show();
-        timePickerDialog.getWindow().setLayout(600, 800);
+        timePickerDialog.getWindow().setLayout(
+                (int) (getResources().getDisplayMetrics().widthPixels * 0.6),
+                (int) (getResources().getDisplayMetrics().heightPixels * 0.6));
     }
 
     private void setDefaultLockedDays(CaldroidFragment caldroidFragment, ArrayList<String> lockedDays) {
@@ -1262,7 +1291,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
         notLoggedContent.setGravity(Gravity.CENTER);
         notLoggedContent.setPadding(10, 10, 10, 10);
         TextView notLoggedTitle = new TextView(mCtx);
-        notLoggedTitle.setText("Acțiune interzisă!");
+        notLoggedTitle.setText("Acțiune interzisă");
         notLoggedTitle.setGravity(Gravity.CENTER);
         notLoggedTitle.setPadding(10, 10, 10, 10);
         notLoggedTitle.setTextSize(18);
@@ -1341,6 +1370,65 @@ public class ServiceAutoActivity extends AppCompatActivity {
         spannable.setSpan(color, 19, spannable.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         spannable.setSpan(style, 19, spannable.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         mServiceAcceptedBrands.setText(spannable);
+        StringBuilder prices = new StringBuilder();
+        if (mServiceAuto.getPriceService() != -1) {
+            prices.append(String.format("Service: %s Lei,", mServiceAuto.getPriceService()));
+        }
+        if (mServiceAuto.getPriceTire() != -1) {
+            prices.append(String.format(" Vulcanizare: %s Lei,", mServiceAuto.getPriceTire()));
+        }
+        if (mServiceAuto.getPriceChassis() != -1) {
+            prices.append(String.format(" Tinichigerie: %s Lei,", mServiceAuto.getPriceChassis()));
+        }
+        if (mServiceAuto.getPriceItp() != -1) {
+            prices.append(String.format(" ITP: %s Lei,", mServiceAuto.getPriceItp()));
+        }
+        spannable = new SpannableStringBuilder(String.format("Prețuri: %s", prices.subSequence(0, prices.length() - 1)));
+        spannable.setSpan(color, 9, spannable.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        spannable.setSpan(style, 9, spannable.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        mServicePrices.setText(spannable);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.openCommentsPage:
+                seeComments();
+                break;
+            case R.id.leaveComment:
+                leaveComment();
+                break;
+            case R.id.requestOffer:
+                requestOffer();
+                break;
+            case R.id.addAppointment:
+                addAppointment();
+                break;
+            case R.id.editService:
+                editService();
+                break;
+            case R.id.openOfferRequestsPage:
+                seeOfferRequests();
+                break;
+            case R.id.openTodaySchedulePage:
+                seeTodaySchedule();
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        Log.i(TAG, "onCreateOptionsMenu: ");
+        MenuInflater inflater = getMenuInflater();
+        if (!isMyService) {
+            inflater.inflate(R.menu.menu_service_auto, menu);
+        } else {
+            inflater.inflate(R.menu.menu_my_service_auto, menu);
+        }
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

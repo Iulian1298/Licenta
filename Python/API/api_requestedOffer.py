@@ -62,7 +62,7 @@ def getByIdForUserOrService(requestId, isUserOrService):
         requestDict = request.first().toDict()
         userName = User.query.filter_by(id=requestDict["userId"]).first().toDict()["fullName"]
         serviceName = Service.query.filter_by(id=requestDict["serviceId"]).first().toDict()["name"]
-        if bool(isUserOrService):
+        if int(isUserOrService) == 1:
             servicePhone = Service.query.filter_by(id=requestDict["serviceId"]).first().toDict()["phoneNumber"]
             requestDict["servicePhoneNumber"] = servicePhone
         else:

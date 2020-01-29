@@ -430,7 +430,7 @@ public class OfferRequestsActivity extends AppCompatActivity {
                                             request.getString("fixEndDate"),
                                             request.getInt("serviceAcceptance"),
                                             request.getInt("userAcceptance"),
-                                            request.getString("servicePhoneNumber"),
+                                            request.getString("userPhoneNumber"),
                                             request.getInt("seen")));
                                     mRequestOfferAdapter.notifyDataSetChanged();
                                 } catch (JSONException e) {

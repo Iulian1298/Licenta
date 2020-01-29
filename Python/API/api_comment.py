@@ -74,8 +74,12 @@ def deleteCommentById(commentId, serviceId):
         comment = Comment.query.filter_by(id=commentId)
         serviceAllRatings = [i[0] for i in
                              Comment.query.with_entities(Comment.rating).filter_by(serviceId=serviceId).all()]
-        newRating = float(
-            format((sum(serviceAllRatings) - comment.first().toDict()["rating"]) / (len(serviceAllRatings) - 1), '.2f'))
+        if (len(serviceAllRatings) == 1):
+            newRating = 0
+        else:
+            newRating = float(
+                format((sum(serviceAllRatings) - comment.first().toDict()["rating"]) / (len(serviceAllRatings) - 1),
+                       '.2f'))
         db.session.query(Service).filter(Service.id == serviceId).update({Service.rating: newRating},
                                                                          synchronize_session=False)
         comment.delete()

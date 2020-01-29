@@ -55,6 +55,7 @@ public class MyRequestFragment extends Fragment {
     private ProgressBar mGetNewRequestFromDatabase;
     private Button mLoadMoreRequests;
     private boolean mDisplayNoRequest;
+    private TextView mNoRequest;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -80,7 +81,7 @@ public class MyRequestFragment extends Fragment {
         Log.i(TAG, "refreshPage: called refresh page");
         //crash some time on instant build (apply changes) -> now most probably no
         mRequestOffset = 0;
-        if (mRequestOfferList != null && mRequestOfferAdapter != null) {
+        if (mRequestOfferList != null && mRequestOfferAdapter != null && mNoRequest != null) {
             mRequestOfferList.clear();
             mRequestOfferAdapter.notifyDataSetChanged();
             try {
@@ -93,7 +94,7 @@ public class MyRequestFragment extends Fragment {
                 e.printStackTrace();
             }
             if (mDisplayNoRequest) {
-                TextView noRequestPerformed = new TextView(mCtx);
+                /*TextView noRequestPerformed = new TextView(mCtx);
                 noRequestPerformed.setText("Nu ai facut nicio cerere de ofertă. Mergi pe pagina service-ului și accesează butonul de cerere din meniu pentru a face o cerere!");
                 noRequestPerformed.setPadding(20, 20, 20, 20);
                 noRequestPerformed.setGravity(Gravity.CENTER);
@@ -103,7 +104,8 @@ public class MyRequestFragment extends Fragment {
                         .setView(noRequestPerformed)
                         .setPositiveButton("Am ințeles!", null)
                         .create();
-                dialog.show();
+                dialog.show();*/
+                mNoRequest.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -113,6 +115,7 @@ public class MyRequestFragment extends Fragment {
         mUrl = mPreferencesManager.getServerUrl();
         mGetNewRequestFromDatabase = v.findViewById(R.id.getNewMyRequestsFromDatabase);
         mLoadMoreRequests = v.findViewById(R.id.loadMoreMyRequests);
+        mNoRequest = v.findViewById(R.id.noRequest);
         mExistMoreRequest = true;
         mRequestLimit = 11;
         mRequestOffset = 0;
@@ -131,7 +134,7 @@ public class MyRequestFragment extends Fragment {
             e.printStackTrace();
         }
         if (mDisplayNoRequest) {
-            TextView noRequestPerformed = new TextView(mCtx);
+            /*TextView noRequestPerformed = new TextView(mCtx);
             noRequestPerformed.setText("Nu ai facut nicio cerere de ofertă. Mergi pe pagina service-ului și accesează butonul de cerere din meniu pentru a face o cerere!");
             noRequestPerformed.setPadding(20, 20, 20, 20);
             noRequestPerformed.setGravity(Gravity.CENTER);
@@ -141,7 +144,8 @@ public class MyRequestFragment extends Fragment {
                     .setView(noRequestPerformed)
                     .setPositiveButton("Am ințeles!", null)
                     .create();
-            dialog.show();
+            dialog.show();*/
+            mNoRequest.setVisibility(View.VISIBLE);
         }
         mLoadMoreRequests.setOnClickListener(new View.OnClickListener() {
             @Override

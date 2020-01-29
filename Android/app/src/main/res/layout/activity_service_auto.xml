@@ -150,6 +150,12 @@
                         android:layout_height="wrap_content"
                         android:text="@string/acceptedBrands"
                         android:textColor="@color/colorBlack" />
+                    <TextView
+                        android:id="@+id/prices"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/prices"
+                        android:textColor="@color/colorBlack"/>
                 </LinearLayout>
 
                 <View

@@ -35,23 +35,31 @@ class Service(db.Model):
     owner = db.Column(db.String)
     serviceType = db.Column(db.String)
     acceptedBrand = db.Column(db.String)
+    priceService = db.Column(db.Integer)
+    priceTire = db.Column(db.Integer)
+    priceChassis = db.Column(db.Integer)
+    priceItp = db.Column(db.Integer)
     distanceFromUser = db.Column(db.Float)
 
     def __repr__(self):
-        return "id: {}, logoPath: {}, name: {}, description: {}, latitude: {},longitude: {}, address: {}, city: {} " \
-               "rating: {}, phoneNumber: {}, email: {}, owner: {}, serviceType: {},acceptedBrand: {}" \
+        return "id: {}, logoPath: {}, name: {}, description: {}, latitude: {},longitude: {}, address: {}, city: {}, " \
+               "rating: {}, phoneNumber: {}, email: {}, owner: {}, serviceType: {}, acceptedBrand: {}, priceService: " \
+               "{}, priceTire: {}, priceChassis: {}, priceItp: {}" \
             .format(self.id, self.logoPath, self.name, self.description, self.latitude, self.longitude, self.address,
                     self.city, self.rating, self.phoneNumber, self.email, self.owner, self.serviceType,
-                    self.acceptedBrand)
+                    self.acceptedBrand, self.priceService, self.priceTire, self.priceChassis, self.priceItp)
 
     def toDict(self):
         return dict(zip(
             ["id", "logoPath", "name", "description", "latitude", "longitude", "address", "city",
-             "rating", "phoneNumber", "email", "owner", "serviceType", "acceptedBrand"], self.toList()))
+             "rating", "phoneNumber", "email", "owner", "serviceType", "acceptedBrand", "priceService", "priceTire",
+             "priceChassis", "priceItp"],
+            self.toList()))
 
     def toList(self):
         return [self.id, self.logoPath, self.name, self.description, self.latitude, self.longitude, self.address,
-                self.city, self.rating, self.phoneNumber, self.email, self.owner, self.serviceType, self.acceptedBrand]
+                self.city, self.rating, self.phoneNumber, self.email, self.owner, self.serviceType, self.acceptedBrand,
+                self.priceService, self.priceTire, self.priceChassis, self.priceItp]
 
     @hybrid_method
     def checkType(self, serviceType):

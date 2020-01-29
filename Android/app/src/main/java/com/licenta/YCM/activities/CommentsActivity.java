@@ -102,7 +102,7 @@ public class CommentsActivity extends AppCompatActivity {
         mUrl = mPreferencesManager.getServerUrl();
         Intent intent = getIntent();
         mServiceId = intent.getStringExtra("serviceId");
-        getSupportActionBar().setTitle("Păreri și comentarii!");
+        getSupportActionBar().setTitle("Păreri și comentarii");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mCommentsList = new ArrayList<>();
         mCommentsAdapter = new CommentsAdapter(this, mCommentsList);

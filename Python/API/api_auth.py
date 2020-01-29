@@ -18,7 +18,6 @@ def getJWT(user):
 
 @app.route("/register", methods=['POST'])
 def authRegister():
-    # ToDo: user profile image convert from base64 to image and save
     try:
         userId = unicode(uuid.uuid4())
         user = User(id=userId,
@@ -44,7 +43,6 @@ def authRegister():
 
 @app.route("/login", methods=['POST'])
 def authLogin():
-    # ToDo: convert image in base64 and send in response
     email = request.json['email']
     password = request.json['password']
     user = User.query.filter_by(email=email)

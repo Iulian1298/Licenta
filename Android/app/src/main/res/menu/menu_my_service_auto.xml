@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group>
+        <item
+            android:id="@+id/openCommentsPage"
+            android:icon="@drawable/ic_comment_black_24dp"
+            android:title="@string/openCommentsPage" />
+        <item
+            android:id="@+id/editService"
+            android:icon="@drawable/ic_edit_black_24dp"
+            android:title="@string/editService" />
+        <item
+            android:id="@+id/openOfferRequestsPage"
+            android:icon="@drawable/ic_local_offer_black_24dp"
+            android:title="@string/openOfferRequestsPage" />
+        <item
+            android:id="@+id/openTodaySchedulePage"
+            android:icon="@drawable/ic_schedule_black_24dp"
+            android:title="@string/openTodaySchedulePage" />
+    </group>
+</menu>

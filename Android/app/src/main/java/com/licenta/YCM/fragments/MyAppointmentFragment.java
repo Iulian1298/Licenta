@@ -54,6 +54,7 @@ public class MyAppointmentFragment extends Fragment {
     private int mAppointmentsLimit;
     private Button mLoadMoreAppointments;
     private ProgressBar mGetNewMyAppointmentFromDatabase;
+    private TextView mNoAppointment;
 
 
     @Override
@@ -91,7 +92,7 @@ public class MyAppointmentFragment extends Fragment {
                 e.printStackTrace();
             }
             if (mDisplayNoMyAppointments) {
-                TextView noRequestPerformed = new TextView(mCtx);
+                /*TextView noRequestPerformed = new TextView(mCtx);
                 noRequestPerformed.setText("Nu ai făcut nicio programare incă!");
                 noRequestPerformed.setPadding(20, 20, 20, 0);
                 noRequestPerformed.setGravity(Gravity.CENTER);
@@ -101,7 +102,8 @@ public class MyAppointmentFragment extends Fragment {
                         .setView(noRequestPerformed)
                         .setPositiveButton("Am ințeles!", null)
                         .create();
-                dialog.show();
+                dialog.show();*/
+                mNoAppointment.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -109,6 +111,7 @@ public class MyAppointmentFragment extends Fragment {
     private void init(View v) {
         Log.i(TAG, "init: ");
         mMyAppointmentsRecyclerView = v.findViewById(R.id.myAppointmentList);
+        mNoAppointment = v.findViewById(R.id.noAppointment);
         mMyAppointmentsRecyclerView.setLayoutManager(new LinearLayoutManager(mCtx));
         mUrl = mPreferencesManager.getServerUrl();
         mAppointmentsLimit = 11;
@@ -127,7 +130,7 @@ public class MyAppointmentFragment extends Fragment {
             e.printStackTrace();
         }
         if (mDisplayNoMyAppointments) {
-            TextView noRequestPerformed = new TextView(mCtx);
+            /*TextView noRequestPerformed = new TextView(mCtx);
             noRequestPerformed.setText("Nu ai făcut nicio programare incă!");
             noRequestPerformed.setPadding(20, 20, 20, 0);
             noRequestPerformed.setGravity(Gravity.CENTER);
@@ -137,7 +140,8 @@ public class MyAppointmentFragment extends Fragment {
                     .setView(noRequestPerformed)
                     .setPositiveButton("Am ințeles!", null)
                     .create();
-            dialog.show();
+            dialog.show();*/
+            mNoAppointment.setVisibility(View.VISIBLE);
         }
         mMyAppointmentsAdapter.setPhoneClickListener(new AppointmentsAdapter.OnPhoneClickListener() {
             @Override

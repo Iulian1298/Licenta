@@ -35,6 +35,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.koushikdutta.ion.Ion;
 import com.koushikdutta.ion.Response;
@@ -204,10 +205,37 @@ public class HomeActivity extends AppCompatActivity {
 
     private void setNavigationView() {
         Log.i(TAG, "setNavigationView: ");
+        boolean isService = false;
         try {
             boolean loginStatus = mPreferencesManager.isLoggedIn();
+            if (loginStatus) {
+                String checkUserTypeUrl = mUrl + "/services/getIdsBetweenForMyServices/" +
+                        mPreferencesManager.getUserId() + "/offset/" + 0 + "/limit/" + 1;
+                try {
+                    Response<JsonObject> response = Ion.with(mCtx)
+                            .load("GET", checkUserTypeUrl)
+                            .setHeader("Authorization", mPreferencesManager.getToken())
+                            .asJsonObject()
+                            .withResponse()
+                            .get();
+                    if (response != null) {
+                        if (response.getHeaders().code() == 200) {
+                            final JsonArray servicesId = response.getResult().get("ids").getAsJsonArray();
+                            isService = servicesId.size() != 0;
+                        } else {
+                            Toast.makeText(mCtx, "Error code: " + response.getHeaders().code(), Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Log.e(TAG, "onCompleted: null response");
+                    }
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             setHeaderHomeMenu(loginStatus);
-            setHomeMenu(loginStatus);
+            setHomeMenu(loginStatus, isService);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -215,7 +243,7 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private void setHomeMenu(boolean loginStatus) {
+    private void setHomeMenu(boolean loginStatus, boolean isService) {
         Log.i(TAG, "setHomeMenu: ");
         Menu menu = mNavigationView.getMenu();
         MenuItem logoutButton = menu.findItem(R.id.menuLogout);
@@ -231,7 +259,11 @@ public class HomeActivity extends AppCompatActivity {
             logoutButton.setVisible(true);
             authButton.setVisible(false);
             myRequestOfferButton.setVisible(true);
-            myServiceButton.setVisible(true);
+            if (isService) {
+                myServiceButton.setVisible(true);
+            } else {
+                myServiceButton.setVisible(false);
+            }
         }
     }
 

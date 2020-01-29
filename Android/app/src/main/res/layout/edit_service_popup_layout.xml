@@ -1,320 +1,389 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:orientation="vertical"
     android:layout_height="match_parent">
 
-    <com.google.android.libraries.maps.MapView
-        android:id="@+id/mapEditService"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.35" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.5">
 
-        <LinearLayout
-            android:id="@+id/editLinearLayout"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="wrap_content">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:text="@string/serviceName"
-                android:textSize="12sp" />
-
-            <android.support.design.widget.CoordinatorLayout
+            <LinearLayout
+                android:id="@+id/editLinearLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
-                <EditText
-                    android:id="@+id/editServiceName"
+                <com.google.android.libraries.maps.MapView
+                    android:id="@+id/mapEditService"
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:text="@string/serviceName"
+                    android:textSize="12sp" />
+
+                <android.support.design.widget.CoordinatorLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:backgroundTint="@color/colorBlack"
-                    android:hint="@string/serviceName"
-                    android:inputType="text"
-                    android:maxLength="50" />
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:orientation="horizontal">
 
-                <ImageView
-                    android:id="@+id/clearEditServiceName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:src="@drawable/ic_close_black_24dp" />
-            </android.support.design.widget.CoordinatorLayout>
+                    <EditText
+                        android:id="@+id/editServiceName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="24dp"
+                        android:hint="@string/serviceName"
+                        android:inputType="text"
+                        android:maxLength="50" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:text="@string/address"
-                android:textSize="12sp" />
-
-            <android.support.design.widget.CoordinatorLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/editServiceAddress"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:backgroundTint="@color/colorBlack"
-                    android:hint="@string/address"
-                    android:inputType="text"
-                    android:maxLength="50"
-                    android:padding="8dp" />
-
-                <ImageView
-                    android:id="@+id/clearEditServiceAddress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:src="@drawable/ic_close_black_24dp" />
-            </android.support.design.widget.CoordinatorLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:text="@string/city"
-                android:textSize="12sp" />
-
-            <android.support.design.widget.CoordinatorLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/editServiceCity"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:backgroundTint="@color/colorBlack"
-                    android:hint="@string/city"
-                    android:inputType="text"
-                    android:maxLength="50"
-                    android:padding="8dp" />
-
-                <ImageView
-                    android:id="@+id/clearEditServiceCity"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:src="@drawable/ic_close_black_24dp" />
-            </android.support.design.widget.CoordinatorLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:text="@string/servicePhone"
-                android:textSize="12sp" />
-
-            <android.support.design.widget.CoordinatorLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/editServicePhone"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:backgroundTint="@color/colorBlack"
-                    android:hint="@string/servicePhone"
-                    android:inputType="phone"
-                    android:padding="8dp" />
-
-                <ImageView
-                    android:id="@+id/clearEditServicePhone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:src="@drawable/ic_close_black_24dp" />
-            </android.support.design.widget.CoordinatorLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:text="@string/serviceEmail"
-                android:textSize="12sp" />
-
-            <android.support.design.widget.CoordinatorLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/editServiceEmail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:backgroundTint="@color/colorBlack"
-                    android:hint="@string/serviceEmail"
-                    android:inputType="textEmailAddress"
-                    android:maxLength="50"
-                    android:padding="8dp" />
-
-                <ImageView
-                    android:id="@+id/clearEditServiceEmail"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:src="@drawable/ic_close_black_24dp" />
-            </android.support.design.widget.CoordinatorLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:text="@string/serviceDescription"
-                android:textSize="12sp" />
-
-            <android.support.design.widget.CoordinatorLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/editServiceDescription"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:backgroundTint="@color/colorBlack"
-                    android:hint="@string/serviceDescription"
-                    android:inputType="textMultiLine"
-                    android:maxLength="1500"
-                    android:padding="8dp" />
-
-                <ImageView
-                    android:id="@+id/clearEditServiceDescription"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:src="@drawable/ic_close_black_24dp" />
-            </android.support.design.widget.CoordinatorLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:text="@string/acceptedBrand"
-                android:textSize="12sp" />
-
-            <android.support.design.widget.CoordinatorLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/editServiceAcceptedBrand"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:backgroundTint="@color/colorBlack"
-                    android:hint="@string/acceptedBrand"
-                    android:inputType="text"
-                    android:maxLength="100"
-                    android:padding="8dp" />
-
-                <ImageView
-                    android:id="@+id/clearEditServiceAcceptedBrands"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:src="@drawable/ic_close_black_24dp" />
-            </android.support.design.widget.CoordinatorLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:text="@string/offeredServices"
-                android:textSize="12sp" />
-
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_marginEnd="5dp">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:backgroundTint="@color/colorBlack"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:padding="8dp">
-
-                    <CheckBox
-                        android:id="@+id/editRepairServiceCheck"
+                    <ImageView
+                        android:id="@+id/clearEditServiceName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="10dp"
-                        android:text="@string/repairService" />
+                        android:layout_gravity="end"
+                        android:src="@drawable/ic_close_black_24dp" />
+                </android.support.design.widget.CoordinatorLayout>
 
-                    <CheckBox
-                        android:id="@+id/editServiceTireCheck"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:text="@string/address"
+                    android:textSize="12sp" />
+
+                <android.support.design.widget.CoordinatorLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/editServiceAddress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="24dp"
+                        android:hint="@string/address"
+                        android:inputType="text"
+                        android:maxLength="50"
+                        android:padding="8dp" />
+
+                    <ImageView
+                        android:id="@+id/clearEditServiceAddress"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:text="@string/serviceTire" />
+                        android:layout_gravity="end"
+                        android:src="@drawable/ic_close_black_24dp" />
+                </android.support.design.widget.CoordinatorLayout>
 
-                    <CheckBox
-                        android:id="@+id/editServiceChassisCheck"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:text="@string/city"
+                    android:textSize="12sp" />
+
+                <android.support.design.widget.CoordinatorLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/editServiceCity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="24dp"
+                        android:hint="@string/city"
+                        android:inputType="text"
+                        android:maxLength="50"
+                        android:padding="8dp" />
+
+                    <ImageView
+                        android:id="@+id/clearEditServiceCity"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:text="@string/serviceChassis" />
+                        android:layout_gravity="end"
+                        android:src="@drawable/ic_close_black_24dp" />
+                </android.support.design.widget.CoordinatorLayout>
 
-                    <CheckBox
-                        android:id="@+id/editServiceItpCheck"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:text="@string/servicePhone"
+                    android:textSize="12sp" />
+
+                <android.support.design.widget.CoordinatorLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/editServicePhone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="24dp"
+                        android:hint="@string/servicePhone"
+                        android:inputType="phone"
+                        android:padding="8dp" />
+
+                    <ImageView
+                        android:id="@+id/clearEditServicePhone"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:text="@string/serviceItp" />
+                        android:layout_gravity="end"
+                        android:src="@drawable/ic_close_black_24dp" />
+                </android.support.design.widget.CoordinatorLayout>
 
-                </LinearLayout>
-            </HorizontalScrollView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:text="@string/serviceEmail"
+                    android:textSize="12sp" />
 
-            <ImageView
-                android:id="@+id/editServiceImage"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_margin="10dp"
-                android:background="@drawable/chose_a_image"
-                android:scaleType="centerCrop" />
+                <android.support.design.widget.CoordinatorLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:orientation="horizontal">
 
-        </LinearLayout>
-    </ScrollView>
+                    <EditText
+                        android:id="@+id/editServiceEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="24dp"
+                        android:hint="@string/serviceEmail"
+                        android:inputType="textEmailAddress"
+                        android:maxLength="50"
+                        android:padding="8dp" />
+
+                    <ImageView
+                        android:id="@+id/clearEditServiceEmail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:src="@drawable/ic_close_black_24dp" />
+                </android.support.design.widget.CoordinatorLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:text="@string/serviceDescription"
+                    android:textSize="12sp" />
+
+                <android.support.design.widget.CoordinatorLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/editServiceDescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="24dp"
+                        android:hint="@string/serviceDescription"
+                        android:inputType="textMultiLine"
+                        android:maxLength="1500"
+                        android:padding="8dp" />
+
+                    <ImageView
+                        android:id="@+id/clearEditServiceDescription"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:src="@drawable/ic_close_black_24dp" />
+                </android.support.design.widget.CoordinatorLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:text="@string/acceptedBrand"
+                    android:textSize="12sp" />
+
+                <android.support.design.widget.CoordinatorLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/editServiceAcceptedBrand"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="24dp"
+                        android:hint="@string/acceptedBrand"
+                        android:inputType="text"
+                        android:maxLength="100"
+                        android:padding="8dp" />
+
+                    <ImageView
+                        android:id="@+id/clearEditServiceAcceptedBrands"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:src="@drawable/ic_close_black_24dp" />
+                </android.support.design.widget.CoordinatorLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:text="@string/offeredServices"
+                    android:textSize="12sp" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@color/colorBlack"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:padding="8dp">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="10dp"
+                            android:orientation="vertical">
+
+                            <CheckBox
+                                android:id="@+id/editRepairServiceCheck"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="15dp"
+                                android:layout_marginEnd="15dp"
+                                android:text="@string/repairService" />
+
+                            <EditText
+                                android:id="@+id/editPriceRepairService"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:enabled="false"
+                                android:gravity="center"
+                                android:hint="@string/priceService"
+                                android:inputType="number"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:orientation="vertical">
+
+                            <CheckBox
+                                android:id="@+id/editServiceTireCheck"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="15dp"
+                                android:layout_marginEnd="15dp"
+                                android:text="@string/serviceTire" />
+
+                            <EditText
+                                android:id="@+id/editPriceTire"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:enabled="false"
+                                android:gravity="center"
+                                android:hint="@string/priceTire"
+                                android:inputType="number"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:orientation="vertical">
+
+                            <CheckBox
+                                android:id="@+id/editServiceChassisCheck"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="15dp"
+                                android:layout_marginEnd="15dp"
+                                android:text="@string/serviceChassis" />
+
+                            <EditText
+                                android:id="@+id/editPriceChassis"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:enabled="false"
+                                android:gravity="center"
+                                android:hint="@string/priceChassis"
+                                android:inputType="number"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:orientation="vertical">
+
+                            <CheckBox
+                                android:id="@+id/editServiceItpCheck"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="15dp"
+                                android:layout_marginEnd="15dp"
+                                android:text="@string/serviceItp" />
+
+                            <EditText
+                                android:id="@+id/editPriceItp"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:enabled="false"
+                                android:gravity="center"
+                                android:hint="@string/priceItp"
+                                android:inputType="number"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </HorizontalScrollView>
+
+                <ImageView
+                    android:id="@+id/editServiceImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/chose_a_image"
+                    android:scaleType="centerCrop" />
+
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/editServiceProgressBar"
@@ -323,4 +392,4 @@
         android:layout_gravity="center"
         android:progressTint="@color/colorBlue"
         android:visibility="gone" />
-</LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

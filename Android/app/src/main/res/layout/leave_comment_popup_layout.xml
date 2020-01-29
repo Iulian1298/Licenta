@@ -15,7 +15,7 @@
             android:layout_centerHorizontal="true"
             android:layout_margin="10dp"
             android:numStars="5"
-            android:progressTint="@color/colorRedWhite"
+            android:progressTint="@color/colorGolden"
             android:stepSize="1" />
 
         <EditText

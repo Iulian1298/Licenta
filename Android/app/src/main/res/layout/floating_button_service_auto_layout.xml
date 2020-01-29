@@ -5,50 +5,6 @@
     android:layout_height="match_parent">
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/viewCommentsFab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="85dp"
-        android:layout_marginBottom="22dp"
-        android:src="@drawable/ic_comment_black_24dp"
-        app:backgroundTint="@color/colorDarkGreen"
-        app:fabSize="mini" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/leaveCommentFab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="135dp"
-        android:layout_marginBottom="22dp"
-        android:src="@drawable/ic_edit_black_24dp"
-        app:backgroundTint="@color/colorDarkGreen"
-        app:fabSize="mini" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/requestOfferFab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="235dp"
-        android:layout_marginBottom="22dp"
-        android:src="@drawable/ic_local_offer_black_24dp"
-        app:backgroundTint="@color/colorDarkGreen"
-        app:fabSize="mini" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/scheduleToServiceFab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="185dp"
-        android:layout_marginBottom="22dp"
-        android:src="@drawable/ic_schedule_black_24dp"
-        app:backgroundTint="@color/colorDarkGreen"
-        app:fabSize="mini" />
-
-    <android.support.design.widget.FloatingActionButton
         android:id="@+id/callServiceFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -56,7 +12,7 @@
         android:layout_marginEnd="22dp"
         android:layout_marginBottom="85dp"
         android:src="@drawable/ic_call_black_24dp"
-        app:backgroundTint="@color/colorDarkGreen"
+        app:backgroundTint="@color/colorDarkBlue"
         app:fabSize="mini" />
 
     <android.support.design.widget.FloatingActionButton
@@ -67,7 +23,7 @@
         android:layout_marginEnd="22dp"
         android:layout_marginBottom="135dp"
         android:src="@drawable/ic_email_black_24dp"
-        app:backgroundTint="@color/colorDarkGreen"
+        app:backgroundTint="@color/colorDarkBlue"
         app:fabSize="mini" />
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/createRouteToService"
@@ -76,8 +32,8 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="22dp"
         android:layout_marginBottom="185dp"
-        android:src="@drawable/ic_drive_black_24dp"
-        app:backgroundTint="@color/colorDarkGreen"
+        android:src="@drawable/ic_navigation_black_24dp"
+        app:backgroundTint="@color/colorDarkBlue"
         app:fabSize="mini" />
 
     <android.support.design.widget.FloatingActionButton

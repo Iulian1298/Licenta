@@ -11,7 +11,7 @@
             android:title="@string/menuMyRequestsAndMyAppointments" />
         <item
             android:id="@+id/menuMyServices"
-            android:icon="@drawable/ic_car_repairing"
+            android:icon="@drawable/ic_service"
             android:title="@string/menuMyServices" />
         <item
             android:id="@+id/menuLogout"

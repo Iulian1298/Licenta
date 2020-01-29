@@ -22,7 +22,7 @@ public class AsyncRequest extends AsyncTask<String, Void, Void> {
     }
 
     private Listener mListener;
-    private StringBuilder responseOutput;
+    private StringBuilder stringBuilder;
     private SharedPreferencesManager mPreferencesManager;
 
     public AsyncRequest(SharedPreferencesManager preferencesManager, Listener listener) {
@@ -35,29 +35,29 @@ public class AsyncRequest extends AsyncTask<String, Void, Void> {
         try {
             URL url = new URL(params[1]);
 
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod(params[0]);
+            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+            httpURLConnection.setRequestMethod(params[0]);
             //connection.setChunkedStreamingMode(0);
-            connection.setRequestProperty("Authorization", mPreferencesManager.getToken());
+            httpURLConnection.setRequestProperty("Authorization", mPreferencesManager.getToken());
 
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(
-                    connection.getInputStream()));
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+                    httpURLConnection.getInputStream()));
             String line = "";
-            responseOutput = new StringBuilder();
-            while ((line = br.readLine()) != null) {
-                responseOutput.append(line);
+            stringBuilder = new StringBuilder();
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuilder.append(line);
             }
-            br.close();
-            connection.disconnect();
+            bufferedReader.close();
+            httpURLConnection.disconnect();
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-            Log.e("AsyncHttpRequest", "doInBackground: content: " + responseOutput);
-            if (responseOutput != null) {
-                responseOutput.append("}");
+            Log.e("AsyncHttpRequest", "doInBackground: content: " + stringBuilder);
+            if (stringBuilder != null) {
+                stringBuilder.append("}");
             }
         }
         return null;
@@ -65,6 +65,6 @@ public class AsyncRequest extends AsyncTask<String, Void, Void> {
 
     @Override
     protected void onPostExecute(Void result) {
-        mListener.onResult(responseOutput.toString());
+        mListener.onResult(stringBuilder.toString());
     }
 }

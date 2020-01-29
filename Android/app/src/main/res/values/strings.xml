@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">YCM</string>
-    <string name="registerBtn">Register</string>
-    <string name="loginBtn">Login</string>
+    <string name="registerBtn">Înregistrare</string>
+    <string name="loginBtn">Conectare</string>
     <string name="app_description">Gasește cel mai apropiat service și fă o programare sau cere o ofertă direct din aplicație.</string>
     <string name="email">Emailul tau..</string>
     <string name="password">Parola ta..</string>
@@ -11,7 +11,7 @@
     <string name="menuHomeButton">Acasă</string>
     <string name="menuProfileButton">Profilul meu</string>
     <string name="menuSeeRequestOffer">Vezi cererile de ofertă</string>
-    <string name="menuLogoutButton">Ieșire</string>
+    <string name="menuLogoutButton">Deconectare</string>
     <string name="searchButton">Caută..</string>
     <string name="filterResult">Filtrează..</string>
     <string name="headerMenuImage">Image</string>
@@ -20,7 +20,6 @@
     <string name="navigation_drawer_open">Open</string>
     <string name="navigation_drawer_close">Close</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="serviceLogo">Logo sau o imagine</string>
     <string name="serviceName">Nume service</string>
@@ -28,8 +27,8 @@
     <string name="serviceDescriptionFull">Descrierea service-ului in mai multe caractere Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt  ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</string>
     <string name="distanceFromYou">Distanta fața de locația curentă</string>
     <string name="address">Adresă service</string>
-    <string name="ratingMin">Rating-ul minim:</string>
-    <string name="ratingMax">Rating-ul maxim:</string>
+    <string name="ratingMin">Rating minim:</string>
+    <string name="ratingMax">Rating maxim:</string>
     <string name="nameFilter">Nume service:</string>
     <string name="addressFilter">Adresă:</string>
     <string name="serviceTypeFilter">Servicii oferite:</string>
@@ -40,14 +39,14 @@
     <string name="leaveComment">Lasă un comentariu</string>
     <string name="contactEmail">testEmail@yahoo.com</string>
     <string name="phoneNumber">07XXXXXXXX</string>
-    <string name="scheduleToService">Programează-te</string>
+    <string name="addAppointment">Programează-te</string>
     <string name="seeAllComments">Toate</string>
     <string name="userProfileImageComment">User profile image</string>
     <string name="deleteMyComment">Șterge</string>
     <string name="usernameComment">Comment owner</string>
     <string name="comment">Comentariu Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt  ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</string>
     <string name="commentDate">Dată adaugarii</string>
-    <string name="requestOffer">Cere oferta</string>
+    <string name="requestOffer">Cere ofertă</string>
     <string name="withMyParts">Cu piesele mele</string>
     <string name="requestTextLabel">Ce trebuie facut la mașină:</string>
     <string name="carType">Mașină:</string>
@@ -104,4 +103,14 @@
     <string name="coin">Lei</string>
     <string name="distanceFilter">Distanța maximă:</string>
     <string name="distanceUnit">Km</string>
+    <string name="noRequest">Nu ai făcut nicio cerere de ofertă! Mergi pe pagina service-ului și accesează butonul de cerere din meniu pentru a face una!</string>
+    <string name="noAppointment">Înca nu ai făcut nicio programare! Mergi pe pagina service-ului și accesează butonul de programare din meniu pentru a adăuga una!</string>
+    <string name="openCommentsPage">Vezi comentarii</string>
+    <string name="openOfferRequestsPage">Cereri de ofertă</string>
+    <string name="openTodaySchedulePage">Programări pe azi</string>
+    <string name="priceService">Preț Lei/h</string>
+    <string name="priceTire">Preț schimb anvelope</string>
+    <string name="priceChassis">Preț Lei/h</string>
+    <string name="priceItp">Preț ITP</string>
+    <string name="prices">Prețuri: Service: preț, Vulcanizare: preț, Tinichigerie: preț, ITP: preț</string>
 </resources>
