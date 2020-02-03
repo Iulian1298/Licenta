@@ -8,14 +8,14 @@ class User(db.Model):
     phoneNumber = db.Column(db.String)
     fullName = db.Column(db.String)
     password = db.Column(db.String)
-    imagePath = db.Column(db.String)
+    imageUrl = db.Column(db.String)
 
     def __repr__(self):
-        return "id: {}, email: {}, phoneNumber: {}, fullName: {}, password: {}, imagePath: {}" \
-            .format(self.id, self.email, self.phoneNumber, self.fullName, self.password, self.imagePath)
+        return "id: {}, email: {}, phoneNumber: {}, fullName: {}, password: {}, imageUrl: {}" \
+            .format(self.id, self.email, self.phoneNumber, self.fullName, self.password, self.imageUrl)
 
     def toDict(self):
-        return dict(zip(["id", "email", "phoneNumber", "fullName", "imagePath"], self.toList()))
+        return dict(zip(["id", "email", "phoneNumber", "fullName", "imageUrl"], self.toList()))
 
     def toList(self):
-        return [self.id, self.email, self.phoneNumber, self.fullName, self.imagePath]
+        return [self.id, self.email, self.phoneNumber, self.fullName, self.imageUrl]

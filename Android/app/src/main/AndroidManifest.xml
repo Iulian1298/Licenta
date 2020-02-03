@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.licenta.YCM">
+    package="com.licenta.ServiceFinder">
     <!-- added for HTTP request -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -22,23 +22,23 @@
         tools:ignore="GoogleAppIndexingWarning">
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCEGaMfRLYBNzHLk-hXuZogTTHG7c6NTLg"/>
+            android:value="AIzaSyBXK7QOTo77RVESUz666WDI8SotEr8KfKo"/>
         <activity
-            android:name=".activities.OfferRequestsActivity"
+            android:name="com.licenta.ServiceFinder.activities.OfferRequestsActivity"
             android:theme="@style/AppThemeActionBarPresent" />
         <activity
-            android:name=".activities.CommentsActivity"
+            android:name="com.licenta.ServiceFinder.activities.CommentsActivity"
             android:theme="@style/AppThemeActionBarPresent" />
-        <activity android:name=".activities.TodayAppointmentsActivity" />
-        <activity android:name=".activities.ServiceAutoActivity" />
-        <activity android:name=".activities.HomeActivity">
+        <activity android:name="com.licenta.ServiceFinder.activities.TodayAppointmentsActivity" />
+        <activity android:name="com.licenta.ServiceFinder.activities.ServiceAutoActivity" />
+        <activity android:name="com.licenta.ServiceFinder.activities.HomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.AuthenticationActivity" />
+        <activity android:name="com.licenta.ServiceFinder.activities.AuthenticationActivity" />
     </application>
 
 </manifest>

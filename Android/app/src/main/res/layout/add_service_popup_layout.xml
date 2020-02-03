@@ -75,7 +75,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/serviceDescriptionAdd"
-                    android:inputType="text"
+                    android:inputType="textMultiLine"
                     android:maxLength="1500"
                     android:padding="8dp" />
 
@@ -209,7 +209,7 @@
                     android:id="@+id/addServiceImage"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
-                    android:background="@drawable/chose_a_image"
+                    android:background="@drawable/default_service_image"
                     android:scaleType="centerCrop" />
             </LinearLayout>
         </ScrollView>

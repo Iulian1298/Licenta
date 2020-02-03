@@ -15,9 +15,7 @@
         <HorizontalScrollView
             android:id="@+id/filterCommentsSW"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp">
+            android:layout_height="wrap_content">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -129,10 +127,11 @@
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/commentsList"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_above="@id/loadMoreCommentsLayout"
+                android:layout_alignParentTop="true"
+                android:background="@color/colorGrey"
                 android:scrollbars="vertical" />
 
             <LinearLayout

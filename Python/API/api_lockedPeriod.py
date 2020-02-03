@@ -64,7 +64,7 @@ def addLockedPeriod():
 @app.route("/getLockedDays/<serviceId>", methods=['GET'])
 @check_token
 def getLockedDays(serviceId):
-    result = LockedDay.query.with_entities(LockedDay.day).filter_by(lockedHours=10, serviceId=serviceId).all()
+    result = LockedDay.query.with_entities(LockedDay.day).filter_by(lockedHours=8, serviceId=serviceId).all()
     if result:
         lockedDays = [i[0] for i in result]
         return make_response(jsonify({"lockedDays": lockedDays}), status.HTTP_200_OK)
@@ -101,6 +101,7 @@ def getLockedHoursForToday(serviceId):
             content['shortDescription'] = i.toDict()['shortDescription']
             content["appointmentId"] = i.toDict()['id']
             content["appointmentType"] = i.toDict()['scheduleType']
+            content['day'] = str(day)
             result.append(content)
         print((result))
     return make_response(jsonify({"appointment": result}), status.HTTP_200_OK)
@@ -129,12 +130,13 @@ def getAppointmentById(appointmentId):
     content['appointmentType'] = lockedHours.toDict()["scheduleType"]
     content['phoneNumber'] = Service.query.filter_by(id=lockedDay.toDict()["serviceId"]).first().toDict()[
         "phoneNumber"]
+    content['day'] = lockedDay.toDict()['day']
     print(content)
     return make_response(jsonify({"appointment": content}), status.HTTP_200_OK)
 
 
 @app.route("/lockedPeriod/deleteById/<appointmentId>", methods=['DELETE'])
-#@check_token
+@check_token
 def deleteAppointmentById(appointmentId):
     try:
         appointment = LockedHour.query.filter_by(id=appointmentId)

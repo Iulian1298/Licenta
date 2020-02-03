@@ -99,6 +99,7 @@ def addServiceResponse():
                          RequestedOffer.fixEndDate: request.json['endDate'],
                          RequestedOffer.servicePriceResponse: request.json['price'],
                          RequestedOffer.serviceAcceptance: serviceAcceptance,
+                         RequestedOffer.addedDate: datetime.date.today(),
                          RequestedOffer.seen: 2}, synchronize_session=False)
             db.session.commit()
             return make_response(jsonify({"status": "Response added"}), status.HTTP_200_OK)
@@ -111,6 +112,7 @@ def addServiceResponse():
                 db.session.query(RequestedOffer).filter(RequestedOffer.id == request.json['requestId']) \
                     .update({RequestedOffer.serviceResponse: request.json['serviceResponse'],
                              RequestedOffer.serviceAcceptance: serviceAcceptance,
+                             RequestedOffer.addedDate: datetime.date.today(),
                              RequestedOffer.seen: 2}, synchronize_session=False)
                 db.session.commit()
                 return make_response(jsonify({"status": "Response added"}), status.HTTP_200_OK)
@@ -129,7 +131,8 @@ def deleteRequestForService(requestId):
                 db.session.commit()
             else:
                 db.session.query(RequestedOffer).filter(RequestedOffer.id == requestId).update(
-                    {RequestedOffer.deletedByService: 1}, synchronize_session=False)
+                    {RequestedOffer.deletedByService: 1,
+                     RequestedOffer.addedDate: datetime.date.today()}, synchronize_session=False)
                 db.session.commit()
         return make_response(jsonify({"status": "Request offer deleted"}), status.HTTP_200_OK)
     except Exception as e:
@@ -141,9 +144,32 @@ def deleteRequestForService(requestId):
 @check_token
 def seenBy(userOrService, requestId):
     db.session.query(RequestedOffer).filter(RequestedOffer.id == requestId) \
-        .update({RequestedOffer.seen: RequestedOffer.seen + int(userOrService)}, synchronize_session=False)
+        .update({RequestedOffer.seen: RequestedOffer.seen + int(userOrService),
+                 RequestedOffer.addedDate: datetime.date.today()}, synchronize_session=False)
     db.session.commit()
     return make_response(jsonify({"status": "Request offer seen updated"}), status.HTTP_200_OK)
+
+
+@app.route("/requestedOffers/hasUpdate/<userId>")
+@check_token
+def hasUserUpdate(userId):
+    requestOffer = RequestedOffer.query.filter_by(userId=userId, seen=2)
+    if requestOffer.first():
+        return make_response(jsonify({"response": "Has Update"}), status.HTTP_200_OK)
+    else:
+        return make_response(jsonify({"response": "No Update"}), status.HTTP_200_OK)
+
+
+@app.route("/requestedOffers/hasRequests/<userId>")
+@check_token
+def hasNewRequests(userId):
+    userServices = Service.query.filter_by(owner=userId)
+    for i in userServices.all():
+        requestOffer = RequestedOffer.query.filter_by(serviceId=i.toDict()['id'], seen=1)
+        if requestOffer.first():
+            return make_response(jsonify({"response": "Has Update"}), status.HTTP_200_OK)
+
+    return make_response(jsonify({"response": "No Update"}), status.HTTP_200_OK)
 
 
 @app.route("/requestedOffer/addClientResponse/<userAcceptance>/forRequest/<requestId>", methods=['PUT'])
@@ -151,6 +177,7 @@ def seenBy(userOrService, requestId):
 def addClientResponse(userAcceptance, requestId):
     db.session.query(RequestedOffer).filter(RequestedOffer.id == requestId) \
         .update({RequestedOffer.userAcceptance: int(userAcceptance),
+                 RequestedOffer.addedDate: datetime.date.today(),
                  RequestedOffer.seen: 1}, synchronize_session=False)
     db.session.commit()
     return make_response(jsonify({"status": "Request offer seen updated"}), status.HTTP_200_OK)
@@ -166,6 +193,7 @@ def deleteRequestForClient(requestId):
                 db.session.query(RequestedOffer).filter(RequestedOffer.id == requestId).update(
                     {RequestedOffer.deletedByUser: 1,
                      RequestedOffer.userAcceptance: 2,
+                     RequestedOffer.addedDate: datetime.date.today(),
                      RequestedOffer.seen: 1}, synchronize_session=False)
                 db.session.commit()
             else:

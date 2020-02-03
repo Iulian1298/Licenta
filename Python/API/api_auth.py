@@ -25,7 +25,7 @@ def authRegister():
                     phoneNumber=request.json['phoneNumber'],
                     fullName=request.json['fullName'],
                     password=request.json['password'],
-                    imagePath=request.json['imageDownloadLink'])
+                    imageUrl=request.json['imageDownloadLink'])
         print(user)
         db.session.add(user)
         db.session.commit()
@@ -34,7 +34,7 @@ def authRegister():
         return make_response(jsonify({"status": "Could not create"}), status.HTTP_409_CONFLICT)
 
     sendUser = user.toDict()
-    del sendUser["imagePath"]
+    del sendUser["imageUrl"]
     return make_response(jsonify({"status": "Created",
                                   "token": getJWT(repr(user)),
                                   "user": sendUser}),

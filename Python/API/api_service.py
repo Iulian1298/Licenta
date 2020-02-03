@@ -37,6 +37,11 @@ def getServiceById(serviceId):
         if 'i' in serviceDict['serviceType']:
             serviceType |= 8
         serviceDict['serviceType'] = serviceType
+        requestedOffer = RequestedOffer.query.filter_by(serviceId=serviceId, seen=1)
+        if requestedOffer.first():
+            serviceDict['seen'] = requestedOffer.first().toDict()['seen']
+        else:
+            serviceDict['seen'] = 3
         return make_response(jsonify({"status": "Found",
                                       "service": serviceDict}),
                              status.HTTP_200_OK)
@@ -48,8 +53,8 @@ def getServiceById(serviceId):
 def createService():
     serviceId = unicode(uuid.uuid4())
     # image = base64.b64decode(request.json['imageEncoded'])
-    # imagePath = os.path.join("Images", serviceId + "+" + request.json['serviceOwner'] + ".png")
-    # f = open(imagePath, 'wb')
+    # imageUrl = os.path.join("Images", serviceId + "+" + request.json['serviceOwner'] + ".png")
+    # f = open(imageUrl, 'wb')
     # f.write(image)
     strServiceType = ""
     if int(request.json['serviceType']) & 1:
@@ -74,7 +79,7 @@ def createService():
         priceItp = -1
     try:
         service = Service(id=serviceId,
-                          logoPath=request.json['imageDownloadLink'],
+                          logoUrl=request.json['imageDownloadLink'],
                           name=request.json['serviceName'],
                           description=request.json['serviceDescription'],
                           latitude=request.json['latitude'],
@@ -159,7 +164,7 @@ def updateService():
              Service.serviceType: strServiceType,
              Service.longitude: request.json['longitude'],
              Service.latitude: request.json['latitude'],
-             Service.logoPath: request.json['imagePath'],
+             Service.logoUrl: request.json['imageUrl'],
              Service.priceService: priceService,
              Service.priceTire: priceTire,
              Service.priceChassis: priceChassis,
@@ -321,7 +326,7 @@ def getServiceInfo(serviceId):
     if service.first():
         # print(service.first())
         serviceDict = service.first().toDict()
-        del serviceDict["logoPath"]
+        del serviceDict["logoUrl"]
         return make_response(jsonify({"status": "Found",
                                       "service": serviceDict}),
                              status.HTTP_302_FOUND)
@@ -333,12 +338,12 @@ def getServiceImage(serviceId):
     service = Service.query.filter_by(id=serviceId)
     if service.first():
         serviceDict = service.first().toDict()
-        print(serviceDict["logoPath"])
-        # return redirect(url_for('/services/getImageById/'+serviceId, filename=app.config['IMAGE_FOLDER'] + serviceDict["logoPath"]))
-        print({"image": url_for("Images", filename="..\\" + serviceDict["logoPath"])})
+        print(serviceDict["logoUrl"])
+        # return redirect(url_for('/services/getImageById/'+serviceId, filename=app.config['IMAGE_FOLDER'] + serviceDict["logoUrl"]))
+        print({"image": url_for("Images", filename="..\\" + serviceDict["logoUrl"])})
         return make_response(jsonify(
-            {"image": url_for("Images", filename=serviceDict["logoPath"].split("\\")[-1])}))
-        # return send_file(app.config['IMAGE_FOLDER'] + serviceDict["logoPath"], mimetype='image/jpg',
+            {"image": url_for("Images", filename=serviceDict["logoUrl"].split("\\")[-1])}))
+        # return send_file(app.config['IMAGE_FOLDER'] + serviceDict["logoUrl"], mimetype='image/jpg',
         #                 attachment_filename='snapshot.png')
 
         return make_response(jsonify({"status": "NotFound"}), status.HTTP_404_NOT_FOUND)'''

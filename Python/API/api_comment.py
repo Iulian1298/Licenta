@@ -23,7 +23,7 @@ def getCommentById(commentId):
         result["ownerName"] = owner.first().toDict()["fullName"]
         result["serviceId"] = commentDict["serviceId"]
         result["ownerId"] = commentDict["userId"]
-        result["profileImage"] = owner.first().toDict()["imagePath"]
+        result["profileImage"] = owner.first().toDict()["imageUrl"]
         # print(result)
         response = make_response(jsonify({"status": "Found", "comment": result}), status.HTTP_200_OK)
         response.headers.set('Content-Length', len({"status": "Found", "comment": result}))

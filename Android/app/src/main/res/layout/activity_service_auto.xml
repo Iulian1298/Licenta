@@ -168,6 +168,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="3dp"
+                    android:paddingStart="7dp"
                     android:text="@string/serviceDescriptionFull"
                     android:textColor="@color/colorBlack"
                     android:textSize="20sp" />

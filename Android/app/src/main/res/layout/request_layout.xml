@@ -1,137 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_margin="2dp"
+    android:elevation="8dp"
+    app:cardCornerRadius="10dp">
 
-    <RelativeLayout
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="5dp">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/userOrService"
-            android:layout_width="170dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:text="@string/userOrService"
-            android:textColor="@color/colorBlack"
-            android:textSize="15sp" />
-
-        <TextView
-            android:id="@+id/userOrServicePhone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:text="@string/phoneNumber"
-            android:textColor="@color/colorBlue"
-            android:textSize="15sp" />
-    </RelativeLayout>
-
-    <TextView
-        android:id="@+id/carFull"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="5dp"
-        android:text="@string/carAllDetails"
-        android:textColor="@color/colorBlackBlue"
-        android:textStyle="italic" />
-
-    <TextView
-        android:id="@+id/serviceResponseFull"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="5dp"
-        android:text="@string/serviceResponse"
-        android:textColor="@color/colorBlack" />
-
-    <TextView
-        android:id="@+id/requestTextElement"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="5dp"
-        android:text="@string/requestText"
-        android:textColor="@color/colorBlack" />
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <ImageView
-            android:id="@+id/offerUpdated"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_error_black_24dp" />
-
-        <ImageView
-            android:id="@+id/userAccepted"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_centerVertical="true"
-            android:layout_toEndOf="@id/offerUpdated"
-            android:src="@drawable/ic_done_green_24dp" />
-
-        <ImageView
-            android:id="@+id/userRejected"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_centerVertical="true"
-            android:layout_toEndOf="@id/offerUpdated"
-            android:src="@drawable/ic_close_red_24dp" />
-
-        <TextView
-            android:id="@+id/userAcceptedOrRejected"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="25dp"
-            android:layout_toEndOf="@id/offerUpdated"
-            android:text="@string/userAcceptance"
-            android:textColor="@color/colorBlack"
-            android:textSize="18sp"
-            android:textStyle="italic" />
-
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="end"
-            android:orientation="horizontal">
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp">
 
+            <TextView
+                android:id="@+id/userOrService"
+                android:layout_width="170dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:text="@string/userOrService"
+                android:textColor="@color/colorBlack"
+                android:textSize="15sp" />
 
-            <Button
-                android:id="@+id/acceptRequestOffer"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            <TextView
+                android:id="@+id/userOrServicePhone"
                 android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:text="@string/accept" />
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="@string/phoneNumber"
+                android:textColor="@color/colorBlue"
+                android:textSize="15sp" />
+        </RelativeLayout>
 
-            <Button
-                android:id="@+id/declineRequestOffer"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        <TextView
+            android:id="@+id/carFull"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:text="@string/carAllDetails"
+            android:textColor="@color/colorBlackBlue"
+            android:textStyle="italic" />
+
+        <TextView
+            android:id="@+id/serviceResponseFull"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:text="@string/serviceResponse"
+            android:textColor="@color/colorBlack" />
+
+        <TextView
+            android:id="@+id/requestTextElement"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:text="@string/requestText"
+            android:textColor="@color/colorBlack" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/offerUpdated"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_error_black_24dp" />
+
+            <ImageView
+                android:id="@+id/userAccepted"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@id/offerUpdated"
+                android:src="@drawable/ic_done_green_24dp" />
+
+            <ImageView
+                android:id="@+id/userRejected"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@id/offerUpdated"
+                android:src="@drawable/ic_close_red_24dp" />
+
+            <TextView
+                android:id="@+id/userAcceptedOrRejected"
                 android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:text="@string/decline" />
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="25dp"
+                android:layout_toEndOf="@id/offerUpdated"
+                android:text="@string/userAcceptance"
+                android:textColor="@color/colorBlack"
+                android:textSize="18sp"
+                android:textStyle="italic" />
 
-            <Button
-                android:id="@+id/deleteRequestOffer"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:text="@string/delete" />
-        </LinearLayout>
-    </RelativeLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:orientation="horizontal">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_gravity="bottom"
-        android:background="@color/colorBlack" />
 
-</LinearLayout>
+                <Button
+                    android:id="@+id/acceptRequestOffer"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:text="@string/accept" />
 
+                <Button
+                    android:id="@+id/declineRequestOffer"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:text="@string/decline" />
+
+                <Button
+                    android:id="@+id/deleteRequestOffer"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:text="@string/delete" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="bottom"
+            android:background="@color/colorBlack" />
+
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>

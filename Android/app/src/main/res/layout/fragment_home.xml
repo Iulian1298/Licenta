@@ -19,6 +19,7 @@
                 android:layout_height="match_parent"
                 android:layout_above="@+id/loadMoreServicesLayout"
                 android:layout_alignParentTop="true"
+                android:background="@color/colorGrey"
                 android:scrollbars="vertical" />
 
 
