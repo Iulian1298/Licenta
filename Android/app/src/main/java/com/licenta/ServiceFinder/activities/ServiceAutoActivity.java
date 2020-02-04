@@ -955,7 +955,7 @@ public class ServiceAutoActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(Uri uri) {
                                 String newImageDownloadLink = uri.toString();
-                                jsonBody.addProperty("imagePath", newImageDownloadLink);
+                                jsonBody.addProperty("imageUrl", newImageDownloadLink);
                                 Response<JsonObject> response = null;
                                 try {
                                     response = Ion.with(mCtx)

@@ -50,7 +50,7 @@ public class Login implements Authentication {
         mEmail = mLoginView.findViewById(R.id.loginPopUpEmail);
         mPassword = mLoginView.findViewById(R.id.loginPopUpPassword);
         mLoginTitle = new TextView(mCtx);
-        mLoginTitle.setText("Login");
+        mLoginTitle.setText("Conectare");
         mLoginTitle.setGravity(Gravity.CENTER);
         mLoginTitle.setPadding(10, 10, 10, 10);
         mLoginTitle.setTextSize(18);

@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.licenta.ServiceFinder.R;
 import com.licenta.ServiceFinder.activities.HomeActivity;
+import com.licenta.ServiceFinder.activities.OfferRequestsActivity;
 import com.licenta.ServiceFinder.models.RequestOffer;
 
 import java.util.ArrayList;
@@ -232,18 +233,24 @@ public class RequestOfferAdapter extends RecyclerView.Adapter<RequestOfferAdapte
                         areYouSureTitle.setPadding(10, 10, 10, 10);
                         areYouSureTitle.setTextSize(18);
                         areYouSureTitle.setTextColor(Color.DKGRAY);
-                        AlertDialog areYouSure = new AlertDialog.Builder((HomeActivity) mContext)
-                                .setCustomTitle(areYouSureTitle)
-                                .setPositiveButton("Da", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        Log.i("HomeFragment->AdapterRequestOffer", "onClick: are you sure: yes");
-                                        mDeleteCLickListener.onDeleteClick(v, getAdapterPosition());
-                                    }
-                                })
-                                .setNegativeButton("Nu", null)
-                                .create();
-                        areYouSure.show();
+                        try {
+                            AlertDialog areYouSure = new AlertDialog.Builder(mContext)
+                                    .setCustomTitle(areYouSureTitle)
+                                    .setPositiveButton("Da", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            Log.i("HomeFragment->AdapterRequestOffer", "onClick: are you sure: yes");
+                                            mDeleteCLickListener.onDeleteClick(v, getAdapterPosition());
+                                        }
+                                    })
+                                    .setNegativeButton("Nu", null)
+                                    .create();
+                            areYouSure.show();
+                        } catch (Exception e) {
+                            Log.i("AdapterRequestOffer", "onClick: called from OfferRequestsActivity");
+                            Log.i("OfferRequestsActivity->AdapterRequestOffer", "onClick: not show pop-up -> delete");
+                            mDeleteCLickListener.onDeleteClick(v, getAdapterPosition());
+                        }
                     }
                 }
             });

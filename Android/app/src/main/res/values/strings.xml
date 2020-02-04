@@ -70,12 +70,12 @@
     <string name="servicePhone">Nr. tel. service</string>
     <string name="serviceEmail">Email service</string>
     <string name="serviceDescriptionAdd">Descriere</string>
-    <string name="acceptedBrand">Branduri acceptate</string>
+    <string name="acceptedBrand">Mărci acceptate</string>
     <string name="repairService">Service</string>
     <string name="serviceTire">Vulcanizare</string>
     <string name="serviceChassis">Tinichigerie</string>
     <string name="offeredServices">Servicii oferite</string>
-    <string name="acceptedBrands">Branduri acceptate: BMW, Mercedes, Grupul VAG, BMW, Mercedes, Grupul VAG, BMW, Mercedes, Grupul VAG</string>
+    <string name="acceptedBrands">Mărci acceptate: BMW, Mercedes, Grupul VAG, BMW, Mercedes, Grupul VAG, BMW, Mercedes, Grupul VAG</string>
     <string name="wrongCredidentials">Parolă sau email greșit</string>
     <string name="loadMore">Incarcă mai mult</string>
     <string name="city">Oraș service</string>

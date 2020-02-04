@@ -87,7 +87,7 @@ public class Register implements Authentication {
             }
         });
         mRegisterTitle = new TextView(mCtx);
-        mRegisterTitle.setText("Register");
+        mRegisterTitle.setText("Înregistrare");
         mRegisterTitle.setGravity(Gravity.CENTER);
         mRegisterTitle.setPadding(10, 10, 10, 10);
         mRegisterTitle.setTextSize(18);
