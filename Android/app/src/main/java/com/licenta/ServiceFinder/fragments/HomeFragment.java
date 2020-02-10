@@ -1092,8 +1092,8 @@ public class HomeFragment extends Fragment {
                                     populateServiceAutoList();
                                     advancedFilterPopUp.dismiss();
                                 } else {
-                                    if (mFilterRatingMinBar.getRating() > mFilterRatingMaxBar.getRating()) {
-                                        Toast.makeText(getActivity(), "Rating-ul minim trebuie sa fie mai mic ca rating-ul maxim!", Toast.LENGTH_SHORT).show();
+                                    if (mFilterRatingMinBar.getRating() >= mFilterRatingMaxBar.getRating()) {
+                                        Toast.makeText(getActivity(), "Rating-ul minim nu trebuie sa fie mai mare sau egal cu rating-ul maxim!", Toast.LENGTH_SHORT).show();
                                     } else {
                                         if (!(mFilterRatingMinBar.getRating() == 0
                                                 && mFilterRatingMaxBar.getRating() == 0)
