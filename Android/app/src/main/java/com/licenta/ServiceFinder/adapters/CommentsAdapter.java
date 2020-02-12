@@ -22,6 +22,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.licenta.ServiceFinder.R;
 import com.licenta.ServiceFinder.SharedPreferencesManager;
 import com.licenta.ServiceFinder.activities.CommentsActivity;
@@ -56,8 +57,8 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.ViewHo
         final Comment comment = mCommentsList.get(pos);
         Glide.with(mContext)
                 .asBitmap()
-                //.skipMemoryCache(true)
-                //.diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .load(comment.getProfileImage())
                 .into(viewHolder.mProfileImage);
         //viewHolder.mProfileImage.setImageBitmap(comment.getProfileImage());

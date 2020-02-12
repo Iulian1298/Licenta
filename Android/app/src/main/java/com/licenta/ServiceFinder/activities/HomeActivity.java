@@ -558,7 +558,8 @@ public class HomeActivity extends AppCompatActivity {
         setOnClearTextListeners(editMyProfileView);
         Glide.with(mCtx)
                 .asBitmap()
-                //.diskCacheStrategy(DiskCacheStrategy.NONE)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
                 .load(mPreferencesManager.getImage())
                 .into(mEditImage);
         mEditImage.setOnClickListener(new View.OnClickListener() {
